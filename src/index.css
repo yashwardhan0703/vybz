@@ -1,0 +1,255 @@
+@import "tailwindcss";
+
+/* ─── CSS Custom Properties ─────────────────────────────── */
+:root {
+  --world-bg: #070a10;
+  --world-bg2: #0e1420;
+  --world-primary: oklch(0.75 0.18 68);
+  --world-secondary: oklch(0.55 0.15 30);
+  --world-fg: oklch(0.96 0.02 75);
+  --world-muted: oklch(0.72 0.04 65);
+  --range-progress: 0%;
+}
+
+/* ─── Tailwind Theme ─────────────────────────────────────── */
+@theme {
+  --color-world-bg: var(--world-bg);
+  --color-world-bg2: var(--world-bg2);
+  --color-world-primary: var(--world-primary);
+  --color-world-secondary: var(--world-secondary);
+  --color-world-fg: var(--world-fg);
+  --color-world-muted: var(--world-muted);
+
+  --font-deva: 'Anek Devanagari', 'Noto Serif Devanagari', serif;
+  --font-sans: 'Familjen Grotesk', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --font-quote: 'Noto Serif Devanagari', 'Anek Devanagari', serif;
+  --font-chalk: 'Caveat', cursive, sans-serif;
+}
+
+/* ─── Base ───────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overscroll-behavior: none;
+}
+
+body {
+  margin: 0;
+  background: var(--world-bg);
+  color: var(--world-fg);
+  overscroll-behavior: none;
+}
+
+/* ─── Grain Texture ─────────────────────────────────────── */
+.world-grain {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.08'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 180px;
+  opacity: 0.45;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+
+/* ─── Custom Range Input ────────────────────────────────── */
+.world-range {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  outline: none;
+}
+
+.world-range::-webkit-slider-runnable-track {
+  height: 3px;
+  border-radius: 999px;
+  background: linear-gradient(to right,
+      var(--world-primary) var(--range-progress),
+      color-mix(in oklab, var(--world-fg) 20%, transparent) var(--range-progress));
+}
+
+.world-range::-moz-range-track {
+  height: 3px;
+  border-radius: 999px;
+  background: linear-gradient(to right,
+      var(--world-primary) var(--range-progress),
+      color-mix(in oklab, var(--world-fg) 20%, transparent) var(--range-progress));
+}
+
+.world-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--world-primary);
+  margin-top: -5.5px;
+  box-shadow: 0 2px 8px -2px var(--world-primary);
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.world-range::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border: none;
+  border-radius: 50%;
+  background: var(--world-primary);
+  box-shadow: 0 2px 8px -2px var(--world-primary);
+  cursor: pointer;
+}
+
+.world-range:hover::-webkit-slider-thumb {
+  transform: scale(1.2);
+}
+
+.world-range::-webkit-slider-thumb:active {
+  transform: scale(1.35);
+}
+
+/* ─── Animations ─────────────────────────────────────────── */
+@keyframes letter-appear {
+  0% {
+    opacity: 0;
+    transform: translateX(var(--dx, 0)) translateY(var(--dy, 0)) rotate(var(--rot, 0deg));
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateX(0) translateY(0) rotate(0deg);
+  }
+}
+
+.animate-letter-appear {
+  animation: letter-appear 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: var(--delay, 0ms);
+}
+
+@keyframes steam-float {
+
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: var(--op, 0.08);
+  }
+
+  50% {
+    transform: translateY(-18px) scale(1.3);
+    opacity: 0;
+  }
+}
+
+@keyframes soft-pulse {
+
+  0%,
+  100% {
+    transform: translateX(-50%) scale(1);
+    opacity: 0.7;
+  }
+
+  50% {
+    transform: translateX(-50%) scale(1.5);
+    opacity: 0;
+  }
+}
+
+@keyframes bar-dance {
+
+  0%,
+  100% {
+    transform: scaleY(0.3);
+  }
+
+  50% {
+    transform: scaleY(1);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+/* ─── World player surface ───────────────────────────────── */
+.world-player-surface {
+  transition: border-color 0.4s ease, box-shadow 0.4s ease;
+}
+
+/* ─── Scrollbar ──────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: color-mix(in oklab, var(--world-primary) 40%, transparent);
+  border-radius: 999px;
+}
+
+/* ─── Focus visible ──────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--world-primary);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* ─── Barber Pole Animation ──────────────────────────────── */
+.barber-pole-badge {
+  background: repeating-linear-gradient(45deg,
+      #e11d48,
+      #e11d48 4px,
+      #ffffff 4px,
+      #ffffff 8px,
+      #2563eb 8px,
+      #2563eb 12px,
+      #ffffff 12px,
+      #ffffff 16px);
+  background-size: 200% 200%;
+  animation: barber-pole-move 2.5s linear infinite;
+}
+
+@keyframes barber-pole-move {
+  0% {
+    background-position: 0 0;
+  }
+
+  100% {
+    background-position: 0 32px;
+  }
+}
+
+/* ─── SR only ────────────────────────────────────────────── */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* ─── Hide scrollbar utilities for smooth touch scrolling ─── */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
