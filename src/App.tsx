@@ -99,10 +99,10 @@ function AppLayout() {
       />
       <RadioTuningOverlay />
 
-      {/* Persistent YouTube mount kept inside viewport but invisible to user */}
+      {/* Persistent YouTube mount with >= 200px dimensions placed behind UI (-z-50) for Android MediaSession compatibility */}
       <div
         aria-hidden="true"
-        className="pointer-events-none fixed bottom-1 right-1 z-0 h-[2px] w-[2px] opacity-[0.01] overflow-hidden"
+        className="pointer-events-none fixed bottom-0 right-0 -z-50 h-[240px] w-[240px] opacity-[0.001] overflow-hidden"
       >
         <div id={MOUNT_ID} className="size-full" />
       </div>

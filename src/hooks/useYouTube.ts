@@ -217,15 +217,17 @@ export function useYouTube(mountId: string) {
     try {
       const cur = player.getCurrentTime?.() ?? 0;
       const dur = player.getDuration?.() ?? 0;
-      if (typeof cur === 'number' && isFinite(cur) && cur >= 0) {
+      if (typeof cur === 'number' && isFinite(cur)) {
         if (cur > 0) {
           lastPositionRef.current = cur;
-        }
-        setCurrentTime(cur);
+          setCurrentTime(cur);
 
-        // Periodically persist playback progress to localStorage (when time changes by at least 1s)
-        if (Math.abs(cur - lastSavedTimeRef.current) >= 1) {
-          persistState();
+          // Periodically persist playback progress to localStorage (when time changes by at least 1s)
+          if (Math.abs(cur - lastSavedTimeRef.current) >= 1) {
+            persistState();
+          }
+        } else if (lastPositionRef.current <= 1) {
+          setCurrentTime(0);
         }
       }
       if (typeof dur === 'number' && isFinite(dur) && dur > 0) {
@@ -360,7 +362,6 @@ export function useYouTube(mountId: string) {
             p.playVideo();
             setIsPlaying(true);
             userIntentPlayingRef.current = true;
-            syncPlayerTimes();
           } catch {}
         }
       }
