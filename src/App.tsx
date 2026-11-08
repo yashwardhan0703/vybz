@@ -1,4 +1,4 @@
-import { Component, useEffect, type ReactNode } from 'react';
+import { Component, useEffect, useRef, type ReactNode } from 'react';
 import { useYouTube } from './hooks/useYouTube';
 import { usePlayerStore } from './store/playerStore';
 import WorldBackground from './components/WorldBackground';
@@ -12,12 +12,11 @@ import SearchModal from './components/SearchModal';
 import UniqueIndianPlayer from './components/UniqueIndianPlayer';
 import RadioTuningOverlay from './components/RadioTuningOverlay';
 
-const MOUNT_ID = 'yt-player-mount';
-
 function AppLayout() {
   const { currentWorld, isPlaying, viewMode, setViewMode } = usePlayerStore();
+  const playerContainerRef = useRef<HTMLDivElement | null>(null);
   const { play, pause, next, prev, seekTo, playAt, playCustomVideoId, playSearchQuery } =
-    useYouTube(MOUNT_ID);
+    useYouTube(playerContainerRef);
 
   // Sync Vibe / Studio mode with browser back/forward buttons
   useEffect(() => {
@@ -48,6 +47,7 @@ function AppLayout() {
          ======================================================== */}
       {viewMode === 'studio' && (
         <UniqueIndianPlayer
+          key="view-studio"
           onPlayCustomVideoId={playCustomVideoId}
           onPlayAt={playAt}
           onPlay={play}
@@ -59,7 +59,7 @@ function AppLayout() {
           MODE 2: RETRO AMBIENT VIBE VIEW (Chai Tapri / Salon / Bartan Time)
          ======================================================== */}
       {viewMode === 'vibe' && (
-        <div className="relative flex flex-1 flex-col overflow-hidden animate-fade-in">
+        <div key="view-vibe" className="relative flex flex-1 flex-col overflow-hidden animate-fade-in">
           {/* 1. Cinematic Background Image */}
           <WorldBackground />
 
@@ -104,7 +104,7 @@ function AppLayout() {
         aria-hidden="true"
         className="pointer-events-none fixed bottom-0 right-0 -z-50 h-[240px] w-[240px] opacity-[0.001] overflow-hidden"
       >
-        <div id={MOUNT_ID} className="size-full" />
+        <div ref={playerContainerRef} className="size-full" />
       </div>
 
       {/* Screen Reader live status */}

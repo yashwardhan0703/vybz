@@ -71,7 +71,7 @@ function loadYouTubeAPI(): Promise<void> {
   });
 }
 
-export function useYouTube(mountId: string) {
+export function useYouTube(containerRef: React.RefObject<HTMLDivElement | null>) {
   const playerRef = useRef<YT.Player | null>(null);
   const isReadyRef = useRef(false);
   const intervalRef = useRef<number | null>(null);
@@ -465,11 +465,16 @@ export function useYouTube(mountId: string) {
   // Initialize YT Player once
   useEffect(() => {
     let isCancelled = false;
+    const container = containerRef.current;
 
     loadYouTubeAPI().then(() => {
-      if (isCancelled) return;
-      const mountElement = document.getElementById(mountId);
-      if (!mountElement) return;
+      if (isCancelled || !container) return;
+
+      container.innerHTML = '';
+      const mountNode = document.createElement('div');
+      mountNode.style.width = '100%';
+      mountNode.style.height = '100%';
+      container.appendChild(mountNode);
 
       const persisted = getStoredPlaybackState();
       const hasSavedTrack = !!(persisted && persisted.currentTrackId);
@@ -641,7 +646,7 @@ export function useYouTube(mountId: string) {
         },
       };
 
-      new window.YT.Player(mountId, playerOptions);
+      new window.YT.Player(mountNode, playerOptions);
     });
 
     return () => {
@@ -652,9 +657,12 @@ export function useYouTube(mountId: string) {
       } catch {}
       playerRef.current = null;
       isReadyRef.current = false;
+      if (container) {
+        container.innerHTML = '';
+      }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mountId]);
+  }, [containerRef]);
 
   // When current station / world changes
   const prevWorldIdRef = useRef(currentWorld.id);
