@@ -117,3 +117,87 @@ export function saveStoredViewMode(mode: 'studio' | 'vibe'): void {
   } catch { }
 }
 
+export interface PersistedQueueTrack {
+  id: string;
+  title: string;
+  artist: string;
+  thumbnail: string;
+  duration?: string | number;
+}
+
+export interface PersistedPlaybackState {
+  currentTrackId: string;
+  sourceUrl?: string;
+  trackTitle: string;
+  trackArtist: string;
+  trackThumbnail: string;
+  currentTime: number;
+  duration: number;
+  isPlaying: boolean;
+  volume: number;
+  isMuted: boolean;
+  repeatMode: 'none' | 'one' | 'all';
+  isShuffle: boolean;
+  viewMode: 'studio' | 'vibe';
+  currentWorldId: string;
+  queue: PersistedQueueTrack[];
+  queueIndex: number;
+  isVibeRadioMode: boolean;
+  updatedAt: number;
+}
+
+const PLAYBACK_STATE_KEY = 'vybz_music_playback_state';
+
+export function getStoredPlaybackState(): PersistedPlaybackState | null {
+  try {
+    const raw = localStorage.getItem(PLAYBACK_STATE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as PersistedPlaybackState;
+    if (parsed && typeof parsed.currentTrackId === 'string' && parsed.currentTrackId) {
+      return parsed;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+export function saveStoredPlaybackState(patch: Partial<PersistedPlaybackState>): void {
+  try {
+    const existing = getStoredPlaybackState();
+    const currentTrackId = patch.currentTrackId ?? existing?.currentTrackId ?? '';
+    const updated: PersistedPlaybackState = {
+      currentTrackId,
+      sourceUrl:
+        patch.sourceUrl ??
+        (currentTrackId ? `https://www.youtube.com/watch?v=${currentTrackId}` : existing?.sourceUrl ?? ''),
+      trackTitle: patch.trackTitle ?? existing?.trackTitle ?? '',
+      trackArtist: patch.trackArtist ?? existing?.trackArtist ?? '',
+      trackThumbnail: patch.trackThumbnail ?? existing?.trackThumbnail ?? '',
+      currentTime: Math.max(0, patch.currentTime ?? existing?.currentTime ?? 0),
+      duration: Math.max(0, patch.duration ?? existing?.duration ?? 0),
+      isPlaying: patch.isPlaying !== undefined ? patch.isPlaying : (existing?.isPlaying ?? false),
+      volume: patch.volume !== undefined ? patch.volume : (existing?.volume ?? 80),
+      isMuted: patch.isMuted !== undefined ? patch.isMuted : (existing?.isMuted ?? false),
+      repeatMode: patch.repeatMode ?? existing?.repeatMode ?? 'none',
+      isShuffle: patch.isShuffle !== undefined ? patch.isShuffle : (existing?.isShuffle ?? false),
+      viewMode: patch.viewMode ?? existing?.viewMode ?? 'studio',
+      currentWorldId: patch.currentWorldId ?? existing?.currentWorldId ?? 'tapri',
+      queue: patch.queue ?? existing?.queue ?? [],
+      queueIndex: patch.queueIndex ?? existing?.queueIndex ?? 0,
+      isVibeRadioMode:
+        patch.isVibeRadioMode !== undefined
+          ? patch.isVibeRadioMode
+          : (existing?.isVibeRadioMode ?? false),
+      updatedAt: Date.now(),
+    };
+    localStorage.setItem(PLAYBACK_STATE_KEY, JSON.stringify(updated));
+  } catch {}
+}
+
+export function clearStoredPlaybackState(): void {
+  try {
+    localStorage.removeItem(PLAYBACK_STATE_KEY);
+  } catch {}
+}
+

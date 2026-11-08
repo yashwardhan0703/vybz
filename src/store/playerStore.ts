@@ -10,6 +10,8 @@ import {
   saveStoredRecentHistory,
   getStoredViewMode,
   saveStoredViewMode,
+  getStoredPlaybackState,
+  saveStoredPlaybackState,
   type StoredTrack,
   type UserPlaylist,
 } from '../utils/localStorageHelper';
@@ -94,11 +96,15 @@ interface PlayerState {
   closeAll: () => void;
 }
 
-const initialWorld = WORLDS.find((w) => w.id === DEFAULT_WORLD_ID) ?? WORLDS[0];
+const persistedState = typeof window !== 'undefined' ? getStoredPlaybackState() : null;
+const initialWorld =
+  (persistedState?.currentWorldId && WORLDS.find((w) => w.id === persistedState.currentWorldId)) ||
+  WORLDS.find((w) => w.id === DEFAULT_WORLD_ID) ||
+  WORLDS[0];
 const initialTrack = initialWorld.tracks?.[0];
 
 export const usePlayerStore = create<PlayerState>((set, get) => ({
-  viewMode: getStoredViewMode(),
+  viewMode: persistedState?.viewMode || getStoredViewMode(),
   activeTab: 'explore',
   activeArtistId: null,
 
@@ -114,18 +120,23 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
 
   isPlaying: false,
   isLoading: false,
-  isShuffle: false,
-  repeatMode: 'none',
-  volume: 80,
-  isMuted: false,
-  currentTime: 0,
-  duration: 0,
-  trackIndex: 0,
-  trackCount: initialWorld.tracks?.length ?? 0,
-  currentTrackId: '',
-  trackTitle: initialTrack?.title ?? initialWorld.nameHindi,
-  trackArtist: initialTrack?.artist ?? initialWorld.name,
-  trackThumbnail: initialTrack?.id ? `https://img.youtube.com/vi/${initialTrack.id}/mqdefault.jpg` : '',
+  isShuffle: persistedState?.isShuffle ?? false,
+  repeatMode: persistedState?.repeatMode ?? 'none',
+  volume: persistedState?.volume ?? 80,
+  isMuted: persistedState?.isMuted ?? false,
+  currentTime: persistedState?.currentTime ?? 0,
+  duration: persistedState?.duration ?? 0,
+  trackIndex: persistedState?.queueIndex ?? 0,
+  trackCount:
+    persistedState?.queue && persistedState.queue.length > 0
+      ? persistedState.queue.length
+      : initialWorld.tracks?.length ?? 0,
+  currentTrackId: persistedState?.currentTrackId ?? (initialTrack?.id || ''),
+  trackTitle: persistedState?.trackTitle ?? initialTrack?.title ?? initialWorld.nameHindi,
+  trackArtist: persistedState?.trackArtist ?? initialTrack?.artist ?? initialWorld.name,
+  trackThumbnail:
+    persistedState?.trackThumbnail ??
+    (initialTrack?.id ? `https://img.youtube.com/vi/${initialTrack.id}/mqdefault.jpg` : ''),
 
   isTrackListOpen: false,
   isWorldSwitcherOpen: false,
@@ -234,17 +245,32 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
   setIsPlaying: (playing) => set({ isPlaying: playing }),
   setIsLoading: (loading) => set({ isLoading: loading }),
 
-  toggleShuffle: () => set((s) => ({ isShuffle: !s.isShuffle })),
+  toggleShuffle: () =>
+    set((s) => {
+      const next = !s.isShuffle;
+      saveStoredPlaybackState({ isShuffle: next });
+      return { isShuffle: next };
+    }),
 
   cycleRepeat: () =>
     set((s) => {
       const next: RepeatMode =
         s.repeatMode === 'none' ? 'all' : s.repeatMode === 'all' ? 'one' : 'none';
+      saveStoredPlaybackState({ repeatMode: next });
       return { repeatMode: next };
     }),
 
-  setVolume: (vol) => set({ volume: Math.max(0, Math.min(100, Math.round(vol))) }),
-  toggleMute: () => set((s) => ({ isMuted: !s.isMuted })),
+  setVolume: (vol) => {
+    const v = Math.max(0, Math.min(100, Math.round(vol)));
+    saveStoredPlaybackState({ volume: v });
+    set({ volume: v });
+  },
+  toggleMute: () =>
+    set((s) => {
+      const next = !s.isMuted;
+      saveStoredPlaybackState({ isMuted: next });
+      return { isMuted: next };
+    }),
 
   setCurrentTime: (t) => set({ currentTime: Math.max(0, t) }),
   setDuration: (d) => set({ duration: Math.max(0, d) }),

@@ -99,10 +99,10 @@ function AppLayout() {
       />
       <RadioTuningOverlay />
 
-      {/* Persistent Hidden YouTube mount (1x1px to eliminate video frame painting overhead) */}
+      {/* Persistent YouTube mount kept inside viewport but invisible to user */}
       <div
         aria-hidden="true"
-        className="pointer-events-none fixed -bottom-10 -right-10 z-0 size-1 opacity-0 overflow-hidden"
+        className="pointer-events-none fixed bottom-1 right-1 z-0 h-[2px] w-[2px] opacity-[0.01] overflow-hidden"
       >
         <div id={MOUNT_ID} className="size-full" />
       </div>
