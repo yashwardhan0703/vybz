@@ -93,15 +93,15 @@ export default function BottomPlayer({ onPlay, onPause, onNext, onPrev, onSeek }
   return (
     <div
       aria-label="Now playing"
-      className="absolute inset-x-0 bottom-[max(0.6rem,env(safe-area-inset-bottom))] sm:bottom-4 z-40 px-2 sm:px-6 flex justify-center select-none pointer-events-none"
+      className="absolute inset-x-0 bottom-[max(0.4rem,env(safe-area-inset-bottom))] sm:bottom-4 z-40 px-2 sm:px-6 flex justify-center select-none pointer-events-none"
     >
-      <div className="w-full max-w-lg rounded-2xl border border-white/10 bg-[#0c1017]/95 backdrop-blur-md p-2.5 sm:p-3.5 shadow-2xl pointer-events-auto">
+      <div className="w-full max-w-lg rounded-2xl border border-white/10 bg-[#0c1017]/95 backdrop-blur-md p-2 sm:p-3.5 shadow-2xl pointer-events-auto">
 
         {/* Top Section: Track Info & Playback Controls */}
-        <div className="flex items-center justify-between gap-2 sm:gap-3">
+        <div className="flex items-center justify-between gap-1.5 sm:gap-3">
           {/* Left: Thumbnail & Song Info */}
           <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
-            <div className="relative size-10 sm:size-12 shrink-0 overflow-hidden rounded-lg bg-white/10 shadow-md">
+            <div className="relative size-9 sm:size-12 shrink-0 overflow-hidden rounded-lg bg-white/10 shadow-md">
               <img
                 src={displayThumbnail}
                 alt=""
@@ -118,7 +118,7 @@ export default function BottomPlayer({ onPlay, onPause, onNext, onPrev, onSeek }
               <p translate="no" className="notranslate truncate text-xs sm:text-sm font-semibold text-white leading-snug">
                 {displayTitle}
               </p>
-              <p translate="no" className="notranslate truncate text-[0.62rem] sm:text-[0.68rem] text-white/50 mt-0.5">
+              <p translate="no" className="notranslate truncate text-[0.6rem] sm:text-[0.68rem] text-white/50 mt-0.5">
                 {displayArtist}
               </p>
             </div>
@@ -150,31 +150,31 @@ export default function BottomPlayer({ onPlay, onPause, onNext, onPrev, onSeek }
             </button>
           </div>
 
-          {/* Right: Previous, Circular Teal Play/Pause, Next */}
+          {/* Right: Previous, Circular Amber Play/Pause, Next */}
           <div className="flex shrink-0 items-center gap-0.5 sm:gap-2">
             <button
               type="button"
               onClick={onPrev}
               aria-label="Previous track"
-              className="grid size-8 sm:size-9 place-items-center rounded-full text-white/70 transition-colors hover:bg-white/10 hover:text-white active:scale-95"
+              className="grid size-7 sm:size-9 place-items-center rounded-full text-white/70 transition-colors hover:bg-white/10 hover:text-white active:scale-95"
             >
-              <SkipBack size={16} fill="currentColor" />
+              <SkipBack size={15} fill="currentColor" />
             </button>
 
-            {/* Circular Mint/Teal Play Button */}
+            {/* Circular Amber Play Button */}
             <button
               type="button"
               onClick={isPlaying ? onPause : onPlay}
               aria-label={isPlaying ? 'Pause' : 'Play'}
-              className="grid size-10 sm:size-12 place-items-center rounded-full text-black shadow-[0_4px_20px_rgba(245,158,11,0.4)] transition-transform hover:scale-105 active:scale-95"
+              className="grid size-9 sm:size-12 place-items-center rounded-full text-black shadow-[0_4px_20px_rgba(245,158,11,0.4)] transition-transform hover:scale-105 active:scale-95"
               style={{ backgroundColor: themeColor }}
             >
               {isLoading || isTuning ? (
-                <Loader2 size={18} className="animate-spin text-black" />
+                <Loader2 size={16} className="animate-spin text-black" />
               ) : isPlaying ? (
-                <Pause size={18} fill="currentColor" />
+                <Pause size={16} fill="currentColor" />
               ) : (
-                <Play size={18} fill="currentColor" className="translate-x-0.5" />
+                <Play size={16} fill="currentColor" className="translate-x-0.5" />
               )}
             </button>
 
@@ -182,16 +182,16 @@ export default function BottomPlayer({ onPlay, onPause, onNext, onPrev, onSeek }
               type="button"
               onClick={onNext}
               aria-label="Next track"
-              className="grid size-8 sm:size-9 place-items-center rounded-full text-white/70 transition-colors hover:bg-white/10 hover:text-white active:scale-95"
+              className="grid size-7 sm:size-9 place-items-center rounded-full text-white/70 transition-colors hover:bg-white/10 hover:text-white active:scale-95"
             >
-              <SkipForward size={16} fill="currentColor" />
+              <SkipForward size={15} fill="currentColor" />
             </button>
           </div>
         </div>
 
         {/* Middle Section: Seek Bar with exact timestamps */}
-        <div className="mt-2 sm:mt-2.5 flex items-center gap-2">
-          <span className="min-w-6 sm:min-w-7 font-mono text-[0.58rem] sm:text-[0.62rem] tabular-nums text-white/50">
+        <div className="mt-1.5 sm:mt-2.5 flex items-center gap-1.5 sm:gap-2">
+          <span className="min-w-6 sm:min-w-7 font-mono text-[0.55rem] sm:text-[0.62rem] tabular-nums text-white/50">
             {fmt(currentTime)}
           </span>
 
@@ -202,21 +202,21 @@ export default function BottomPlayer({ onPlay, onPause, onNext, onPrev, onSeek }
             value={Math.min(Math.floor(currentTime), duration > 0 ? Math.floor(duration) : 100)}
             aria-label="Seek track"
             onChange={(e) => onSeek(Number(e.target.value))}
-            className="world-range h-3.5 sm:h-4 flex-1 cursor-pointer"
+            className="world-range h-3 sm:h-4 flex-1 cursor-pointer"
             style={{
               '--world-primary': themeColor,
               '--range-progress': `${progress}%`,
             } as React.CSSProperties}
           />
 
-          <span className="min-w-7 sm:min-w-8 text-right font-mono text-[0.58rem] sm:text-[0.62rem] tabular-nums text-white/50">
+          <span className="min-w-6 sm:min-w-8 text-right font-mono text-[0.55rem] sm:text-[0.62rem] tabular-nums text-white/50">
             {duration > 0 ? fmt(duration) : '0:00'}
           </span>
         </div>
 
         {/* Bottom Section: Tracks, Shuffle, Repeat, Volume */}
-        <div className="mt-1.5 sm:mt-2 flex items-center justify-between border-t border-white/5 pt-1.5 sm:pt-2 text-[0.62rem] sm:text-[0.68rem] text-white/70 gap-2">
-          <div className="flex items-center gap-2 sm:gap-6 shrink-0">
+        <div className="mt-1 sm:mt-2 flex items-center justify-between border-t border-white/5 pt-1 sm:pt-2 text-[0.6rem] sm:text-[0.68rem] text-white/70 gap-2">
+          <div className="flex items-center gap-3 sm:gap-6 shrink-0">
             {/* Tracks */}
             <button
               type="button"
@@ -224,7 +224,7 @@ export default function BottomPlayer({ onPlay, onPause, onNext, onPrev, onSeek }
               className="flex items-center gap-1 sm:gap-1.5 hover:text-white transition-colors"
             >
               <ListMusic size={13} />
-              <span className="hidden xs:inline">Tracks</span>
+              <span>Tracks</span>
             </button>
 
             {/* Shuffle */}
@@ -237,7 +237,7 @@ export default function BottomPlayer({ onPlay, onPause, onNext, onPrev, onSeek }
               style={{ color: isShuffle ? themeColor : undefined }}
             >
               <Shuffle size={13} />
-              <span className="hidden xs:inline">Shuffle</span>
+              <span>Shuffle</span>
             </button>
 
             {/* Repeat */}
@@ -250,17 +250,17 @@ export default function BottomPlayer({ onPlay, onPause, onNext, onPrev, onSeek }
               style={{ color: repeatMode !== 'none' ? themeColor : undefined }}
             >
               {repeatMode === 'one' ? <Repeat1 size={13} /> : <Repeat size={13} />}
-              <span className="hidden xs:inline">Repeat</span>
+              <span>Repeat</span>
             </button>
           </div>
 
           {/* Volume */}
-          <div className="flex items-center gap-1.5 sm:gap-2">
+          <div className="flex items-center gap-1 sm:gap-2">
             <button
               type="button"
               onClick={toggleMute}
               aria-label={isMuted ? 'Unmute' : 'Mute'}
-              className="hover:text-white transition-colors"
+              className="hover:text-white transition-colors p-0.5"
             >
               {isMuted || volume === 0 ? <VolumeX size={14} /> : <Volume2 size={14} />}
             </button>
@@ -271,7 +271,7 @@ export default function BottomPlayer({ onPlay, onPause, onNext, onPrev, onSeek }
               value={isMuted ? 0 : volume}
               aria-label="Volume"
               onChange={(e) => setVolume(Number(e.target.value))}
-              className="world-range h-3 w-12 sm:w-20 cursor-pointer"
+              className="world-range h-3 w-12 sm:w-20 cursor-pointer hidden sm:inline-block"
               style={{
                 '--world-primary': themeColor,
                 '--range-progress': `${isMuted ? 0 : volume}%`,

@@ -415,9 +415,9 @@ export default function UniqueIndianPlayer({
       {/* ========================================================
           1. TOP APP BAR (Solid Dark Surface - Fast 60 FPS Render)
          ======================================================== */}
-      <header className="relative z-30 flex items-center justify-between border-b border-white/10 bg-[#090d14] px-3 py-2.5 sm:px-8 sm:py-3 shadow-md">
+      <header className="relative z-30 flex items-center justify-between border-b border-white/10 bg-[#090d14] px-3.5 pt-[max(0.6rem,env(safe-area-inset-top))] pb-2.5 sm:px-8 sm:py-3 shadow-md">
         {/* Brand & Logo */}
-        <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           <div
             className="relative flex size-8 sm:size-10 items-center justify-center rounded-xl sm:rounded-2xl bg-amber-400/10 p-0.5 border border-amber-400/25 shadow-md shrink-0 group hover:scale-105 transition-transform"
           >
@@ -432,11 +432,11 @@ export default function UniqueIndianPlayer({
               <h1 className="text-lg sm:text-xl font-black tracking-tight text-white lowercase">
                 vybz<span className={`bg-gradient-to-r ${themeStyles.accentGradient} bg-clip-text text-transparent font-black`}>.</span>
               </h1>
-              <span className={`rounded-full px-1.5 sm:px-2 py-0.5 text-[0.55rem] sm:text-[0.62rem] font-bold uppercase tracking-wider border ${themeStyles.badgeBg} shrink-0`}>
+              <span className={`hidden sm:inline-block rounded-full px-1.5 sm:px-2 py-0.5 text-[0.55rem] sm:text-[0.62rem] font-bold uppercase tracking-wider border ${themeStyles.badgeBg} shrink-0`}>
                 Top 25 Live
               </span>
             </div>
-            <p className="hidden xs:block text-[0.58rem] sm:text-[0.65rem] text-white/50 tracking-wider font-mono truncate">
+            <p className="hidden md:block text-[0.58rem] sm:text-[0.65rem] text-white/50 tracking-wider font-mono truncate">
               DESI MUSIC STREAMING • REAL-TIME ENGINE
             </p>
           </div>
@@ -457,13 +457,14 @@ export default function UniqueIndianPlayer({
         </div>
 
         {/* Right Actions: Mobile Search + Vibe Mode Switch */}
-        <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
+        <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
           {/* Search Button for Mobile */}
           <button
             type="button"
             onClick={toggleSearch}
-            className="md:hidden grid size-8 sm:size-9 place-items-center rounded-xl border border-white/10 bg-white/5 text-amber-400 hover:bg-white/10"
+            className="md:hidden grid size-8 sm:size-9 place-items-center rounded-xl border border-white/10 bg-white/5 text-amber-400 hover:bg-white/10 active:scale-95 transition-transform"
             title="Search songs & lyrics"
+            aria-label="Search songs"
           >
             <Search size={16} />
           </button>
@@ -472,11 +473,12 @@ export default function UniqueIndianPlayer({
           <button
             type="button"
             onClick={toggleViewMode}
-            className="group flex items-center gap-1.5 sm:gap-2 rounded-xl sm:rounded-2xl border border-amber-400/40 bg-gradient-to-r from-amber-500/20 via-orange-500/20 to-amber-500/10 px-2.5 sm:px-4 py-1.5 sm:py-2 text-[0.7rem] sm:text-xs font-bold text-amber-300 shadow hover:border-amber-400 hover:scale-102 active:scale-98 transition-transform shrink-0"
+            className="group flex items-center gap-1 sm:gap-1.5 rounded-xl sm:rounded-2xl border border-amber-400/40 bg-gradient-to-r from-amber-500/20 via-orange-500/20 to-amber-500/10 px-2.5 sm:px-3.5 py-1.5 sm:py-2 text-[0.7rem] sm:text-xs font-bold text-amber-300 shadow hover:border-amber-400 active:scale-95 transition-transform shrink-0"
             title="Switch to ambient retro world (Chai Tapri / Salon / Bartan Time)"
           >
-            <Sparkles size={14} className="text-amber-400 group-hover:rotate-12 transition-transform shrink-0" />
-            <span>✨ Vibe Mode</span>
+            <Sparkles size={13} className="text-amber-400 group-hover:rotate-12 transition-transform shrink-0" />
+            <span className="sm:hidden">Vibe</span>
+            <span className="hidden sm:inline">Vibe Mode</span>
             <span translate="no" className="notranslate hidden xl:inline text-[0.65rem] opacity-75 font-normal">
               ({currentWorld.nameHindi})
             </span>
@@ -489,7 +491,7 @@ export default function UniqueIndianPlayer({
          ======================================================== */}
       <nav
         aria-label="Categories"
-        className="relative z-20 flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar border-b border-white/5 bg-[#080c14] px-3 py-2 sm:px-8 sm:py-2.5"
+        className="relative z-20 flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar border-b border-white/5 bg-[#080c14] px-3.5 py-2 sm:px-8 sm:py-2.5 touch-pan-x"
       >
         <button
           type="button"
@@ -497,14 +499,15 @@ export default function UniqueIndianPlayer({
             setActiveCategory('all');
             setSelectedArtist(null);
           }}
-          className={`flex items-center gap-1.5 sm:gap-2 rounded-xl px-3 sm:px-4 py-1.5 sm:py-2 text-[0.7rem] sm:text-xs font-bold transition-colors shrink-0 ${
+          className={`flex items-center gap-1.5 rounded-xl px-3 sm:px-4 py-1.5 sm:py-2 text-[0.7rem] sm:text-xs font-bold transition-colors shrink-0 ${
             activeCategory === 'all' && !selectedArtist
               ? `bg-gradient-to-r ${themeStyles.accentGradient} text-black shadow`
               : 'border border-white/10 bg-white/5 text-white/70 hover:bg-white/10 hover:text-white'
           }`}
         >
-          <LayoutGrid size={14} />
-          <span>All Music</span>
+          <LayoutGrid size={13} />
+          <span>All</span>
+          <span className="hidden xs:inline">Music</span>
         </button>
 
         <button
@@ -513,14 +516,15 @@ export default function UniqueIndianPlayer({
             setActiveCategory('trending');
             setSelectedArtist(null);
           }}
-          className={`flex items-center gap-1.5 sm:gap-2 rounded-xl px-3 sm:px-4 py-1.5 sm:py-2 text-[0.7rem] sm:text-xs font-bold transition-colors shrink-0 ${
+          className={`flex items-center gap-1.5 rounded-xl px-3 sm:px-4 py-1.5 sm:py-2 text-[0.7rem] sm:text-xs font-bold transition-colors shrink-0 ${
             activeCategory === 'trending' && !selectedArtist
               ? `bg-gradient-to-r ${themeStyles.accentGradient} text-black shadow`
               : 'border border-white/10 bg-white/5 text-white/70 hover:bg-white/10 hover:text-white'
           }`}
         >
-          <Flame size={14} />
-          <span>Top 25 Trending Hits</span>
+          <Flame size={13} />
+          <span>Top 25</span>
+          <span className="hidden xs:inline">Trending Hits</span>
         </button>
 
         <button
@@ -529,14 +533,14 @@ export default function UniqueIndianPlayer({
             setActiveCategory('artists');
             setSelectedArtist(null);
           }}
-          className={`flex items-center gap-1.5 sm:gap-2 rounded-xl px-3 sm:px-4 py-1.5 sm:py-2 text-[0.7rem] sm:text-xs font-bold transition-colors shrink-0 ${
+          className={`flex items-center gap-1.5 rounded-xl px-3 sm:px-4 py-1.5 sm:py-2 text-[0.7rem] sm:text-xs font-bold transition-colors shrink-0 ${
             (activeCategory === 'artists' || selectedArtist)
               ? `bg-gradient-to-r ${themeStyles.accentGradient} text-black shadow`
               : 'border border-white/10 bg-white/5 text-white/70 hover:bg-white/10 hover:text-white'
           }`}
         >
-          <Mic2 size={14} />
-          <span>Popular Artists</span>
+          <Mic2 size={13} />
+          <span>Artists</span>
         </button>
 
         <button
@@ -545,14 +549,15 @@ export default function UniqueIndianPlayer({
             setActiveCategory('playlists');
             setSelectedArtist(null);
           }}
-          className={`flex items-center gap-1.5 sm:gap-2 rounded-xl px-3 sm:px-4 py-1.5 sm:py-2 text-[0.7rem] sm:text-xs font-bold transition-colors shrink-0 ${
+          className={`flex items-center gap-1.5 rounded-xl px-3 sm:px-4 py-1.5 sm:py-2 text-[0.7rem] sm:text-xs font-bold transition-colors shrink-0 ${
             activeCategory === 'playlists' && !selectedArtist
               ? `bg-gradient-to-r ${themeStyles.accentGradient} text-black shadow`
               : 'border border-white/10 bg-white/5 text-white/70 hover:bg-white/10 hover:text-white'
           }`}
         >
-          <FolderHeart size={14} />
-          <span>My Playlists ({userPlaylists.length})</span>
+          <FolderHeart size={13} />
+          <span>Playlists</span>
+          {userPlaylists.length > 0 && <span className="opacity-75">({userPlaylists.length})</span>}
         </button>
 
         <button
@@ -561,21 +566,22 @@ export default function UniqueIndianPlayer({
             setActiveCategory('favorites');
             setSelectedArtist(null);
           }}
-          className={`flex items-center gap-1.5 sm:gap-2 rounded-xl px-3 sm:px-4 py-1.5 sm:py-2 text-[0.7rem] sm:text-xs font-bold transition-colors shrink-0 ${
+          className={`flex items-center gap-1.5 rounded-xl px-3 sm:px-4 py-1.5 sm:py-2 text-[0.7rem] sm:text-xs font-bold transition-colors shrink-0 ${
             activeCategory === 'favorites' && !selectedArtist
               ? 'bg-gradient-to-r from-rose-500 to-pink-500 text-white shadow'
               : 'border border-white/10 bg-white/5 text-white/70 hover:bg-white/10 hover:text-white'
           }`}
         >
-          <Heart size={14} className={likedSongs.length > 0 ? 'fill-rose-500 text-rose-500' : ''} />
-          <span>Liked Songs ({likedSongs.length})</span>
+          <Heart size={13} className={likedSongs.length > 0 ? 'fill-rose-500 text-rose-500' : ''} />
+          <span>Liked</span>
+          {likedSongs.length > 0 && <span className="opacity-75">({likedSongs.length})</span>}
         </button>
       </nav>
 
       {/* ========================================================
           3. SCROLLABLE MAIN CONTENT AREA (Hardware-Accelerated)
          ======================================================== */}
-      <main className="relative z-10 flex-1 overflow-y-auto px-3 sm:px-8 pb-52 sm:pb-36 pt-4 sm:pt-6 space-y-6 sm:space-y-8 will-change-scroll">
+      <main className="relative z-10 flex-1 overflow-y-auto px-3 sm:px-8 pb-48 sm:pb-36 pt-3.5 sm:pt-6 space-y-5 sm:space-y-8 will-change-scroll">
         {/* ========================================================
             ARTIST DETAIL VIEW
            ======================================================== */}
@@ -806,32 +812,32 @@ export default function UniqueIndianPlayer({
             {(activeCategory === 'all' || activeCategory === 'trending') && (
               <section className="space-y-4 sm:space-y-5">
                 {/* Big Trending Billboard Banner */}
-                <div className={`relative overflow-hidden rounded-2xl sm:rounded-3xl border ${themeStyles.borderGlow} bg-gradient-to-r ${themeStyles.heroGrad} p-4 sm:p-8 shadow-xl`}>
+                <div className={`relative overflow-hidden rounded-2xl sm:rounded-3xl border ${themeStyles.borderGlow} bg-gradient-to-r ${themeStyles.heroGrad} p-3.5 sm:p-7 shadow-xl`}>
                   <div className="relative z-10 max-w-2xl">
-                    <div className="flex items-center gap-1.5 sm:gap-2 text-[0.68rem] sm:text-xs font-bold uppercase tracking-widest text-amber-300">
-                      <TrendingUp size={15} />
+                    <div className="flex items-center gap-1.5 text-[0.62rem] sm:text-xs font-bold uppercase tracking-widest text-amber-300">
+                      <TrendingUp size={13} />
                       <span>Official vybz India Chart • Top 25</span>
                     </div>
-                    <h2 className="mt-1.5 sm:mt-2 text-xl sm:text-3xl md:text-4xl font-black text-white leading-tight">
+                    <h2 className="mt-1 sm:mt-2 text-lg sm:text-2xl md:text-3xl font-black text-white leading-tight">
                       Top 25 Trending on vybz
                     </h2>
-                    <p className="mt-1 text-xs sm:text-sm text-white/60">
-                      Top 5 songs listed below for ultra-fast, snappy loading. Click &ldquo;Next 5&rdquo; to load seamlessly without lag.
+                    <p className="mt-0.5 sm:mt-1 text-[0.7rem] sm:text-xs text-white/60">
+                      Top 5 songs listed below for ultra-fast, snappy 0-lag playback.
                     </p>
 
-                    <div className="mt-4 sm:mt-5 flex flex-col xs:flex-row flex-wrap items-stretch xs:items-center gap-2.5 sm:gap-3">
+                    <div className="mt-3 sm:mt-4 flex items-center gap-2 sm:gap-3 flex-wrap">
                       <button
                         type="button"
                         onClick={() => handleTogglePlayTrending(TOP_25_TRENDING_INDIAN[0], 0)}
-                        className={`flex items-center justify-center gap-2 rounded-full bg-gradient-to-r ${themeStyles.accentGradient} px-5 sm:px-6 py-2.5 text-xs font-bold text-black shadow hover:scale-105 active:scale-95 transition-transform`}
+                        className={`flex items-center justify-center gap-1.5 sm:gap-2 rounded-full bg-gradient-to-r ${themeStyles.accentGradient} px-4 sm:px-6 py-2 sm:py-2.5 text-xs font-bold text-black shadow hover:scale-105 active:scale-95 transition-transform`}
                       >
                         {currentTrackId === TOP_25_TRENDING_INDIAN[0].id && isPlaying ? (
                           <>
-                            <Pause size={15} fill="black" /> Pause #1 Trending Song
+                            <Pause size={14} fill="black" /> <span>Pause #1</span>
                           </>
                         ) : (
                           <>
-                            <Play size={15} fill="black" /> Play #1 Trending Song
+                            <Play size={14} fill="black" /> <span>Play #1 Song</span>
                           </>
                         )}
                       </button>
@@ -841,33 +847,32 @@ export default function UniqueIndianPlayer({
                           const r = Math.floor(Math.random() * TOP_25_TRENDING_INDIAN.length);
                           handleTogglePlayTrending(TOP_25_TRENDING_INDIAN[r], r);
                         }}
-                        className="flex items-center justify-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 sm:px-5 py-2.5 text-xs font-semibold text-white hover:bg-white/10 active:scale-95 transition-colors"
+                        className="flex items-center justify-center gap-1.5 rounded-full border border-white/15 bg-white/5 px-3.5 sm:px-5 py-2 sm:py-2.5 text-xs font-semibold text-white hover:bg-white/10 active:scale-95 transition-colors"
                       >
-                        <Shuffle size={14} /> Shuffle Trending
+                        <Shuffle size={13} /> <span>Shuffle</span>
                       </button>
                     </div>
                   </div>
                 </div>
 
                 {/* 5-BY-5 CHART CONTAINER */}
-                <div className="rounded-2xl sm:rounded-3xl border border-white/10 bg-[#0a0e17] p-3 sm:p-6 shadow-xl">
+                <div className="rounded-2xl sm:rounded-3xl border border-white/10 bg-[#0a0e17] p-2.5 sm:p-6 shadow-xl">
                   {/* Header: Title + Batch / Page Selector */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 sm:pb-4 border-b border-white/5">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-2.5 sm:pb-4 border-b border-white/5">
                     <div>
                       <div className="flex items-center gap-2 flex-wrap">
-                        <h3 className="text-base sm:text-lg font-bold text-white">Top 25 Hits</h3>
-                        <span className="rounded-full bg-amber-400/20 px-2 py-0.5 text-[0.62rem] sm:text-[0.65rem] font-bold text-amber-300">
+                        <h3 className="text-sm sm:text-lg font-bold text-white">Top 25 Hits</h3>
+                        <span className="rounded-full bg-amber-400/20 px-2 py-0.5 text-[0.6rem] sm:text-[0.65rem] font-bold text-amber-300">
                           {isExpandAll ? 'All 25' : `Page ${selectedPage}/5 (${startIdx + 1} - ${startIdx + visibleTrendingSongs.length})`}
                         </span>
                       </div>
-                      <p className="text-[0.7rem] sm:text-xs text-white/40 mt-0.5">
+                      <p className="text-[0.68rem] sm:text-xs text-white/40 mt-0.5">
                         Super-fast loading with 5-track chunks for smooth browsing
                       </p>
                     </div>
 
                     {/* Quick 5-Batch Jump Pills */}
-                    <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1">
-                      <span className="text-[0.68rem] text-white/40 mr-1 hidden md:inline shrink-0">Jump:</span>
+                    <div className="flex items-center gap-1 sm:gap-1.5 overflow-x-auto no-scrollbar py-0.5 touch-pan-x">
                       {[
                         { page: 1, label: '1 - 5' },
                         { page: 2, label: '6 - 10' },
@@ -881,7 +886,7 @@ export default function UniqueIndianPlayer({
                             key={`batch-${page}`}
                             type="button"
                             onClick={() => handleSelectPage(page)}
-                            className={`rounded-xl px-2.5 py-1 text-[0.68rem] sm:text-xs font-mono font-bold transition-colors shrink-0 ${
+                            className={`rounded-lg sm:rounded-xl px-2 sm:px-2.5 py-1 text-[0.65rem] sm:text-xs font-mono font-bold transition-colors shrink-0 ${
                               isActive
                                 ? 'bg-amber-400 text-black shadow'
                                 : 'border border-white/10 bg-white/5 text-white/60 hover:text-white hover:bg-white/10'
@@ -894,7 +899,7 @@ export default function UniqueIndianPlayer({
                       <button
                         type="button"
                         onClick={() => setIsExpandAll((prev) => !prev)}
-                        className={`rounded-xl px-2.5 py-1 text-[0.68rem] sm:text-xs font-mono font-bold transition-colors shrink-0 ${
+                        className={`rounded-lg sm:rounded-xl px-2 sm:px-2.5 py-1 text-[0.65rem] sm:text-xs font-mono font-bold transition-colors shrink-0 ${
                           isExpandAll
                             ? 'bg-amber-400 text-black shadow'
                             : 'border border-white/10 bg-white/5 text-white/60 hover:text-white hover:bg-white/10'
@@ -1050,36 +1055,35 @@ export default function UniqueIndianPlayer({
                   </div>
 
                   {/* 5-BY-5 PAGINATION / MORE CONTROLS */}
-                  <div className="mt-4 sm:mt-5 flex flex-wrap items-center justify-between gap-2.5 pt-3 border-t border-white/5">
+                  <div className="mt-3 sm:mt-5 flex items-center justify-between gap-2 pt-2.5 border-t border-white/5">
                     {/* Previous 5 Button */}
                     {!isExpandAll && selectedPage > 1 ? (
                       <button
                         type="button"
                         onClick={() => setSelectedPage((p) => Math.max(1, p - 1))}
-                        className="flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3.5 sm:px-4 py-1.5 sm:py-2 text-[0.7rem] sm:text-xs font-semibold text-white/80 hover:bg-white/10 hover:text-white transition-colors"
+                        className="flex items-center gap-1 rounded-full border border-white/10 bg-white/5 px-3 sm:px-4 py-1.5 sm:py-2 text-[0.68rem] sm:text-xs font-semibold text-white/80 hover:bg-white/10 hover:text-white active:scale-95 transition-all"
                       >
                         ← Prev 5
                       </button>
                     ) : <div />}
 
                     {/* Next 5 / Expand Buttons */}
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1.5 sm:gap-2">
                       {!isExpandAll && selectedPage < 5 && (
                         <button
                           type="button"
                           onClick={() => setSelectedPage((p) => Math.min(5, p + 1))}
-                          className="group flex items-center gap-1.5 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 px-3.5 sm:px-5 py-1.5 sm:py-2 text-[0.7rem] sm:text-xs font-bold text-black shadow hover:scale-102 active:scale-98 transition-transform"
+                          className="group flex items-center gap-1 sm:gap-1.5 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 px-3 sm:px-5 py-1.5 sm:py-2 text-[0.68rem] sm:text-xs font-bold text-black shadow hover:scale-102 active:scale-98 transition-transform"
                         >
-                          <span className="hidden sm:inline">Next 5 Songs ({selectedPage * 5 + 1} - {(selectedPage + 1) * 5})</span>
-                          <span className="sm:hidden">Next 5 ({selectedPage * 5 + 1} - {(selectedPage + 1) * 5})</span>
-                          <ChevronRight size={14} />
+                          <span>Next 5 ({selectedPage * 5 + 1} - {(selectedPage + 1) * 5})</span>
+                          <ChevronRight size={13} />
                         </button>
                       )}
 
                       <button
                         type="button"
                         onClick={() => setIsExpandAll((prev) => !prev)}
-                        className="rounded-full border border-amber-400/30 bg-amber-400/10 px-3 sm:px-4 py-1.5 sm:py-2 text-[0.7rem] sm:text-xs font-semibold text-amber-300 hover:bg-amber-400/20 transition-colors"
+                        className="rounded-full border border-amber-400/30 bg-amber-400/10 px-2.5 sm:px-4 py-1.5 sm:py-2 text-[0.68rem] sm:text-xs font-semibold text-amber-300 hover:bg-amber-400/20 active:scale-95 transition-colors"
                       >
                         {isExpandAll ? 'Show 5' : 'All 25'}
                       </button>
