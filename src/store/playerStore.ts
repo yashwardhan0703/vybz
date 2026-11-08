@@ -139,6 +139,13 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
   toggleViewMode: () => {
     const next = get().viewMode === 'studio' ? 'vibe' : 'studio';
     saveStoredViewMode(next);
+    if (typeof window !== 'undefined') {
+      if (next === 'vibe') {
+        window.history.pushState({ mode: 'vibe' }, '', '#vibe');
+      } else if (window.location.hash === '#vibe') {
+        window.history.back();
+      }
+    }
     set({ viewMode: next });
   },
 

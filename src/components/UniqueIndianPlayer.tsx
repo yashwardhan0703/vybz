@@ -83,6 +83,48 @@ export default function UniqueIndianPlayer({
   const [activeCategory, setActiveCategory] = useState<'all' | 'trending' | 'artists' | 'playlists' | 'favorites'>('all');
   const [selectedArtist, setSelectedArtist] = useState<Artist | null>(null);
 
+  // Sync selected artist with browser history & URL hash (#artist/pritam)
+  // This enables native mobile back gesture & browser back button!
+  useEffect(() => {
+    // 1. Initial load from hash if present
+    const hash = window.location.hash;
+    if (hash.startsWith('#artist/')) {
+      const artId = hash.replace('#artist/', '');
+      const found = ARTISTS_CATALOG.find((a) => a.id === artId);
+      if (found) {
+        setSelectedArtist(found);
+      }
+    }
+
+    // 2. Listen to browser Back / Forward events (popstate)
+    const handlePopState = () => {
+      const currentHash = window.location.hash;
+      if (currentHash.startsWith('#artist/')) {
+        const artId = currentHash.replace('#artist/', '');
+        const found = ARTISTS_CATALOG.find((a) => a.id === artId);
+        setSelectedArtist(found || null);
+      } else {
+        setSelectedArtist(null);
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  const openArtist = (artist: Artist) => {
+    window.history.pushState({ type: 'artist', artistId: artist.id }, '', `#artist/${artist.id}`);
+    setSelectedArtist(artist);
+  };
+
+  const closeArtist = () => {
+    if (window.location.hash.startsWith('#artist/')) {
+      window.history.back();
+    } else {
+      setSelectedArtist(null);
+    }
+  };
+
   // 5-by-5 Pagination State for Top 25
   const [selectedPage, setSelectedPage] = useState<number>(1);
   const [isExpandAll, setIsExpandAll] = useState<boolean>(false);
@@ -541,7 +583,7 @@ export default function UniqueIndianPlayer({
           <div className="space-y-6">
             <button
               type="button"
-              onClick={() => setSelectedArtist(null)}
+              onClick={closeArtist}
               className="flex items-center gap-1.5 text-xs text-amber-400 hover:underline"
             >
               ← Back to all artists
@@ -1071,7 +1113,7 @@ export default function UniqueIndianPlayer({
                     return (
                       <div
                         key={artist.id || `artist-${aIdx}`}
-                        onClick={() => setSelectedArtist(artist)}
+                        onClick={() => openArtist(artist)}
                         className="group relative flex flex-col rounded-xl sm:rounded-2xl border border-white/5 bg-[#0e1420] p-2.5 sm:p-4 transition-colors hover:border-amber-400/40 hover:bg-[#131c2b] cursor-pointer shadow-md"
                       >
                         {/* Circular Avatar Container with Hover & Touch Play Button */}

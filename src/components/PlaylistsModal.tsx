@@ -1,9 +1,33 @@
+import { useEffect, useCallback } from 'react';
 import { X, Check } from 'lucide-react';
 import { THEMES } from '../data/worlds';
 import { usePlayerStore } from '../store/playerStore';
 
 export default function PlaylistsModal() {
   const { currentWorldId, setWorld, toggleWorldSwitcher, isWorldSwitcherOpen } = usePlayerStore();
+
+  // Mobile gesture & browser back button handling
+  useEffect(() => {
+    if (!isWorldSwitcherOpen) return;
+    if (!window.location.hash.includes('themes')) {
+      window.history.pushState({ modal: 'themes' }, '', '#themes');
+    }
+
+    const handlePopState = () => {
+      toggleWorldSwitcher();
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [isWorldSwitcherOpen, toggleWorldSwitcher]);
+
+  const handleClose = useCallback(() => {
+    if (window.location.hash.includes('themes')) {
+      window.history.back();
+    } else {
+      toggleWorldSwitcher();
+    }
+  }, [toggleWorldSwitcher]);
 
   if (!isWorldSwitcherOpen) return null;
 
@@ -12,7 +36,7 @@ export default function PlaylistsModal() {
       {/* Backdrop */}
       <div
         className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm"
-        onClick={toggleWorldSwitcher}
+        onClick={handleClose}
         aria-hidden="true"
       />
 
@@ -33,7 +57,7 @@ export default function PlaylistsModal() {
           </div>
           <button
             type="button"
-            onClick={toggleWorldSwitcher}
+            onClick={handleClose}
             aria-label="Close playlists modal"
             className="grid size-8 place-items-center rounded-full bg-white/10 text-white/70 hover:bg-white/20 hover:text-white transition-colors"
           >

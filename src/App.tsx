@@ -1,4 +1,4 @@
-import { Component, type ReactNode } from 'react';
+import { Component, useEffect, type ReactNode } from 'react';
 import { useYouTube } from './hooks/useYouTube';
 import { usePlayerStore } from './store/playerStore';
 import WorldBackground from './components/WorldBackground';
@@ -15,9 +15,25 @@ import RadioTuningOverlay from './components/RadioTuningOverlay';
 const MOUNT_ID = 'yt-player-mount';
 
 function AppLayout() {
-  const { currentWorld, isPlaying, viewMode } = usePlayerStore();
+  const { currentWorld, isPlaying, viewMode, setViewMode } = usePlayerStore();
   const { play, pause, next, prev, seekTo, playAt, playCustomVideoId, playSearchQuery } =
     useYouTube(MOUNT_ID);
+
+  // Sync Vibe / Studio mode with browser back/forward buttons
+  useEffect(() => {
+    const handlePopState = () => {
+      const hash = window.location.hash;
+      const currentMode = usePlayerStore.getState().viewMode;
+      if (hash === '#vibe' && currentMode !== 'vibe') {
+        setViewMode('vibe');
+      } else if (!hash.includes('vibe') && currentMode === 'vibe') {
+        setViewMode('studio');
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [setViewMode]);
 
   return (
     <div

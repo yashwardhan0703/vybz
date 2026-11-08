@@ -62,16 +62,38 @@ export default function SearchModal({ onPlayCustomVideoId }: SearchModalProps) {
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const themeColor = currentWorld.themeColor || '#2dd4bf';
 
-  // Auto focus input when opened
+  // Auto focus input when opened & handle mobile / browser back button
   useEffect(() => {
     if (isSearchOpen) {
       const timer = setTimeout(() => {
         inputRef.current?.focus();
         setSelectedIndex(0);
       }, 50);
-      return () => clearTimeout(timer);
+
+      // Push #search to history so pressing back closes modal
+      if (!window.location.hash.includes('search')) {
+        window.history.pushState({ modal: 'search' }, '', '#search');
+      }
+
+      const handlePopState = () => {
+        setSearchOpen(false);
+      };
+
+      window.addEventListener('popstate', handlePopState);
+      return () => {
+        clearTimeout(timer);
+        window.removeEventListener('popstate', handlePopState);
+      };
     }
-  }, [isSearchOpen]);
+  }, [isSearchOpen, setSearchOpen]);
+
+  const closeSearch = useCallback(() => {
+    if (window.location.hash.includes('search')) {
+      window.history.back();
+    } else {
+      setSearchOpen(false);
+    }
+  }, [setSearchOpen]);
 
   // Execute YouTube Live Search (supports song titles, movie names, and lyrics)
   const executeSearch = useCallback(async (searchQuery: string) => {
@@ -231,14 +253,14 @@ export default function SearchModal({ onPlayCustomVideoId }: SearchModalProps) {
         true, // isVibeRadioMode
         item.duration // exact known duration
       );
-      setSearchOpen(false);
+      closeSearch();
     },
-    [onPlayCustomVideoId, setSearchOpen]
+    [onPlayCustomVideoId, closeSearch]
   );
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Escape') {
-      setSearchOpen(false);
+      closeSearch();
     } else if (e.key === 'ArrowDown') {
       e.preventDefault();
       setSelectedIndex((prev) => Math.min(results.length - 1, prev + 1));
@@ -262,7 +284,7 @@ export default function SearchModal({ onPlayCustomVideoId }: SearchModalProps) {
       {/* Backdrop */}
       <div
         className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md transition-opacity"
-        onClick={() => setSearchOpen(false)}
+        onClick={closeSearch}
         aria-hidden="true"
       />
 
@@ -303,7 +325,7 @@ export default function SearchModal({ onPlayCustomVideoId }: SearchModalProps) {
           )}
           <button
             type="button"
-            onClick={() => setSearchOpen(false)}
+            onClick={closeSearch}
             className="rounded-lg bg-white/10 px-2 py-1 text-[0.65rem] sm:text-xs font-mono text-white/60 hover:bg-white/20 hover:text-white shrink-0"
           >
             ESC

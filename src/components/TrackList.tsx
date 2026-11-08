@@ -1,3 +1,4 @@
+import { useEffect, useCallback } from 'react';
 import { X, Music } from 'lucide-react';
 import { usePlayerStore } from '../store/playerStore';
 
@@ -8,6 +9,29 @@ interface TrackListProps {
 export default function TrackList({ onPlayAt }: TrackListProps) {
   const { isTrackListOpen, toggleTrackList, trackIndex, currentWorld, isPlaying } = usePlayerStore();
 
+  // Mobile gesture & browser back button handling
+  useEffect(() => {
+    if (!isTrackListOpen) return;
+    if (!window.location.hash.includes('queue')) {
+      window.history.pushState({ modal: 'queue' }, '', '#queue');
+    }
+
+    const handlePopState = () => {
+      toggleTrackList();
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [isTrackListOpen, toggleTrackList]);
+
+  const handleClose = useCallback(() => {
+    if (window.location.hash.includes('queue')) {
+      window.history.back();
+    } else {
+      toggleTrackList();
+    }
+  }, [toggleTrackList]);
+
   if (!isTrackListOpen) return null;
 
   const tracks = currentWorld.tracks || [];
@@ -17,7 +41,7 @@ export default function TrackList({ onPlayAt }: TrackListProps) {
     <>
       <div
         className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm"
-        onClick={toggleTrackList}
+        onClick={handleClose}
         aria-hidden="true"
       />
 
@@ -39,7 +63,7 @@ export default function TrackList({ onPlayAt }: TrackListProps) {
             </h2>
           </div>
           <button
-            onClick={toggleTrackList}
+            onClick={handleClose}
             aria-label="Close track list"
             className="grid size-9 place-items-center rounded-full bg-white/10 text-white/70 hover:bg-white/20 hover:text-white transition-colors"
           >
