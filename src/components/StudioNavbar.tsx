@@ -1,4 +1,5 @@
-import { Search, Compass, Mic2, FolderHeart, Heart, Sparkles } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Search, Compass, Mic2, FolderHeart, Heart, Sparkles, Download } from 'lucide-react';
 import { usePlayerStore, type StudioTab } from '../store/playerStore';
 
 export default function StudioNavbar() {
@@ -11,6 +12,28 @@ export default function StudioNavbar() {
     likedSongs,
     currentWorld,
   } = usePlayerStore();
+
+  const [installPrompt, setInstallPrompt] = useState<any>(null);
+
+  useEffect(() => {
+    const handleBeforeInstall = (e: Event) => {
+      e.preventDefault();
+      setInstallPrompt(e);
+    };
+    window.addEventListener('beforeinstallprompt', handleBeforeInstall);
+    return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
+  }, []);
+
+  const handleInstallApp = async () => {
+    if (!installPrompt) return;
+    try {
+      installPrompt.prompt();
+      const choice = await installPrompt.userChoice;
+      if (choice?.outcome === 'accepted') {
+        setInstallPrompt(null);
+      }
+    } catch {}
+  };
 
   const navItems: Array<{ id: StudioTab; label: string; icon: React.ReactNode }> = [
     { id: 'explore', label: 'Explore', icon: <Compass size={16} /> },
@@ -76,6 +99,19 @@ export default function StudioNavbar() {
 
       {/* Right: Search & Vibe Mode Switcher */}
       <div className="flex items-center gap-2 sm:gap-3">
+        {/* 1-Click PWA Install Button */}
+        {installPrompt && (
+          <button
+            type="button"
+            onClick={handleInstallApp}
+            aria-label="Install VybZ App"
+            className="flex items-center gap-1.5 rounded-full border border-amber-400/50 bg-amber-400/15 px-3 py-1.5 text-xs font-semibold text-amber-300 hover:bg-amber-400/25 transition-all active:scale-95 shadow-[0_0_15px_rgba(245,158,11,0.25)]"
+          >
+            <Download size={13} className="text-amber-400" />
+            <span className="hidden sm:inline">Install App</span>
+          </button>
+        )}
+
         {/* Quick Search trigger button */}
         <button
           type="button"
