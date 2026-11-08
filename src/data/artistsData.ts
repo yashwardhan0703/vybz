@@ -26,16 +26,16 @@ export const ARTISTS_CATALOG: Artist[] = [
     "bgColor": "#1e293b",
     "topTracks": [
       {
-        "id": "P1fIdFRnfqw",
-        "title": "What Jhumka?",
-        "album": "Rocky Aur Rani",
-        "duration": "3:33"
-      },
-      {
         "id": "BddP6PYo2gs",
         "title": "Kesariya",
         "album": "Brahmāstra",
         "duration": "4:28"
+      },
+      {
+        "id": "P1fIdFRnfqw",
+        "title": "What Jhumka?",
+        "album": "Rocky Aur Rani",
+        "duration": "3:33"
       },
       {
         "id": "284Ov7ysmfA",
@@ -54,6 +54,96 @@ export const ARTISTS_CATALOG: Artist[] = [
         "title": "I Am In Love",
         "album": "Once Upon A Time In Mumbaai",
         "duration": "5:06"
+      },
+      {
+        "id": "AEIVhBS6baE",
+        "title": "Gerua",
+        "album": "Dilwale",
+        "duration": "5:45"
+      },
+      {
+        "id": "jHNNMj5bNQw",
+        "title": "Kabira",
+        "album": "Yeh Jawaani Hai Deewani",
+        "duration": "3:43"
+      },
+      {
+        "id": "VJCoDjStos0",
+        "title": "Badtameez Dil",
+        "album": "Yeh Jawaani Hai Deewani",
+        "duration": "4:12"
+      },
+      {
+        "id": "4coEYCvx-qk",
+        "title": "Balam Pichkari",
+        "album": "Yeh Jawaani Hai Deewani",
+        "duration": "4:49"
+      },
+      {
+        "id": "R6g_k5xq1GM",
+        "title": "Subhanallah",
+        "album": "Yeh Jawaani Hai Deewani",
+        "duration": "4:09"
+      },
+      {
+        "id": "J_DWkWqANyU",
+        "title": "Dilliwaali Girlfriend",
+        "album": "Yeh Jawaani Hai Deewani",
+        "duration": "4:20"
+      },
+      {
+        "id": "cYOB941gyXI",
+        "title": "Hawayein",
+        "album": "Jab Harry Met Sejal",
+        "duration": "4:50"
+      },
+      {
+        "id": "odVptmgIcD0",
+        "title": "Tum Mile",
+        "album": "Tum Mile",
+        "duration": "5:44"
+      },
+      {
+        "id": "p4fxIdy7ndw",
+        "title": "Pee Loon",
+        "album": "Once Upon A Time In Mumbaai",
+        "duration": "4:47"
+      },
+      {
+        "id": "P-V3n5_Qy5k",
+        "title": "Tu Jaane Na",
+        "album": "Ajab Prem Ki Ghazab Kahani",
+        "duration": "5:38"
+      },
+      {
+        "id": "Grr0Exhy-lQ",
+        "title": "Kalank Title Track",
+        "album": "Kalank",
+        "duration": "5:11"
+      },
+      {
+        "id": "5uY3z5U_ayY",
+        "title": "O Maahi",
+        "album": "Dunki",
+        "duration": "3:53"
+      },
+      {
+        "id": "wa2NC4lOZYI",
+        "title": "Lutt Putt Gaya",
+        "album": "Dunki",
+        "duration": "3:45"
+      },
+      {
+        "id": "6FURuLYrR_Q",
+        "title": "Ae Dil Hai Mushkil",
+        "album": "Ae Dil Hai Mushkil",
+        "duration": "4:29"
+      },
+      {
+        "id": "kd5KqlmcHNo",
+        "title": "The Breakup Song",
+        "album": "Ae Dil Hai Mushkil",
+        "duration": "4:12"
       }
     ]
   },
@@ -77,16 +167,76 @@ export const ARTISTS_CATALOG: Artist[] = [
         "duration": "6:54"
       },
       {
-        "id": "c-W01X6Zz6M",
+        "id": "xwwAVRyNmgQ",
         "title": "Jai Ho",
         "album": "Slumdog Millionaire",
         "duration": "5:19"
       },
       {
-        "id": "DMLrGfMxOQA",
+        "id": "WY6IZKkVw0g",
         "title": "Tum Ho",
         "album": "Rockstar",
         "duration": "5:18"
+      },
+      {
+        "id": "MDt-Wew5cz8",
+        "title": "Nadaan Parinde",
+        "album": "Rockstar",
+        "duration": "6:26"
+      },
+      {
+        "id": "xRb8hxwN5zc",
+        "title": "Agar Tum Saath Ho",
+        "album": "Tamasha",
+        "duration": "5:41"
+      },
+      {
+        "id": "a_ZPz_sxzY8",
+        "title": "Masakali",
+        "album": "Delhi-6",
+        "duration": "4:50"
+      },
+      {
+        "id": "0VwgpYJ4q38",
+        "title": "Urvasi Urvasi",
+        "album": "Humse Hai Muqabala",
+        "duration": "5:38"
+      },
+      {
+        "id": "qNnvL0ztJhA",
+        "title": "Radha Kaise Na Jale",
+        "album": "Lagaan",
+        "duration": "5:34"
+      },
+      {
+        "id": "A3q9X7VPdhg",
+        "title": "Matargashti",
+        "album": "Tamasha",
+        "duration": "5:28"
+      },
+      {
+        "id": "7mTDBsdfw88",
+        "title": "Safarnama",
+        "album": "Tamasha",
+        "duration": "4:11"
+      },
+      {
+        "id": "H_e90zbRzpg",
+        "title": "Kal Ho Naa Ho",
+        "album": "Kal Ho Naa Ho",
+        "duration": "5:21"
+      },
+      {
+        "id": "Umqb9KENgmk",
+        "title": "Tum Hi Ho",
+        "album": "Aashiqui 2",
+        "duration": "4:22"
+      },
+      {
+        "id": "RLzC55ai0eo",
+        "title": "Heeriye",
+        "album": "Jasleen Royal feat. Arijit",
+        "duration": "3:14"
       }
     ]
   },
@@ -98,34 +248,28 @@ export const ARTISTS_CATALOG: Artist[] = [
     "bgColor": "#854d0e",
     "topTracks": [
       {
-        "id": "BddP6PYo2gs",
-        "title": "Kesariya",
-        "album": "Brahmāstra",
-        "duration": "4:28"
-      },
-      {
-        "id": "284Ov7ysmfA",
-        "title": "Channa Mereya",
-        "album": "Ae Dil Hai Mushkil",
-        "duration": "4:49"
-      },
-      {
-        "id": "9YhzTM-KHkM",
-        "title": "Ilahi",
-        "album": "Yeh Jawaani Hai Deewani",
-        "duration": "3:50"
-      },
-      {
-        "id": "P1fIdFRnfqw",
-        "title": "What Jhumka?",
-        "album": "Rocky Aur Rani",
-        "duration": "3:33"
-      },
-      {
         "id": "Umqb9KENgmk",
         "title": "Tum Hi Ho",
         "album": "Aashiqui 2",
         "duration": "4:22"
+      },
+      {
+        "id": "xRb8hxwN5zc",
+        "title": "Agar Tum Saath Ho",
+        "album": "Tamasha",
+        "duration": "5:41"
+      },
+      {
+        "id": "RLzC55ai0eo",
+        "title": "Heeriye",
+        "album": "Jasleen Royal feat. Arijit",
+        "duration": "3:14"
+      },
+      {
+        "id": "7zjGzEJQ7MA",
+        "title": "Teri Baaton Mein Aisa Uljha Jiya",
+        "album": "TBMAUJ",
+        "duration": "2:32"
       }
     ]
   },
@@ -137,22 +281,22 @@ export const ARTISTS_CATALOG: Artist[] = [
     "bgColor": "#475569",
     "topTracks": [
       {
-        "id": "BddP6PYo2gs",
-        "title": "Apna Bana Le",
-        "album": "Bhediya",
-        "duration": "4:21"
+        "id": "T94PHkuydcw",
+        "title": "Kun Faya Kun",
+        "album": "Rockstar",
+        "duration": "7:53"
       },
       {
-        "id": "P1fIdFRnfqw",
-        "title": "Tere Vaaste",
-        "album": "Zara Hatke Zara Bachke",
-        "duration": "3:10"
+        "id": "9EodaUmLhAI",
+        "title": "Chaiyya Chaiyya",
+        "album": "Dil Se",
+        "duration": "6:54"
       },
       {
-        "id": "9YhzTM-KHkM",
-        "title": "Saibo",
-        "album": "Shor in the City",
-        "duration": "3:16"
+        "id": "Umqb9KENgmk",
+        "title": "Tum Hi Ho",
+        "album": "Aashiqui 2",
+        "duration": "4:22"
       }
     ]
   },
@@ -170,16 +314,22 @@ export const ARTISTS_CATALOG: Artist[] = [
         "duration": "4:18"
       },
       {
-        "id": "9YhzTM-KHkM",
-        "title": "Ghungroo",
-        "album": "War",
-        "duration": "5:02"
+        "id": "T94PHkuydcw",
+        "title": "Kun Faya Kun",
+        "album": "Rockstar",
+        "duration": "7:53"
       },
       {
-        "id": "284Ov7ysmfA",
-        "title": "Nashe Si Chadh Gayi",
-        "album": "Befikre",
-        "duration": "3:57"
+        "id": "9EodaUmLhAI",
+        "title": "Chaiyya Chaiyya",
+        "album": "Dil Se",
+        "duration": "6:54"
+      },
+      {
+        "id": "Umqb9KENgmk",
+        "title": "Tum Hi Ho",
+        "album": "Aashiqui 2",
+        "duration": "4:22"
       }
     ]
   },
@@ -191,22 +341,46 @@ export const ARTISTS_CATALOG: Artist[] = [
     "bgColor": "#155e75",
     "topTracks": [
       {
-        "id": "DMLrGfMxOQA",
-        "title": "Jeena Jeena",
-        "album": "Badlapur",
-        "duration": "3:50"
-      },
-      {
         "id": "T94PHkuydcw",
         "title": "Tajdar-e-Haram",
         "album": "Coke Studio",
         "duration": "10:15"
       },
       {
-        "id": "BddP6PYo2gs",
-        "title": "Tera Hone Laga Hoon",
-        "album": "Ajab Prem Ki Ghazab Kahani",
-        "duration": "4:58"
+        "id": "Umqb9KENgmk",
+        "title": "Aadat",
+        "album": "Kalyug",
+        "duration": "5:34"
+      },
+      {
+        "id": "H_e90zbRzpg",
+        "title": "Kuch Is Tarah",
+        "album": "Doorie",
+        "duration": "5:13"
+      },
+      {
+        "id": "xRb8hxwN5zc",
+        "title": "Piya O Re Piya",
+        "album": "Tere Naal Love Ho Gaya",
+        "duration": "4:52"
+      },
+      {
+        "id": "A3q9X7VPdhg",
+        "title": "Hum Kis Gali",
+        "album": "Doorie",
+        "duration": "5:01"
+      },
+      {
+        "id": "7mTDBsdfw88",
+        "title": "Paniyon Sa",
+        "album": "Satyameva Jayate",
+        "duration": "3:56"
+      },
+      {
+        "id": "RLzC55ai0eo",
+        "title": "Musafir",
+        "album": "Sweetiee Weds NRI",
+        "duration": "5:07"
       }
     ]
   },
@@ -218,22 +392,22 @@ export const ARTISTS_CATALOG: Artist[] = [
     "bgColor": "#1e1b4b",
     "topTracks": [
       {
-        "id": "P1fIdFRnfqw",
-        "title": "Chaleya",
-        "album": "Jawan",
-        "duration": "3:20"
-      },
-      {
         "id": "9EodaUmLhAI",
         "title": "Hukum",
         "album": "Jailer",
         "duration": "3:27"
       },
       {
-        "id": "284Ov7ysmfA",
-        "title": "Badass",
-        "album": "Leo",
-        "duration": "3:49"
+        "id": "T94PHkuydcw",
+        "title": "Kun Faya Kun",
+        "album": "Rockstar",
+        "duration": "7:53"
+      },
+      {
+        "id": "Umqb9KENgmk",
+        "title": "Tum Hi Ho",
+        "album": "Aashiqui 2",
+        "duration": "4:22"
       }
     ]
   },
@@ -261,6 +435,24 @@ export const ARTISTS_CATALOG: Artist[] = [
         "title": "Tip Tip Barsa Paani",
         "album": "Mohra",
         "duration": "5:55"
+      },
+      {
+        "id": "T94PHkuydcw",
+        "title": "Kun Faya Kun",
+        "album": "Rockstar",
+        "duration": "7:53"
+      },
+      {
+        "id": "9EodaUmLhAI",
+        "title": "Chaiyya Chaiyya",
+        "album": "Dil Se",
+        "duration": "6:54"
+      },
+      {
+        "id": "Umqb9KENgmk",
+        "title": "Tum Hi Ho",
+        "album": "Aashiqui 2",
+        "duration": "4:22"
       }
     ]
   },
@@ -272,22 +464,22 @@ export const ARTISTS_CATALOG: Artist[] = [
     "bgColor": "#78350f",
     "topTracks": [
       {
+        "id": "Umqb9KENgmk",
+        "title": "Lungi Dance",
+        "album": "Chennai Express",
+        "duration": "4:36"
+      },
+      {
+        "id": "T94PHkuydcw",
+        "title": "Naagan",
+        "album": "Honey 3.0",
+        "duration": "3:19"
+      },
+      {
         "id": "9EodaUmLhAI",
-        "title": "Blue Eyes",
+        "title": "Satan",
         "album": "Single",
-        "duration": "3:40"
-      },
-      {
-        "id": "P1fIdFRnfqw",
-        "title": "Dope Shope",
-        "album": "International Villager",
-        "duration": "3:05"
-      },
-      {
-        "id": "284Ov7ysmfA",
-        "title": "Brown Rang",
-        "album": "International Villager",
-        "duration": "2:59"
+        "duration": "4:56"
       }
     ]
   },
@@ -311,10 +503,22 @@ export const ARTISTS_CATALOG: Artist[] = [
         "duration": "6:06"
       },
       {
-        "id": "9YhzTM-KHkM",
-        "title": "Dil Chahta Hai",
-        "album": "Title Track",
-        "duration": "5:11"
+        "id": "T94PHkuydcw",
+        "title": "Kun Faya Kun",
+        "album": "Rockstar",
+        "duration": "7:53"
+      },
+      {
+        "id": "9EodaUmLhAI",
+        "title": "Chaiyya Chaiyya",
+        "album": "Dil Se",
+        "duration": "6:54"
+      },
+      {
+        "id": "Umqb9KENgmk",
+        "title": "Tum Hi Ho",
+        "album": "Aashiqui 2",
+        "duration": "4:22"
       }
     ]
   },
@@ -326,22 +530,22 @@ export const ARTISTS_CATALOG: Artist[] = [
     "bgColor": "#701a75",
     "topTracks": [
       {
-        "id": "BddP6PYo2gs",
-        "title": "Teri Ore",
-        "album": "Singh Is Kinng",
-        "duration": "5:39"
+        "id": "Umqb9KENgmk",
+        "title": "Radha",
+        "album": "Student of the Year",
+        "duration": "5:41"
       },
       {
-        "id": "284Ov7ysmfA",
-        "title": "Sunn Raha Hai Na Tu",
-        "album": "Aashiqui 2",
-        "duration": "5:14"
+        "id": "T94PHkuydcw",
+        "title": "Samjhawan",
+        "album": "Humpty Sharma Ki Dulhania",
+        "duration": "4:25"
       },
       {
-        "id": "P1fIdFRnfqw",
-        "title": "Deewani Mastani",
-        "album": "Bajirao Mastani",
-        "duration": "5:40"
+        "id": "9EodaUmLhAI",
+        "title": "Hangover",
+        "album": "Kick",
+        "duration": "6:16"
       }
     ]
   },
@@ -365,10 +569,22 @@ export const ARTISTS_CATALOG: Artist[] = [
         "duration": "3:48"
       },
       {
-        "id": "9YhzTM-KHkM",
-        "title": "Din Shagna Da",
-        "album": "Phillauri",
-        "duration": "3:36"
+        "id": "T94PHkuydcw",
+        "title": "Kun Faya Kun",
+        "album": "Rockstar",
+        "duration": "7:53"
+      },
+      {
+        "id": "9EodaUmLhAI",
+        "title": "Chaiyya Chaiyya",
+        "album": "Dil Se",
+        "duration": "6:54"
+      },
+      {
+        "id": "Umqb9KENgmk",
+        "title": "Tum Hi Ho",
+        "album": "Aashiqui 2",
+        "duration": "4:22"
       }
     ]
   },
@@ -386,16 +602,16 @@ export const ARTISTS_CATALOG: Artist[] = [
         "duration": "4:13"
       },
       {
-        "id": "284Ov7ysmfA",
-        "title": "Namo Namo",
-        "album": "Kedarnath",
-        "duration": "5:22"
+        "id": "9EodaUmLhAI",
+        "title": "Chaiyya Chaiyya",
+        "album": "Dil Se",
+        "duration": "6:54"
       },
       {
-        "id": "BddP6PYo2gs",
-        "title": "Love You Zindagi",
-        "album": "Dear Zindagi",
-        "duration": "3:50"
+        "id": "Umqb9KENgmk",
+        "title": "Tum Hi Ho",
+        "album": "Aashiqui 2",
+        "duration": "4:22"
       }
     ]
   },
@@ -407,22 +623,28 @@ export const ARTISTS_CATALOG: Artist[] = [
     "bgColor": "#713f12",
     "topTracks": [
       {
-        "id": "284Ov7ysmfA",
-        "title": "Bekhayali",
-        "album": "Kabir Singh",
-        "duration": "6:11"
-      },
-      {
         "id": "R0KlDFAFl0c",
         "title": "Malang Sajna",
         "album": "Single",
         "duration": "3:40"
       },
       {
-        "id": "BddP6PYo2gs",
-        "title": "Maiyya Mainu",
-        "album": "Jersey",
-        "duration": "3:51"
+        "id": "T94PHkuydcw",
+        "title": "Kun Faya Kun",
+        "album": "Rockstar",
+        "duration": "7:53"
+      },
+      {
+        "id": "9EodaUmLhAI",
+        "title": "Chaiyya Chaiyya",
+        "album": "Dil Se",
+        "duration": "6:54"
+      },
+      {
+        "id": "Umqb9KENgmk",
+        "title": "Tum Hi Ho",
+        "album": "Aashiqui 2",
+        "duration": "4:22"
       }
     ]
   },
@@ -450,6 +672,24 @@ export const ARTISTS_CATALOG: Artist[] = [
         "title": "Tum Dil Ki Dhadkan Mein",
         "album": "Dhadkan",
         "duration": "5:10"
+      },
+      {
+        "id": "T94PHkuydcw",
+        "title": "Kun Faya Kun",
+        "album": "Rockstar",
+        "duration": "7:53"
+      },
+      {
+        "id": "9EodaUmLhAI",
+        "title": "Chaiyya Chaiyya",
+        "album": "Dil Se",
+        "duration": "6:54"
+      },
+      {
+        "id": "Umqb9KENgmk",
+        "title": "Tum Hi Ho",
+        "album": "Aashiqui 2",
+        "duration": "4:22"
       }
     ]
   },
@@ -467,16 +707,16 @@ export const ARTISTS_CATALOG: Artist[] = [
         "duration": "6:04"
       },
       {
-        "id": "P1fIdFRnfqw",
-        "title": "Jhalak Dikhlaaja",
-        "album": "Aksar",
-        "duration": "5:10"
+        "id": "T94PHkuydcw",
+        "title": "Kun Faya Kun",
+        "album": "Rockstar",
+        "duration": "7:53"
       },
       {
-        "id": "284Ov7ysmfA",
-        "title": "Tera Suroor",
-        "album": "Aap Kaa Surroor",
-        "duration": "5:59"
+        "id": "Umqb9KENgmk",
+        "title": "Tum Hi Ho",
+        "album": "Aashiqui 2",
+        "duration": "4:22"
       }
     ]
   },
@@ -500,10 +740,22 @@ export const ARTISTS_CATALOG: Artist[] = [
         "duration": "3:38"
       },
       {
-        "id": "9YhzTM-KHkM",
-        "title": "Alag Aasmaan",
+        "id": "Umqb9KENgmk",
+        "title": "Maula",
         "album": "Single",
-        "duration": "3:32"
+        "duration": "3:58"
+      },
+      {
+        "id": "T94PHkuydcw",
+        "title": "Dil Mere",
+        "album": "Acoustic Sessions",
+        "duration": "3:30"
+      },
+      {
+        "id": "9EodaUmLhAI",
+        "title": "Choo Lo",
+        "album": "The Local Train Tribute",
+        "duration": "3:53"
       }
     ]
   },
@@ -521,16 +773,16 @@ export const ARTISTS_CATALOG: Artist[] = [
         "duration": "3:03"
       },
       {
-        "id": "P1fIdFRnfqw",
-        "title": "No Love",
-        "album": "Single",
-        "duration": "2:50"
+        "id": "T94PHkuydcw",
+        "title": "Kun Faya Kun",
+        "album": "Rockstar",
+        "duration": "7:53"
       },
       {
-        "id": "284Ov7ysmfA",
-        "title": "Baller",
-        "album": "Single",
-        "duration": "2:30"
+        "id": "Umqb9KENgmk",
+        "title": "Tum Hi Ho",
+        "album": "Aashiqui 2",
+        "duration": "4:22"
       }
     ]
   },
@@ -542,22 +794,22 @@ export const ARTISTS_CATALOG: Artist[] = [
     "bgColor": "#171717",
     "topTracks": [
       {
-        "id": "P1fIdFRnfqw",
-        "title": "Jugnu",
-        "album": "Single",
-        "duration": "3:50"
-      },
-      {
         "id": "9EodaUmLhAI",
         "title": "Genda Phool",
         "album": "Single",
         "duration": "2:50"
       },
       {
-        "id": "284Ov7ysmfA",
-        "title": "DJ Waley Babu",
-        "album": "Single",
-        "duration": "2:58"
+        "id": "T94PHkuydcw",
+        "title": "Kun Faya Kun",
+        "album": "Rockstar",
+        "duration": "7:53"
+      },
+      {
+        "id": "Umqb9KENgmk",
+        "title": "Tum Hi Ho",
+        "album": "Aashiqui 2",
+        "duration": "4:22"
       }
     ]
   },
@@ -569,22 +821,28 @@ export const ARTISTS_CATALOG: Artist[] = [
     "bgColor": "#3b0764",
     "topTracks": [
       {
-        "id": "284Ov7ysmfA",
-        "title": "Bekhayali",
-        "album": "Kabir Singh",
-        "duration": "6:11"
-      },
-      {
         "id": "R0KlDFAFl0c",
         "title": "Malang Sajna",
         "album": "Single",
         "duration": "3:40"
       },
       {
-        "id": "BddP6PYo2gs",
-        "title": "Ram Siya Ram",
-        "album": "Adipurush",
-        "duration": "3:50"
+        "id": "T94PHkuydcw",
+        "title": "Kun Faya Kun",
+        "album": "Rockstar",
+        "duration": "7:53"
+      },
+      {
+        "id": "9EodaUmLhAI",
+        "title": "Chaiyya Chaiyya",
+        "album": "Dil Se",
+        "duration": "6:54"
+      },
+      {
+        "id": "Umqb9KENgmk",
+        "title": "Tum Hi Ho",
+        "album": "Aashiqui 2",
+        "duration": "4:22"
       }
     ]
   },
@@ -596,28 +854,40 @@ export const ARTISTS_CATALOG: Artist[] = [
     "bgColor": "#1e3a8a",
     "topTracks": [
       {
-        "id": "DMLrGfMxOQA",
-        "title": "I Am In Love",
-        "album": "Once Upon A Time In Mumbaai",
-        "duration": "5:06"
+        "id": "Umqb9KENgmk",
+        "title": "Labon Ko",
+        "album": "Bhool Bhulaiyaa",
+        "duration": "5:42"
       },
       {
-        "id": "bKZTnnFU9HA",
-        "title": "Yaaron",
+        "id": "Qa-uVqnv-No",
+        "title": "Pyaar Ke Pal",
         "album": "Pal",
-        "duration": "4:40"
+        "duration": "5:39"
       },
       {
-        "id": "284Ov7ysmfA",
-        "title": "Zara Sa",
+        "id": "xRb8hxwN5zc",
+        "title": "Haan Tu Hain",
         "album": "Jannat",
-        "duration": "5:04"
+        "duration": "5:25"
       },
       {
-        "id": "9YhzTM-KHkM",
-        "title": "Kya Mujhe Pyar Hai",
-        "album": "Woh Lamhe",
-        "duration": "4:45"
+        "id": "A3q9X7VPdhg",
+        "title": "O Meri Jaan",
+        "album": "Life in a... Metro",
+        "duration": "5:05"
+      },
+      {
+        "id": "7mTDBsdfw88",
+        "title": "Tune Maari Entriyaan",
+        "album": "Gunday",
+        "duration": "5:12"
+      },
+      {
+        "id": "hXh35CtnSyU",
+        "title": "Tu Aashiqui Hai",
+        "album": "Jhankaar Beats",
+        "duration": "6:11"
       }
     ]
   },
@@ -645,6 +915,12 @@ export const ARTISTS_CATALOG: Artist[] = [
         "title": "Suraj Hua Maddham",
         "album": "Kabhi Khushi Kabhie Gham",
         "duration": "7:08"
+      },
+      {
+        "id": "Umqb9KENgmk",
+        "title": "Tanhayee",
+        "album": "Dil Chahta Hai",
+        "duration": "6:10"
       }
     ]
   },
@@ -672,6 +948,24 @@ export const ARTISTS_CATALOG: Artist[] = [
         "title": "Pal Pal Dil Ke Paas",
         "album": "Blackmail",
         "duration": "5:28"
+      },
+      {
+        "id": "T94PHkuydcw",
+        "title": "Kun Faya Kun",
+        "album": "Rockstar",
+        "duration": "7:53"
+      },
+      {
+        "id": "9EodaUmLhAI",
+        "title": "Chaiyya Chaiyya",
+        "album": "Dil Se",
+        "duration": "6:54"
+      },
+      {
+        "id": "Umqb9KENgmk",
+        "title": "Tum Hi Ho",
+        "album": "Aashiqui 2",
+        "duration": "4:22"
       }
     ]
   },
@@ -699,6 +993,24 @@ export const ARTISTS_CATALOG: Artist[] = [
         "title": "Tere Liye",
         "album": "Veer-Zaara",
         "duration": "5:34"
+      },
+      {
+        "id": "T94PHkuydcw",
+        "title": "Kun Faya Kun",
+        "album": "Rockstar",
+        "duration": "7:53"
+      },
+      {
+        "id": "9EodaUmLhAI",
+        "title": "Chaiyya Chaiyya",
+        "album": "Dil Se",
+        "duration": "6:54"
+      },
+      {
+        "id": "Umqb9KENgmk",
+        "title": "Tum Hi Ho",
+        "album": "Aashiqui 2",
+        "duration": "4:22"
       }
     ]
   },
@@ -726,6 +1038,24 @@ export const ARTISTS_CATALOG: Artist[] = [
         "title": "Yeh Reshmi Zulfen",
         "album": "Do Raaste",
         "duration": "4:20"
+      },
+      {
+        "id": "T94PHkuydcw",
+        "title": "Kun Faya Kun",
+        "album": "Rockstar",
+        "duration": "7:53"
+      },
+      {
+        "id": "9EodaUmLhAI",
+        "title": "Chaiyya Chaiyya",
+        "album": "Dil Se",
+        "duration": "6:54"
+      },
+      {
+        "id": "Umqb9KENgmk",
+        "title": "Tum Hi Ho",
+        "album": "Aashiqui 2",
+        "duration": "4:22"
       }
     ]
   },
@@ -737,22 +1067,22 @@ export const ARTISTS_CATALOG: Artist[] = [
     "bgColor": "#be123c",
     "topTracks": [
       {
-        "id": "P1fIdFRnfqw",
-        "title": "Kamli",
-        "album": "Dhoom 3",
-        "duration": "3:55"
-      },
-      {
         "id": "9EodaUmLhAI",
         "title": "Sheila Ki Jawani",
         "album": "Tees Maar Khan",
         "duration": "4:43"
       },
       {
-        "id": "284Ov7ysmfA",
-        "title": "Beedi",
-        "album": "Omkara",
-        "duration": "5:05"
+        "id": "T94PHkuydcw",
+        "title": "Kun Faya Kun",
+        "album": "Rockstar",
+        "duration": "7:53"
+      },
+      {
+        "id": "Umqb9KENgmk",
+        "title": "Tum Hi Ho",
+        "album": "Aashiqui 2",
+        "duration": "4:22"
       }
     ]
   },
@@ -770,16 +1100,16 @@ export const ARTISTS_CATALOG: Artist[] = [
         "duration": "7:53"
       },
       {
-        "id": "284Ov7ysmfA",
-        "title": "Tum Se Hi",
-        "album": "Jab We Met",
-        "duration": "5:23"
+        "id": "9EodaUmLhAI",
+        "title": "Chaiyya Chaiyya",
+        "album": "Dil Se",
+        "duration": "6:54"
       },
       {
-        "id": "9YhzTM-KHkM",
-        "title": "Pee Loon",
-        "album": "Once Upon A Time In Mumbaai",
-        "duration": "4:48"
+        "id": "Umqb9KENgmk",
+        "title": "Tum Hi Ho",
+        "album": "Aashiqui 2",
+        "duration": "4:22"
       }
     ]
   },
@@ -791,22 +1121,22 @@ export const ARTISTS_CATALOG: Artist[] = [
     "bgColor": "#9d174d",
     "topTracks": [
       {
-        "id": "P1fIdFRnfqw",
-        "title": "Aankh Marey",
-        "album": "Simmba",
-        "duration": "3:32"
-      },
-      {
         "id": "9EodaUmLhAI",
         "title": "Garmi",
         "album": "Street Dancer 3D",
         "duration": "3:04"
       },
       {
-        "id": "284Ov7ysmfA",
-        "title": "Dilbar",
-        "album": "Satyameva Jayate",
-        "duration": "3:04"
+        "id": "T94PHkuydcw",
+        "title": "Kun Faya Kun",
+        "album": "Rockstar",
+        "duration": "7:53"
+      },
+      {
+        "id": "Umqb9KENgmk",
+        "title": "Tum Hi Ho",
+        "album": "Aashiqui 2",
+        "duration": "4:22"
       }
     ]
   },
@@ -824,16 +1154,22 @@ export const ARTISTS_CATALOG: Artist[] = [
         "duration": "3:50"
       },
       {
-        "id": "BddP6PYo2gs",
-        "title": "Lut Gaye",
-        "album": "Single",
-        "duration": "3:48"
+        "id": "T94PHkuydcw",
+        "title": "Kun Faya Kun",
+        "album": "Rockstar",
+        "duration": "7:53"
       },
       {
-        "id": "284Ov7ysmfA",
-        "title": "Tum Hi Aana",
-        "album": "Marjaavaan",
-        "duration": "4:09"
+        "id": "9EodaUmLhAI",
+        "title": "Chaiyya Chaiyya",
+        "album": "Dil Se",
+        "duration": "6:54"
+      },
+      {
+        "id": "Umqb9KENgmk",
+        "title": "Tum Hi Ho",
+        "album": "Aashiqui 2",
+        "duration": "4:22"
       }
     ]
   },
@@ -845,22 +1181,22 @@ export const ARTISTS_CATALOG: Artist[] = [
     "bgColor": "#0284c7",
     "topTracks": [
       {
-        "id": "BddP6PYo2gs",
-        "title": "Bol Do Na Zara",
-        "album": "Azhar",
-        "duration": "4:53"
+        "id": "T94PHkuydcw",
+        "title": "Kun Faya Kun",
+        "album": "Rockstar",
+        "duration": "7:53"
       },
       {
-        "id": "P1fIdFRnfqw",
-        "title": "Main Hoon Hero Tera",
-        "album": "Hero",
-        "duration": "4:45"
+        "id": "9EodaUmLhAI",
+        "title": "Chaiyya Chaiyya",
+        "album": "Dil Se",
+        "duration": "6:54"
       },
       {
-        "id": "284Ov7ysmfA",
-        "title": "Pehla Pyaar",
-        "album": "Kabir Singh",
-        "duration": "4:32"
+        "id": "Umqb9KENgmk",
+        "title": "Tum Hi Ho",
+        "album": "Aashiqui 2",
+        "duration": "4:22"
       }
     ]
   },
@@ -872,22 +1208,22 @@ export const ARTISTS_CATALOG: Artist[] = [
     "bgColor": "#b45309",
     "topTracks": [
       {
-        "id": "9EodaUmLhAI",
-        "title": "Lover",
-        "album": "MoonChild Era",
+        "id": "Umqb9KENgmk",
+        "title": "Peaches",
+        "album": "Drive",
         "duration": "3:10"
       },
       {
-        "id": "P1fIdFRnfqw",
-        "title": "Born to Shine",
-        "album": "G.O.A.T.",
-        "duration": "3:33"
+        "id": "T94PHkuydcw",
+        "title": "Panga",
+        "album": "Honey Singh feat. Diljit",
+        "duration": "4:24"
       },
       {
-        "id": "284Ov7ysmfA",
-        "title": "Naina",
-        "album": "Crew",
-        "duration": "3:00"
+        "id": "9EodaUmLhAI",
+        "title": "Goliyan",
+        "album": "International Villager",
+        "duration": "3:15"
       }
     ]
   },
@@ -899,22 +1235,22 @@ export const ARTISTS_CATALOG: Artist[] = [
     "bgColor": "#292524",
     "topTracks": [
       {
-        "id": "9EodaUmLhAI",
-        "title": "295",
-        "album": "Moosetape",
-        "duration": "4:30"
+        "id": "Umqb9KENgmk",
+        "title": "Never Fold",
+        "album": "No Name",
+        "duration": "3:03"
       },
       {
-        "id": "P1fIdFRnfqw",
-        "title": "So High",
-        "album": "PBX 1",
-        "duration": "3:55"
-      },
-      {
-        "id": "284Ov7ysmfA",
-        "title": "The Last Ride",
+        "id": "T94PHkuydcw",
+        "title": "Vaar",
         "album": "Single",
-        "duration": "4:20"
+        "duration": "2:46"
+      },
+      {
+        "id": "9EodaUmLhAI",
+        "title": "Chorni",
+        "album": "Divine feat. Sidhu",
+        "duration": "3:04"
       }
     ]
   },
@@ -932,16 +1268,16 @@ export const ARTISTS_CATALOG: Artist[] = [
         "duration": "4:28"
       },
       {
-        "id": "P1fIdFRnfqw",
-        "title": "Excuses",
-        "album": "Single",
-        "duration": "3:00"
+        "id": "T94PHkuydcw",
+        "title": "Kun Faya Kun",
+        "album": "Rockstar",
+        "duration": "7:53"
       },
       {
-        "id": "284Ov7ysmfA",
-        "title": "With You",
-        "album": "Single",
-        "duration": "2:34"
+        "id": "Umqb9KENgmk",
+        "title": "Tum Hi Ho",
+        "album": "Aashiqui 2",
+        "duration": "4:22"
       }
     ]
   },
@@ -953,22 +1289,22 @@ export const ARTISTS_CATALOG: Artist[] = [
     "bgColor": "#064e3b",
     "topTracks": [
       {
+        "id": "Umqb9KENgmk",
+        "title": "Jee Ni Lagda",
+        "album": "Single",
+        "duration": "3:45"
+      },
+      {
+        "id": "T94PHkuydcw",
+        "title": "WYTB",
+        "album": "Four Me",
+        "duration": "3:14"
+      },
+      {
         "id": "9EodaUmLhAI",
-        "title": "Tauba Tauba",
-        "album": "Bad Newz",
-        "duration": "3:27"
-      },
-      {
-        "id": "P1fIdFRnfqw",
-        "title": "Softly",
-        "album": "Making Memories",
-        "duration": "2:35"
-      },
-      {
-        "id": "284Ov7ysmfA",
-        "title": "Winning Speech",
-        "album": "Street Dreams",
-        "duration": "3:15"
+        "title": "Take It Easy",
+        "album": "Four Me",
+        "duration": "3:26"
       }
     ]
   },
@@ -986,16 +1322,16 @@ export const ARTISTS_CATALOG: Artist[] = [
         "duration": "3:14"
       },
       {
-        "id": "P1fIdFRnfqw",
-        "title": "Tu Aake Dekhle",
-        "album": "The Carnival",
-        "duration": "4:45"
+        "id": "T94PHkuydcw",
+        "title": "Kun Faya Kun",
+        "album": "Rockstar",
+        "duration": "7:53"
       },
       {
-        "id": "284Ov7ysmfA",
-        "title": "Oops",
-        "album": "Champagne Talk",
-        "duration": "2:50"
+        "id": "Umqb9KENgmk",
+        "title": "Tum Hi Ho",
+        "album": "Aashiqui 2",
+        "duration": "4:22"
       }
     ]
   },
@@ -1013,16 +1349,16 @@ export const ARTISTS_CATALOG: Artist[] = [
         "duration": "4:22"
       },
       {
-        "id": "284Ov7ysmfA",
-        "title": "Sanam Re",
-        "album": "Title Track",
-        "duration": "5:08"
+        "id": "T94PHkuydcw",
+        "title": "Kun Faya Kun",
+        "album": "Rockstar",
+        "duration": "7:53"
       },
       {
-        "id": "BddP6PYo2gs",
-        "title": "Dil Sambhal Ja Zara",
-        "album": "Murder 2",
-        "duration": "4:45"
+        "id": "9EodaUmLhAI",
+        "title": "Chaiyya Chaiyya",
+        "album": "Dil Se",
+        "duration": "6:54"
       }
     ]
   },
@@ -1034,22 +1370,28 @@ export const ARTISTS_CATALOG: Artist[] = [
     "bgColor": "#7f1d1d",
     "topTracks": [
       {
-        "id": "P1fIdFRnfqw",
-        "title": "Zingaat",
-        "album": "Sairat",
-        "duration": "3:46"
-      },
-      {
         "id": "bKZTnnFU9HA",
         "title": "Abhi Mujh Mein Kahin",
         "album": "Agneepath",
         "duration": "6:04"
       },
       {
-        "id": "284Ov7ysmfA",
-        "title": "Deva Shree Ganesha",
-        "album": "Agneepath",
-        "duration": "5:56"
+        "id": "T94PHkuydcw",
+        "title": "Kun Faya Kun",
+        "album": "Rockstar",
+        "duration": "7:53"
+      },
+      {
+        "id": "9EodaUmLhAI",
+        "title": "Chaiyya Chaiyya",
+        "album": "Dil Se",
+        "duration": "6:54"
+      },
+      {
+        "id": "Umqb9KENgmk",
+        "title": "Tum Hi Ho",
+        "album": "Aashiqui 2",
+        "duration": "4:22"
       }
     ]
   },
@@ -1077,6 +1419,24 @@ export const ARTISTS_CATALOG: Artist[] = [
         "title": "Yeh Kaali Kaali Aankhen",
         "album": "Baazigar",
         "duration": "7:50"
+      },
+      {
+        "id": "T94PHkuydcw",
+        "title": "Kun Faya Kun",
+        "album": "Rockstar",
+        "duration": "7:53"
+      },
+      {
+        "id": "9EodaUmLhAI",
+        "title": "Chaiyya Chaiyya",
+        "album": "Dil Se",
+        "duration": "6:54"
+      },
+      {
+        "id": "Umqb9KENgmk",
+        "title": "Tum Hi Ho",
+        "album": "Aashiqui 2",
+        "duration": "4:22"
       }
     ]
   },
@@ -1104,6 +1464,24 @@ export const ARTISTS_CATALOG: Artist[] = [
         "title": "Woh Kagaz Ki Kashti",
         "album": "The Unforgettables",
         "duration": "4:52"
+      },
+      {
+        "id": "T94PHkuydcw",
+        "title": "Kun Faya Kun",
+        "album": "Rockstar",
+        "duration": "7:53"
+      },
+      {
+        "id": "9EodaUmLhAI",
+        "title": "Chaiyya Chaiyya",
+        "album": "Dil Se",
+        "duration": "6:54"
+      },
+      {
+        "id": "Umqb9KENgmk",
+        "title": "Tum Hi Ho",
+        "album": "Aashiqui 2",
+        "duration": "4:22"
       }
     ]
   },
@@ -1131,6 +1509,18 @@ export const ARTISTS_CATALOG: Artist[] = [
         "title": "Mere Rashke Qamar",
         "album": "Classic",
         "duration": "7:20"
+      },
+      {
+        "id": "9EodaUmLhAI",
+        "title": "Chaiyya Chaiyya",
+        "album": "Dil Se",
+        "duration": "6:54"
+      },
+      {
+        "id": "Umqb9KENgmk",
+        "title": "Tum Hi Ho",
+        "album": "Aashiqui 2",
+        "duration": "4:22"
       }
     ]
   },
@@ -1148,16 +1538,16 @@ export const ARTISTS_CATALOG: Artist[] = [
         "duration": "6:19"
       },
       {
-        "id": "BddP6PYo2gs",
-        "title": "Tere Mast Mast Do Nain",
-        "album": "Dabangg",
-        "duration": "5:59"
+        "id": "9EodaUmLhAI",
+        "title": "Chaiyya Chaiyya",
+        "album": "Dil Se",
+        "duration": "6:54"
       },
       {
-        "id": "284Ov7ysmfA",
-        "title": "Jiya Dhadak Dhadak Jaye",
-        "album": "Kalyug",
-        "duration": "5:24"
+        "id": "Umqb9KENgmk",
+        "title": "Tum Hi Ho",
+        "album": "Aashiqui 2",
+        "duration": "4:22"
       }
     ]
   },
@@ -1175,16 +1565,16 @@ export const ARTISTS_CATALOG: Artist[] = [
         "duration": "4:40"
       },
       {
-        "id": "284Ov7ysmfA",
-        "title": "Safarnama",
-        "album": "Tamasha",
-        "duration": "4:11"
+        "id": "9EodaUmLhAI",
+        "title": "Chaiyya Chaiyya",
+        "album": "Dil Se",
+        "duration": "6:54"
       },
       {
-        "id": "9YhzTM-KHkM",
-        "title": "Hairat",
-        "album": "Anjaana Anjaani",
-        "duration": "4:06"
+        "id": "Umqb9KENgmk",
+        "title": "Tum Hi Ho",
+        "album": "Aashiqui 2",
+        "duration": "4:22"
       }
     ]
   },
@@ -1208,10 +1598,22 @@ export const ARTISTS_CATALOG: Artist[] = [
         "duration": "3:17"
       },
       {
-        "id": "9YhzTM-KHkM",
-        "title": "Kho Gaye Hum Kahan",
-        "album": "Baar Baar Dekho",
-        "duration": "3:33"
+        "id": "T94PHkuydcw",
+        "title": "Kun Faya Kun",
+        "album": "Rockstar",
+        "duration": "7:53"
+      },
+      {
+        "id": "9EodaUmLhAI",
+        "title": "Chaiyya Chaiyya",
+        "album": "Dil Se",
+        "duration": "6:54"
+      },
+      {
+        "id": "Umqb9KENgmk",
+        "title": "Tum Hi Ho",
+        "album": "Aashiqui 2",
+        "duration": "4:22"
       }
     ]
   },
@@ -1223,22 +1625,28 @@ export const ARTISTS_CATALOG: Artist[] = [
     "bgColor": "#991b1b",
     "topTracks": [
       {
-        "id": "284Ov7ysmfA",
-        "title": "Teri Mitti",
-        "album": "Kesari",
-        "duration": "5:14"
-      },
-      {
         "id": "R0KlDFAFl0c",
         "title": "Filhall",
         "album": "Single",
         "duration": "4:15"
       },
       {
-        "id": "BddP6PYo2gs",
-        "title": "Mann Bharryaa",
-        "album": "Shershaah",
-        "duration": "4:50"
+        "id": "T94PHkuydcw",
+        "title": "Kun Faya Kun",
+        "album": "Rockstar",
+        "duration": "7:53"
+      },
+      {
+        "id": "9EodaUmLhAI",
+        "title": "Chaiyya Chaiyya",
+        "album": "Dil Se",
+        "duration": "6:54"
+      },
+      {
+        "id": "Umqb9KENgmk",
+        "title": "Tum Hi Ho",
+        "album": "Aashiqui 2",
+        "duration": "4:22"
       }
     ]
   },
@@ -1256,16 +1664,16 @@ export const ARTISTS_CATALOG: Artist[] = [
         "duration": "3:35"
       },
       {
-        "id": "P1fIdFRnfqw",
-        "title": "Lahore",
-        "album": "Single",
-        "duration": "3:17"
+        "id": "T94PHkuydcw",
+        "title": "Kun Faya Kun",
+        "album": "Rockstar",
+        "duration": "7:53"
       },
       {
-        "id": "284Ov7ysmfA",
-        "title": "Suit Suit",
-        "album": "Hindi Medium",
-        "duration": "3:10"
+        "id": "Umqb9KENgmk",
+        "title": "Tum Hi Ho",
+        "album": "Aashiqui 2",
+        "duration": "4:22"
       }
     ]
   },
@@ -1277,22 +1685,22 @@ export const ARTISTS_CATALOG: Artist[] = [
     "bgColor": "#1d4ed8",
     "topTracks": [
       {
-        "id": "BddP6PYo2gs",
-        "title": "Chogada",
-        "album": "Loveyatri",
-        "duration": "4:09"
+        "id": "T94PHkuydcw",
+        "title": "Kun Faya Kun",
+        "album": "Rockstar",
+        "duration": "7:53"
       },
       {
-        "id": "P1fIdFRnfqw",
-        "title": "Kamariya",
-        "album": "Mitron",
-        "duration": "3:10"
+        "id": "9EodaUmLhAI",
+        "title": "Chaiyya Chaiyya",
+        "album": "Dil Se",
+        "duration": "6:54"
       },
       {
-        "id": "284Ov7ysmfA",
-        "title": "Tera Zikr",
-        "album": "Single",
-        "duration": "3:38"
+        "id": "Umqb9KENgmk",
+        "title": "Tum Hi Ho",
+        "album": "Aashiqui 2",
+        "duration": "4:22"
       }
     ]
   },
@@ -1310,16 +1718,16 @@ export const ARTISTS_CATALOG: Artist[] = [
         "duration": "4:48"
       },
       {
-        "id": "P1fIdFRnfqw",
-        "title": "Mauja Hi Mauja",
-        "album": "Jab We Met",
-        "duration": "4:05"
+        "id": "T94PHkuydcw",
+        "title": "Kun Faya Kun",
+        "album": "Rockstar",
+        "duration": "7:53"
       },
       {
-        "id": "284Ov7ysmfA",
-        "title": "Aankh Marey",
-        "album": "Simmba",
-        "duration": "3:32"
+        "id": "Umqb9KENgmk",
+        "title": "Tum Hi Ho",
+        "album": "Aashiqui 2",
+        "duration": "4:22"
       }
     ]
   },
@@ -1343,10 +1751,16 @@ export const ARTISTS_CATALOG: Artist[] = [
         "duration": "4:20"
       },
       {
-        "id": "284Ov7ysmfA",
-        "title": "Ainvayi Ainvayi",
-        "album": "Band Baaja Baaraat",
-        "duration": "4:25"
+        "id": "9EodaUmLhAI",
+        "title": "Chaiyya Chaiyya",
+        "album": "Dil Se",
+        "duration": "6:54"
+      },
+      {
+        "id": "Umqb9KENgmk",
+        "title": "Tum Hi Ho",
+        "album": "Aashiqui 2",
+        "duration": "4:22"
       }
     ]
   },
@@ -1364,16 +1778,16 @@ export const ARTISTS_CATALOG: Artist[] = [
         "duration": "7:53"
       },
       {
-        "id": "BddP6PYo2gs",
-        "title": "Srivalli",
-        "album": "Pushpa",
-        "duration": "3:44"
+        "id": "9EodaUmLhAI",
+        "title": "Chaiyya Chaiyya",
+        "album": "Dil Se",
+        "duration": "6:54"
       },
       {
-        "id": "284Ov7ysmfA",
-        "title": "Jashn-E-Bahaara",
-        "album": "Jodhaa Akbar",
-        "duration": "5:15"
+        "id": "Umqb9KENgmk",
+        "title": "Tum Hi Ho",
+        "album": "Aashiqui 2",
+        "duration": "4:22"
       }
     ]
   },
@@ -1401,6 +1815,24 @@ export const ARTISTS_CATALOG: Artist[] = [
         "title": "Yeh Raaten Yeh Mausam",
         "album": "Single",
         "duration": "3:45"
+      },
+      {
+        "id": "T94PHkuydcw",
+        "title": "Kun Faya Kun",
+        "album": "Rockstar",
+        "duration": "7:53"
+      },
+      {
+        "id": "9EodaUmLhAI",
+        "title": "Chaiyya Chaiyya",
+        "album": "Dil Se",
+        "duration": "6:54"
+      },
+      {
+        "id": "Umqb9KENgmk",
+        "title": "Tum Hi Ho",
+        "album": "Aashiqui 2",
+        "duration": "4:22"
       }
     ]
   }

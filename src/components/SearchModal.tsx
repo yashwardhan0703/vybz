@@ -270,7 +270,7 @@ export default function SearchModal({ onPlayCustomVideoId }: SearchModalProps) {
       <div
         role="dialog"
         aria-label="YouTube Music & Lyrics Search"
-        className="fixed inset-x-2.5 top-8 sm:top-16 z-50 mx-auto w-auto sm:w-[94vw] max-w-2xl sm:inset-x-auto sm:left-1/2 sm:-translate-x-1/2 overflow-hidden rounded-2xl border border-white/15 bg-[#0e1215]/95 shadow-[0_30px_90px_rgba(0,0,0,0.98)] backdrop-blur-2xl"
+        className="fixed inset-x-2.5 top-4 sm:top-16 z-50 mx-auto w-auto sm:w-[94vw] max-w-2xl sm:inset-x-auto sm:left-1/2 sm:-translate-x-1/2 overflow-hidden rounded-2xl border border-white/15 bg-[#0e1215]/95 shadow-[0_30px_90px_rgba(0,0,0,0.98)] backdrop-blur-2xl"
       >
         {/* Top Search Input Box */}
         <div className="flex items-center gap-2 sm:gap-3 border-b border-white/10 px-3 py-2.5 sm:px-5 sm:py-3.5">
@@ -282,7 +282,7 @@ export default function SearchModal({ onPlayCustomVideoId }: SearchModalProps) {
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
             placeholder="Search song, artist, or lyrics..."
-            className="flex-1 bg-transparent font-sans text-xs sm:text-base text-white placeholder-white/40 outline-none"
+            className="flex-1 bg-transparent font-sans text-[16px] sm:text-base text-white placeholder-white/40 outline-none"
           />
           {isLoading && (
             <Loader2 size={16} className="shrink-0 animate-spin text-teal-400" />

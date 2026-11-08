@@ -93,7 +93,7 @@ export default function BottomPlayer({ onPlay, onPause, onNext, onPrev, onSeek }
   return (
     <div
       aria-label="Now playing"
-      className="absolute inset-x-0 bottom-2.5 sm:bottom-4 z-40 px-2 sm:px-6 flex justify-center select-none pointer-events-none"
+      className="absolute inset-x-0 bottom-[max(0.6rem,env(safe-area-inset-bottom))] sm:bottom-4 z-40 px-2 sm:px-6 flex justify-center select-none pointer-events-none"
     >
       <div className="w-full max-w-lg rounded-2xl border border-white/10 bg-[#0c1017]/95 backdrop-blur-md p-2.5 sm:p-3.5 shadow-2xl pointer-events-auto">
 
@@ -215,8 +215,8 @@ export default function BottomPlayer({ onPlay, onPause, onNext, onPrev, onSeek }
         </div>
 
         {/* Bottom Section: Tracks, Shuffle, Repeat, Volume */}
-        <div className="mt-1.5 sm:mt-2 flex items-center justify-between border-t border-white/5 pt-1.5 sm:pt-2 text-[0.62rem] sm:text-[0.68rem] text-white/70">
-          <div className="flex items-center gap-2.5 sm:gap-6">
+        <div className="mt-1.5 sm:mt-2 flex items-center justify-between border-t border-white/5 pt-1.5 sm:pt-2 text-[0.62rem] sm:text-[0.68rem] text-white/70 gap-2">
+          <div className="flex items-center gap-2 sm:gap-6 shrink-0">
             {/* Tracks */}
             <button
               type="button"

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Play,
   Pause,
@@ -15,6 +15,7 @@ import {
   LayoutGrid,
   ChevronDown,
   Volume2,
+  Loader2,
 } from 'lucide-react';
 import { usePlayerStore } from '../store/playerStore';
 import { TOP_25_TRENDING_INDIAN, type TrendingTrack } from '../data/trendingSongs';
@@ -40,6 +41,16 @@ interface UniqueIndianPlayerProps {
 
 // Zero-network, offline-safe SVG avatar fallback that NEVER fails and NEVER triggers infinite loop
 const SAFE_SVG_FALLBACK = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%231f2937'/%3E%3Ccircle cx='50' cy='38' r='20' fill='%23f59e0b'/%3E%3Cpath d='M20 90 A30 30 0 0 1 80 90 Z' fill='%23f59e0b' opacity='0.7'/%3E%3C/svg%3E";
+
+function cleanSongTitle(raw: string): string {
+  if (!raw) return '';
+  return raw
+    .replace(/[([][^\])]*?(official|video|audio|lyrics|lyrical|full song|teaser|trailer|4k|hd|remix|slowed|reverb)[^\])]*?[\])]/gi, '')
+    .replace(/\s*\|\s*(t-series|zee music company|sony music india|tips official|yrf|speed records|saregama|white hill).*$/gi, '')
+    .replace(/\s*\|\s*$/g, '')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+}
 
 // Consistent warm acoustic Indian audio styling
 const themeStyles = {
@@ -76,8 +87,87 @@ export default function UniqueIndianPlayer({
   const [selectedPage, setSelectedPage] = useState<number>(1);
   const [isExpandAll, setIsExpandAll] = useState<boolean>(false);
 
+  // 5-by-5 Pagination State & Dynamic Search for Selected Artist
+  const [artistPage, setArtistPage] = useState<number>(1);
+  const [isArtistExpandAll, setIsArtistExpandAll] = useState<boolean>(false);
+  const [artistTracksMap, setArtistTracksMap] = useState<Record<string, ArtistSong[]>>({});
+  const [isSearchingArtist, setIsSearchingArtist] = useState<boolean>(false);
+
   // Progressive Display for Popular Artists (Initial 12, load more +12)
   const [displayedArtistsCount, setDisplayedArtistsCount] = useState<number>(12);
+
+  // Auto-search real YouTube songs when an artist is selected (Cached in localStorage for instant 0ms reload)
+  useEffect(() => {
+    if (!selectedArtist) return;
+    const artistId = selectedArtist.id;
+    setArtistPage(1);
+    setIsArtistExpandAll(false);
+
+    // 1. Check in-memory state or localStorage cache first
+    const cacheKey = `vybz_art_v3_${artistId}`;
+    try {
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length >= 5) {
+          setArtistTracksMap((prev) => ({ ...prev, [artistId]: parsed }));
+          return;
+        }
+      }
+    } catch {
+      // Ignore cache read errors
+    }
+
+    // 2. Fetch live YouTube search for this artist
+    let isMounted = true;
+    setIsSearchingArtist(true);
+
+    const fetchArtistSongs = async () => {
+      try {
+        const res = await fetch(`/api/search?q=${encodeURIComponent(selectedArtist.name + ' songs hit')}`);
+        if (!res.ok) throw new Error('Search failed');
+        const data = await res.json();
+        if (!isMounted) return;
+
+        if (Array.isArray(data.results) && data.results.length > 0) {
+          const stopWords = ['jukebox', 'all songs', 'non stop', 'full album', 'compilation', 'podcast', 'mashup 1 hour', 'interview'];
+          const cleanResults: ArtistSong[] = data.results
+            .filter((item: any) => {
+              const titleLower = (item.title || '').toLowerCase();
+              return !stopWords.some((sw) => titleLower.includes(sw));
+            })
+            .map((item: any) => ({
+              id: item.id,
+              title: cleanSongTitle(item.title),
+              album: item.artist || selectedArtist.name,
+              duration: item.duration || '3:45',
+            }))
+            .slice(0, 20);
+
+          if (cleanResults.length >= 3) {
+            setArtistTracksMap((prev) => ({ ...prev, [artistId]: cleanResults }));
+            try {
+              localStorage.setItem(cacheKey, JSON.stringify(cleanResults));
+            } catch {
+              // Ignore cache write errors
+            }
+          }
+        }
+      } catch {
+        // Fallback remains active
+      } finally {
+        if (isMounted) {
+          setIsSearchingArtist(false);
+        }
+      }
+    };
+
+    fetchArtistSongs();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [selectedArtist?.id]);
 
   // Playlist creation
   const [playlistModalSong, setPlaylistModalSong] = useState<StoredTrack | null>(null);
@@ -188,10 +278,11 @@ export default function UniqueIndianPlayer({
   // Toggle Play / Pause artist top track
   const handleTogglePlayArtist = (artist: Artist, e?: React.MouseEvent) => {
     e?.stopPropagation();
-    if (!artist || !artist.topTracks || artist.topTracks.length === 0) return;
-    const first = artist.topTracks[0];
+    const tracksList = (artist ? artistTracksMap[artist.id] : null) || artist.topTracks || [];
+    if (!tracksList || tracksList.length === 0) return;
+    const first = tracksList[0];
     if (first) {
-      handleTogglePlayArtistSong(first.id, first.title, artist.name, 0, artist.topTracks);
+      handleTogglePlayArtistSong(first.id, first.title, artist.name, 0, tracksList);
     }
   };
 
@@ -211,7 +302,9 @@ export default function UniqueIndianPlayer({
       }
       return;
     }
-    const tracksList = artistTracks || (selectedArtist ? selectedArtist.topTracks : []);
+    const tracksList =
+      artistTracks ||
+      (selectedArtist ? artistTracksMap[selectedArtist.id] || selectedArtist.topTracks : []);
     const artistQueue: QueueTrack[] = tracksList.map((t) => ({
       id: t.id,
       title: t.title,
@@ -249,6 +342,16 @@ export default function UniqueIndianPlayer({
   const visibleTrendingSongs = isExpandAll
     ? TOP_25_TRENDING_INDIAN
     : TOP_25_TRENDING_INDIAN.slice(startIdx, startIdx + 5);
+
+  // Selected Artist Tracks (From dynamic search or curated tracks)
+  const currentArtistTracks: ArtistSong[] =
+    (selectedArtist ? artistTracksMap[selectedArtist.id] : null) ||
+    (selectedArtist?.topTracks && selectedArtist.topTracks.length > 0 ? selectedArtist.topTracks : []);
+
+  const artistStartIdx = (artistPage - 1) * 5;
+  const visibleArtistTracks = isArtistExpandAll
+    ? currentArtistTracks
+    : currentArtistTracks.slice(artistStartIdx, artistStartIdx + 5);
 
   // Visible artists: If user clicked 'Popular Artists' tab, show all 50; otherwise progressive slice
   const visibleArtists =
@@ -430,7 +533,7 @@ export default function UniqueIndianPlayer({
       {/* ========================================================
           3. SCROLLABLE MAIN CONTENT AREA (Hardware-Accelerated)
          ======================================================== */}
-      <main className="relative z-10 flex-1 overflow-y-auto px-3 sm:px-8 pb-44 sm:pb-36 pt-4 sm:pt-6 space-y-6 sm:space-y-8 will-change-scroll">
+      <main className="relative z-10 flex-1 overflow-y-auto px-3 sm:px-8 pb-52 sm:pb-36 pt-4 sm:pt-6 space-y-6 sm:space-y-8 will-change-scroll">
         {/* ========================================================
             ARTIST DETAIL VIEW
            ======================================================== */}
@@ -455,79 +558,202 @@ export default function UniqueIndianPlayer({
                 className="size-28 sm:size-40 rounded-full object-cover border-4 border-amber-400/40 shadow-xl shrink-0"
               />
               <div className="min-w-0 flex-1">
-                <span className={`inline-block rounded-full px-2.5 sm:px-3 py-0.5 sm:py-1 text-[0.68rem] sm:text-xs font-semibold ${themeStyles.badgeBg}`}>
-                  Popular Indian Artist
-                </span>
+                <div className="flex items-center justify-center sm:justify-start gap-2 flex-wrap">
+                  <span className={`inline-block rounded-full px-2.5 sm:px-3 py-0.5 sm:py-1 text-[0.68rem] sm:text-xs font-semibold ${themeStyles.badgeBg}`}>
+                    Trending Artist • Top {currentArtistTracks.length || 20} Songs
+                  </span>
+                  {isSearchingArtist && (
+                    <span className="flex items-center gap-1 rounded-full bg-amber-400/10 border border-amber-400/20 px-2 py-0.5 text-[0.62rem] text-amber-300">
+                      <Loader2 size={10} className="animate-spin" />
+                      Live YouTube search...
+                    </span>
+                  )}
+                </div>
                 <h2 translate="no" className="notranslate mt-1.5 sm:mt-2 text-2xl sm:text-4xl font-black text-white leading-tight">
                   {selectedArtist.name}
                 </h2>
                 <p className="mt-1 text-xs sm:text-sm text-white/60">{selectedArtist.tagline}</p>
-                <button
-                  type="button"
-                  onClick={() => handleTogglePlayArtist(selectedArtist)}
-                  className={`mt-3 sm:mt-4 flex items-center justify-center mx-auto sm:mx-0 gap-2 rounded-full bg-gradient-to-r ${themeStyles.accentGradient} px-5 sm:px-6 py-2 sm:py-2.5 text-xs font-bold text-black shadow hover:scale-105 active:scale-95 transition-transform`}
-                >
-                  {selectedArtist.topTracks?.[0] && currentTrackId === selectedArtist.topTracks[0].id && isPlaying ? (
-                    <>
-                      <Pause size={14} fill="black" /> Pause Top Releases
-                    </>
-                  ) : (
-                    <>
-                      <Play size={14} fill="black" /> Play Top Releases
-                    </>
-                  )}
-                </button>
+                <div className="mt-3 sm:mt-4 flex flex-col xs:flex-row items-center justify-center sm:justify-start gap-2.5">
+                  <button
+                    type="button"
+                    onClick={() => handleTogglePlayArtist(selectedArtist)}
+                    className={`flex items-center justify-center gap-2 rounded-full bg-gradient-to-r ${themeStyles.accentGradient} px-5 sm:px-6 py-2 sm:py-2.5 text-xs font-bold text-black shadow hover:scale-105 active:scale-95 transition-transform`}
+                  >
+                    {currentArtistTracks[0] && currentTrackId === currentArtistTracks[0].id && isPlaying ? (
+                      <>
+                        <Pause size={14} fill="black" /> Pause Top 20
+                      </>
+                    ) : (
+                      <>
+                        <Play size={14} fill="black" /> Play All 20 Songs
+                      </>
+                    )}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (currentArtistTracks.length === 0) return;
+                      const r = Math.floor(Math.random() * currentArtistTracks.length);
+                      const t = currentArtistTracks[r];
+                      handleTogglePlayArtistSong(t.id, t.title, selectedArtist.name, r, currentArtistTracks);
+                    }}
+                    className="flex items-center justify-center gap-1.5 rounded-full border border-white/15 bg-white/5 px-4 py-2 text-xs font-semibold text-white hover:bg-white/10 active:scale-95 transition-colors"
+                  >
+                    <Shuffle size={13} /> Shuffle {selectedArtist.name}
+                  </button>
+                </div>
               </div>
             </div>
 
-            {/* Artist Releases */}
-            <div className="divide-y divide-white/5 rounded-2xl border border-white/10 bg-[#0c121b] p-2.5 sm:p-3 shadow-lg">
-              {selectedArtist.topTracks?.map((song, i) => {
-                if (!song) return null;
-                const isSongCurrent = currentTrackId === song.id;
-                return (
-                  <div
-                    key={song.id || `artist-song-${i}`}
-                    className="group flex items-center justify-between p-2.5 sm:p-3 rounded-xl hover:bg-white/5 transition-colors gap-2"
+            {/* 5-BY-5 ARTIST SONGS CONTAINER */}
+            <div className="rounded-2xl sm:rounded-3xl border border-white/10 bg-[#0c121b] p-3 sm:p-6 shadow-xl space-y-3">
+              {/* Header: Title + 5-Batch Jump Pills */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-white/5">
+                <div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h3 className="text-base sm:text-lg font-bold text-white">Top 20 Songs</h3>
+                    <span className="rounded-full bg-amber-400/20 px-2 py-0.5 text-[0.62rem] sm:text-[0.65rem] font-bold text-amber-300">
+                      {isArtistExpandAll
+                        ? `All ${currentArtistTracks.length}`
+                        : `Page ${artistPage}/4 (${artistStartIdx + 1} - ${Math.min(artistStartIdx + 5, currentArtistTracks.length)})`}
+                    </span>
+                  </div>
+                  <p className="text-[0.7rem] sm:text-xs text-white/40 mt-0.5">
+                    Trending 5-5 songs chunk for instant loading & zero lag
+                  </p>
+                </div>
+
+                {/* 5-Batch Jump Pills */}
+                <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1">
+                  <span className="text-[0.68rem] text-white/40 mr-1 hidden sm:inline shrink-0">Batches:</span>
+                  {[
+                    { page: 1, label: '1 - 5' },
+                    { page: 2, label: '6 - 10' },
+                    { page: 3, label: '11 - 15' },
+                    { page: 4, label: '16 - 20' },
+                  ].map(({ page, label }) => {
+                    const isActive = !isArtistExpandAll && artistPage === page;
+                    return (
+                      <button
+                        key={`art-page-${page}`}
+                        type="button"
+                        onClick={() => {
+                          setIsArtistExpandAll(false);
+                          setArtistPage(page);
+                        }}
+                        className={`rounded-xl px-2.5 py-1 text-[0.68rem] sm:text-xs font-mono font-bold transition-colors shrink-0 ${
+                          isActive
+                            ? 'bg-amber-400 text-black shadow'
+                            : 'border border-white/10 bg-white/5 text-white/60 hover:text-white hover:bg-white/10'
+                        }`}
+                      >
+                        {label}
+                      </button>
+                    );
+                  })}
+                  <button
+                    type="button"
+                    onClick={() => setIsArtistExpandAll((prev) => !prev)}
+                    className={`rounded-xl px-2.5 py-1 text-[0.68rem] sm:text-xs font-mono font-bold transition-colors shrink-0 ${
+                      isArtistExpandAll
+                        ? 'bg-amber-400 text-black shadow'
+                        : 'border border-white/10 bg-white/5 text-white/60 hover:text-white hover:bg-white/10'
+                    }`}
                   >
-                    <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
-                      <span className="w-5 text-center font-mono text-xs text-white/40 shrink-0">
-                        {i + 1}
-                      </span>
-                      <img
-                        src={`https://img.youtube.com/vi/${song.id}/mqdefault.jpg`}
-                        alt=""
-                        loading="lazy"
-                        decoding="async"
-                        onError={handleImageError}
-                        className="size-10 sm:size-11 rounded-lg object-cover shadow shrink-0"
-                      />
-                      <div className="min-w-0 flex-1">
-                        <p translate="no" className="notranslate truncate text-xs sm:text-sm font-semibold text-white group-hover:text-amber-300 transition-colors">
-                          {song.title}
-                        </p>
-                        <p translate="no" className="notranslate truncate text-[0.68rem] sm:text-xs text-white/50">{song.album || selectedArtist.name}</p>
+                    {isArtistExpandAll ? '5-by-5' : 'All 20'}
+                  </button>
+                </div>
+              </div>
+
+              {/* Artist Songs List */}
+              <div className="divide-y divide-white/5">
+                {visibleArtistTracks.map((song, i) => {
+                  if (!song) return null;
+                  const overallIndex = isArtistExpandAll ? i : artistStartIdx + i;
+                  const isSongCurrent = currentTrackId === song.id;
+                  return (
+                    <div
+                      key={`${song.id || 'artist-song'}-${overallIndex}`}
+                      className="group flex items-center justify-between p-2.5 sm:p-3 rounded-xl hover:bg-white/5 transition-colors gap-2"
+                    >
+                      <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
+                        <span className="w-5 text-center font-mono text-xs text-white/40 shrink-0">
+                          {overallIndex + 1}
+                        </span>
+                        <img
+                          src={`https://img.youtube.com/vi/${song.id}/mqdefault.jpg`}
+                          alt=""
+                          loading="lazy"
+                          decoding="async"
+                          onError={(e) => {
+                            const el = e.currentTarget;
+                            el.onerror = null;
+                            el.src = selectedArtist.avatar || SAFE_SVG_FALLBACK;
+                          }}
+                          className="size-10 sm:size-11 rounded-lg object-cover shadow shrink-0"
+                        />
+                        <div className="min-w-0 flex-1">
+                          <p translate="no" className="notranslate truncate text-xs sm:text-sm font-semibold text-white group-hover:text-amber-300 transition-colors">
+                            {song.title}
+                          </p>
+                          <p translate="no" className="notranslate truncate text-[0.68rem] sm:text-xs text-white/50">{song.album || selectedArtist.name}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+                        {song.duration && (
+                          <span className="font-mono text-[0.68rem] sm:text-xs text-white/40 hidden xs:inline">{song.duration}</span>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => handleTogglePlayArtistSong(song.id, song.title, selectedArtist.name, overallIndex, currentArtistTracks)}
+                          className="grid size-8 place-items-center rounded-full bg-white/10 text-white group-hover:bg-amber-400 group-hover:text-black transition-colors"
+                        >
+                          {isSongCurrent && isPlaying ? (
+                            <Pause size={13} fill="currentColor" />
+                          ) : (
+                            <Play size={13} fill="currentColor" />
+                          )}
+                        </button>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-                      {song.duration && (
-                        <span className="font-mono text-[0.68rem] sm:text-xs text-white/40 hidden xs:inline">{song.duration}</span>
-                      )}
-                      <button
-                        type="button"
-                        onClick={() => handleTogglePlayArtistSong(song.id, song.title, selectedArtist.name, i, selectedArtist.topTracks)}
-                        className="grid size-8 place-items-center rounded-full bg-white/10 text-white group-hover:bg-amber-400 group-hover:text-black transition-colors"
-                      >
-                        {isSongCurrent && isPlaying ? (
-                          <Pause size={13} fill="currentColor" />
-                        ) : (
-                          <Play size={13} fill="currentColor" />
-                        )}
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
+
+              {/* Prev / Next Pagination Bar */}
+              <div className="flex items-center justify-between pt-2 border-t border-white/5">
+                {!isArtistExpandAll && artistPage > 1 ? (
+                  <button
+                    type="button"
+                    onClick={() => setArtistPage((p) => Math.max(1, p - 1))}
+                    className="flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3.5 sm:px-4 py-1.5 sm:py-2 text-[0.7rem] sm:text-xs font-semibold text-white/80 hover:bg-white/10 hover:text-white transition-colors"
+                  >
+                    ← Prev 5
+                  </button>
+                ) : <div />}
+
+                <div className="flex items-center gap-2">
+                  {!isArtistExpandAll && artistPage < 4 && currentArtistTracks.length > artistPage * 5 && (
+                    <button
+                      type="button"
+                      onClick={() => setArtistPage((p) => Math.min(4, p + 1))}
+                      className="group flex items-center gap-1.5 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 px-3.5 sm:px-5 py-1.5 sm:py-2 text-[0.7rem] sm:text-xs font-bold text-black shadow hover:scale-102 active:scale-98 transition-transform"
+                    >
+                      <span className="hidden sm:inline">Next 5 Songs ({artistPage * 5 + 1} - {Math.min((artistPage + 1) * 5, currentArtistTracks.length)})</span>
+                      <span className="sm:hidden">Next 5 ({artistPage * 5 + 1} - {Math.min((artistPage + 1) * 5, currentArtistTracks.length)})</span>
+                      <ChevronRight size={14} />
+                    </button>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={() => setIsArtistExpandAll((prev) => !prev)}
+                    className="rounded-full border border-amber-400/30 bg-amber-400/10 px-3 sm:px-4 py-1.5 sm:py-2 text-[0.7rem] sm:text-xs font-semibold text-amber-300 hover:bg-amber-400/20 transition-colors"
+                  >
+                    {isArtistExpandAll ? 'Show 5' : 'All 20'}
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         ) : (
@@ -802,7 +1028,8 @@ export default function UniqueIndianPlayer({
                           onClick={() => setSelectedPage((p) => Math.min(5, p + 1))}
                           className="group flex items-center gap-1.5 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 px-3.5 sm:px-5 py-1.5 sm:py-2 text-[0.7rem] sm:text-xs font-bold text-black shadow hover:scale-102 active:scale-98 transition-transform"
                         >
-                          <span>Next 5 Songs ({selectedPage * 5 + 1} - {(selectedPage + 1) * 5})</span>
+                          <span className="hidden sm:inline">Next 5 Songs ({selectedPage * 5 + 1} - {(selectedPage + 1) * 5})</span>
+                          <span className="sm:hidden">Next 5 ({selectedPage * 5 + 1} - {(selectedPage + 1) * 5})</span>
                           <ChevronRight size={14} />
                         </button>
                       )}

@@ -37,7 +37,7 @@ export function getStoredLikedSongs(): StoredTrack[] {
 export function saveStoredLikedSongs(songs: StoredTrack[]): void {
   try {
     localStorage.setItem(LIKED_SONGS_KEY, JSON.stringify(songs));
-  } catch {}
+  } catch { }
 }
 
 export function getStoredUserPlaylists(): UserPlaylist[] {
@@ -83,7 +83,7 @@ export function getStoredUserPlaylists(): UserPlaylist[] {
 export function saveStoredUserPlaylists(playlists: UserPlaylist[]): void {
   try {
     localStorage.setItem(USER_PLAYLISTS_KEY, JSON.stringify(playlists));
-  } catch {}
+  } catch { }
 }
 
 export function getStoredRecentHistory(): StoredTrack[] {
@@ -99,7 +99,7 @@ export function saveStoredRecentHistory(history: StoredTrack[]): void {
   try {
     // Keep max 30 recent tracks
     localStorage.setItem(RECENT_HISTORY_KEY, JSON.stringify(history.slice(0, 30)));
-  } catch {}
+  } catch { }
 }
 
 export function getStoredViewMode(): 'studio' | 'vibe' {
@@ -114,6 +114,6 @@ export function getStoredViewMode(): 'studio' | 'vibe' {
 export function saveStoredViewMode(mode: 'studio' | 'vibe'): void {
   try {
     localStorage.setItem(VIEW_MODE_KEY, mode);
-  } catch {}
+  } catch { }
 }
 

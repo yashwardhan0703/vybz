@@ -506,7 +506,7 @@ export default function SpotifyLayout({ onPlayCustomVideoId }: SpotifyLayoutProp
                 <h3 className="text-lg font-bold text-white mb-3">Popular Releases</h3>
                 {selectedArtist.topTracks.map((song, i) => (
                   <div
-                    key={song.id}
+                    key={`${song.id}-${i}`}
                     className="group flex items-center justify-between p-3 rounded-lg hover:bg-white/10 transition-colors"
                   >
                     <div className="flex items-center gap-3 min-w-0 flex-1">

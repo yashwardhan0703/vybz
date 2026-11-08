@@ -132,6 +132,13 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
             <p className="mt-2 text-xs text-white/60">
               An unexpected render glitch occurred. Click below to reload cleanly.
             </p>
+            {this.state.error && (
+              <pre className="mt-3 max-h-40 overflow-auto rounded bg-red-950/60 p-2 text-left font-mono text-[0.65rem] text-red-300">
+                {this.state.error.message}
+                {'\n'}
+                {this.state.error.stack}
+              </pre>
+            )}
             <button
               type="button"
               onClick={() => {

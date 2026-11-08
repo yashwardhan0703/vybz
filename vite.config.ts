@@ -18,32 +18,6 @@ function youtubeSearchPlugin(): Plugin {
             return;
           }
 
-          const ytUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
-          const ytRes = await fetch(ytUrl, {
-            headers: {
-              'User-Agent':
-                'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-              'Accept-Language': 'en-US,en;q=0.9',
-            },
-          });
-
-          const html = await ytRes.text();
-          const match =
-            html.match(/var ytInitialData = ({.*?});<\/script>/) ||
-            html.match(/ytInitialData\s*=\s*({.+?});/);
-
-          if (!match) {
-            res.setHeader('Content-Type', 'application/json');
-            res.end(JSON.stringify({ results: [] }));
-            return;
-          }
-
-          const json = JSON.parse(match[1]);
-          const contents =
-            json.contents?.twoColumnSearchResultsRenderer?.primaryContents
-              ?.sectionListRenderer?.contents?.[0]?.itemSectionRenderer
-              ?.contents || [];
-
           const videos: Array<{
             id: string;
             title: string;
@@ -52,23 +26,105 @@ function youtubeSearchPlugin(): Plugin {
             thumbnail: string;
           }> = [];
 
-          for (const item of contents) {
-            const vr = item.videoRenderer;
-            if (vr && vr.videoId) {
-              const title = vr.title?.runs?.[0]?.text || '';
-              const artist = vr.ownerText?.runs?.[0]?.text || 'YouTube';
-              const duration = vr.lengthText?.simpleText || '';
-              const thumbnail =
-                vr.thumbnail?.thumbnails?.slice(-1)[0]?.url ||
-                `https://img.youtube.com/vi/${vr.videoId}/mqdefault.jpg`;
+          // 1. Try HTML scraping
+          try {
+            const ytUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
+            const ytRes = await fetch(ytUrl, {
+              headers: {
+                'User-Agent':
+                  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'Accept-Language': 'en-US,en;q=0.9',
+              },
+            });
 
-              videos.push({
-                id: vr.videoId,
-                title,
-                artist,
-                duration,
-                thumbnail,
+            const html = await ytRes.text();
+            const match =
+              html.match(/var ytInitialData = ({.*?});<\/script>/) ||
+              html.match(/ytInitialData\s*=\s*({.+?});/);
+
+            if (match) {
+              const json = JSON.parse(match[1]);
+              const contents =
+                json.contents?.twoColumnSearchResultsRenderer?.primaryContents
+                  ?.sectionListRenderer?.contents?.[0]?.itemSectionRenderer
+                  ?.contents || [];
+
+              for (const item of contents) {
+                const vr = item.videoRenderer;
+                if (vr && vr.videoId) {
+                  const title = vr.title?.runs?.[0]?.text || '';
+                  const artist = vr.ownerText?.runs?.[0]?.text || 'YouTube';
+                  const duration = vr.lengthText?.simpleText || '';
+                  const thumbnail =
+                    vr.thumbnail?.thumbnails?.slice(-1)[0]?.url ||
+                    `https://img.youtube.com/vi/${vr.videoId}/mqdefault.jpg`;
+
+                  videos.push({
+                    id: vr.videoId,
+                    title,
+                    artist,
+                    duration,
+                    thumbnail,
+                  });
+                }
+              }
+            }
+          } catch {
+            // Proceed to InnerTube
+          }
+
+          // 2. High-reliability fallback: InnerTube API
+          if (videos.length === 0) {
+            try {
+              const itRes = await fetch('https://www.youtube.com/youtubei/v1/search', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'User-Agent':
+                    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                },
+                body: JSON.stringify({
+                  context: {
+                    client: {
+                      clientName: 'WEB',
+                      clientVersion: '2.20240101.01.00',
+                      hl: 'en',
+                      gl: 'IN',
+                    },
+                  },
+                  query,
+                }),
               });
+
+              if (itRes.ok) {
+                const itData = (await itRes.json()) as any;
+                const itContents =
+                  itData.contents?.twoColumnSearchResultsRenderer?.primaryContents
+                    ?.sectionListRenderer?.contents?.[0]?.itemSectionRenderer
+                    ?.contents || [];
+
+                for (const item of itContents) {
+                  const vr = item.videoRenderer;
+                  if (vr && vr.videoId) {
+                    const title = vr.title?.runs?.[0]?.text || '';
+                    const artist = vr.ownerText?.runs?.[0]?.text || 'YouTube';
+                    const duration = vr.lengthText?.simpleText || '';
+                    const thumbnail =
+                      vr.thumbnail?.thumbnails?.slice(-1)[0]?.url ||
+                      `https://img.youtube.com/vi/${vr.videoId}/mqdefault.jpg`;
+
+                    videos.push({
+                      id: vr.videoId,
+                      title,
+                      artist,
+                      duration,
+                      thumbnail,
+                    });
+                  }
+                }
+              }
+            } catch {
+              // Both failed
             }
           }
 

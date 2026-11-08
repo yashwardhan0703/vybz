@@ -138,7 +138,7 @@ export default function StudioView({ onPlayCustomVideoId }: StudioViewProps) {
 
                 return (
                   <div
-                    key={song.id}
+                    key={`${song.id}-${i}`}
                     className={`group flex items-center justify-between gap-3 rounded-xl p-3 transition-colors hover:bg-white/10 ${
                       isCurrent ? 'bg-white/10 text-teal-300' : 'text-white/80'
                     }`}

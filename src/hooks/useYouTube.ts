@@ -276,8 +276,27 @@ export function useYouTube(mountId: string) {
             }
           },
           onError: () => {
-            // Auto skip failed tracks so audio keeps playing continuously
-            playNextTrackRef.current();
+            const failedTrack = activeCustomTrackRef.current;
+            if (failedTrack && failedTrack.title && failedTrack.title.trim()) {
+              const q = `${failedTrack.title} ${failedTrack.artist || ''} official audio`;
+              fetch(`/api/search?q=${encodeURIComponent(q)}`)
+                .then((r) => (r.ok ? r.json() : null))
+                .then((data) => {
+                  const best = data?.results?.[0];
+                  if (best && best.id && best.id !== failedTrack.videoId && playerRef.current) {
+                    failedTrack.videoId = best.id;
+                    if (best.thumbnail) failedTrack.thumbnail = best.thumbnail;
+                    playerRef.current.loadVideoById(best.id);
+                    return;
+                  }
+                  playNextTrackRef.current();
+                })
+                .catch(() => {
+                  playNextTrackRef.current();
+                });
+            } else {
+              playNextTrackRef.current();
+            }
           },
         },
       };
