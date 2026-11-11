@@ -1,4 +1,4 @@
-import { LayoutGrid, Flame, Mic2, FolderHeart, Heart } from 'lucide-react';
+import { LayoutGrid, Flame, Radio, Mic2, FolderHeart, Heart } from 'lucide-react';
 import { usePlayerStore, type PlayerCategory } from '../store/playerStore';
 
 interface MobileBottomNavProps {
@@ -17,17 +17,18 @@ export default function MobileBottomNav({ onCategorySelect }: MobileBottomNavPro
     label: string;
     icon: React.ReactNode;
   }> = [
-    { id: 'all', label: 'Home', icon: <LayoutGrid size={18} /> },
-    { id: 'trending', label: 'Top 25', icon: <Flame size={18} /> },
-    { id: 'artists', label: 'Artists', icon: <Mic2 size={18} /> },
-    { id: 'playlists', label: 'Playlists', icon: <FolderHeart size={18} /> },
+    { id: 'all', label: 'Home', icon: <LayoutGrid size={17} /> },
+    { id: 'trending', label: 'Top 25', icon: <Flame size={17} /> },
+    { id: 'vibes', label: 'Vibes', icon: <Radio size={17} /> },
+    { id: 'artists', label: 'Artists', icon: <Mic2 size={17} /> },
+    { id: 'playlists', label: 'Playlists', icon: <FolderHeart size={17} /> },
     {
       id: 'favorites',
       label: 'Liked',
       icon: (
         <span className="relative inline-flex">
           <Heart
-            size={18}
+            size={17}
             className={
               activeCategory === 'favorites'
                 ? 'fill-rose-400 text-rose-400'
@@ -37,7 +38,7 @@ export default function MobileBottomNav({ onCategorySelect }: MobileBottomNavPro
             }
           />
           {likedSongs.length > 0 && (
-            <span className="absolute -right-2 -top-1 rounded-full bg-rose-500 px-1 text-[0.52rem] font-bold leading-tight text-white">
+            <span className="absolute -right-2 -top-1 rounded-full bg-rose-500 px-1 text-[0.5rem] font-bold leading-tight text-white">
               {likedSongs.length > 99 ? '99+' : likedSongs.length}
             </span>
           )}

@@ -173,8 +173,23 @@ export default function UniqueIndianPlayer({
   const [newPlaylistTitle, setNewPlaylistTitle] = useState('');
   const [isCreatingNewPl, setIsCreatingNewPl] = useState(false);
 
-  // PWA install prompt
+  // PWA install prompt & iOS detection
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const [isIOS] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return (
+      /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+    );
+  });
+  const [isStandalone] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return (
+      window.matchMedia('(display-mode: standalone)').matches ||
+      (window.navigator as unknown as { standalone?: boolean }).standalone === true
+    );
+  });
+  const [showIOSInstallModal, setShowIOSInstallModal] = useState(false);
 
   useEffect(() => {
     const handleBeforeInstall = (e: Event) => {
@@ -185,16 +200,21 @@ export default function UniqueIndianPlayer({
     return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
   }, []);
 
-  const handleInstallApp = async () => {
-    if (!installPrompt) return;
-    try {
-      await installPrompt.prompt();
-      const choice = await installPrompt.userChoice;
-      if (choice?.outcome === 'accepted') {
-        setInstallPrompt(null);
-      }
-    } catch {}
+  const handleInstallClick = async () => {
+    if (installPrompt) {
+      try {
+        await installPrompt.prompt();
+        const choice = await installPrompt.userChoice;
+        if (choice?.outcome === 'accepted') {
+          setInstallPrompt(null);
+        }
+      } catch {}
+    } else if (isIOS) {
+      setShowIOSInstallModal(true);
+    }
   };
+
+  const showInstallBtn = !isStandalone && (Boolean(installPrompt) || isIOS);
 
   // Auto-sync live YouTube India Top 25 chart on app mount
   useEffect(() => {
@@ -668,10 +688,10 @@ export default function UniqueIndianPlayer({
 
           {/* Right Header Actions */}
           <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0 ml-auto">
-            {installPrompt && (
+            {showInstallBtn && (
               <button
                 type="button"
-                onClick={handleInstallApp}
+                onClick={handleInstallClick}
                 aria-label="Install VybZ App"
                 className="flex items-center gap-1.5 rounded-full border border-amber-400/40 bg-amber-400/15 px-2.5 sm:px-3 py-1.5 text-[0.7rem] sm:text-xs font-semibold text-amber-300 hover:bg-amber-400/25 active:scale-95 transition-all"
               >
@@ -1431,7 +1451,7 @@ export default function UniqueIndianPlayer({
                       </div>
                     )}
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3.5">
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3.5">
                       {(activeCategory === 'all' ? WORLDS.slice(0, 4) : WORLDS).map((world) => {
                         const isCurrentWorld = currentWorld.id === world.id;
                         return (
@@ -1446,7 +1466,7 @@ export default function UniqueIndianPlayer({
                                 handlePlayVibeStation(world);
                               }
                             }}
-                            className={`group relative overflow-hidden rounded-2xl border p-3 sm:p-3.5 flex flex-col justify-between transition-all select-none cursor-pointer hover:scale-[1.02] active:scale-[0.99] ${
+                            className={`group relative overflow-hidden rounded-2xl border p-2.5 sm:p-3.5 flex flex-col justify-between transition-all select-none cursor-pointer hover:scale-[1.02] active:scale-[0.99] ${
                               isCurrentWorld
                                 ? 'border-amber-400/60 bg-[#141b2a] shadow-lg shadow-amber-500/15 ring-1 ring-amber-400/30'
                                 : 'border-white/10 bg-[#0d131f] hover:border-amber-400/40 hover:bg-[#121927]'
@@ -1482,30 +1502,30 @@ export default function UniqueIndianPlayer({
                                               ? '💻'
                                               : '🧹'}
                                 </span>
-                                <span className="font-mono text-[0.6rem] uppercase tracking-wider text-white/40">
+                                <span className="font-mono text-[0.58rem] sm:text-[0.6rem] uppercase tracking-wider text-white/40">
                                   {world.tracks.length} Songs
                                 </span>
                               </div>
 
-                              <h3 className="mt-2 text-sm sm:text-base font-bold text-white leading-snug group-hover:text-amber-300 transition-colors">
+                              <h3 className="mt-2 text-xs sm:text-base font-bold text-white leading-snug group-hover:text-amber-300 transition-colors">
                                 {world.nameHindi}
                               </h3>
-                              <p className="font-mono text-[0.68rem] text-amber-400/90 font-medium truncate mt-0.5">
+                              <p className="font-mono text-[0.62rem] sm:text-[0.68rem] text-amber-400/90 font-medium truncate mt-0.5">
                                 {world.name}
                               </p>
-                              <p className="text-[0.68rem] sm:text-xs text-white/55 line-clamp-2 mt-1 leading-relaxed">
+                              <p className="text-[0.62rem] sm:text-xs text-white/55 line-clamp-1 sm:line-clamp-2 mt-0.5 sm:mt-1 leading-relaxed">
                                 {world.tagline || world.subtitle}
                               </p>
                             </div>
 
-                            <div className="relative z-10 mt-3 pt-2.5 border-t border-white/5">
+                            <div className="relative z-10 mt-2.5 sm:mt-3 pt-2 sm:pt-2.5 border-t border-white/5">
                               <button
                                 type="button"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   handlePlayVibeStation(world);
                                 }}
-                                className={`w-full flex items-center justify-center gap-1.5 rounded-xl py-1.5 sm:py-2 px-3 text-xs font-bold transition-all shadow-md ${
+                                className={`w-full flex items-center justify-center gap-1.5 rounded-xl py-1.5 sm:py-2 px-2 sm:px-3 text-[0.68rem] sm:text-xs font-bold transition-all shadow-md ${
                                   isCurrentWorld && isPlaying
                                     ? 'bg-amber-400 text-black shadow-amber-400/30'
                                     : 'bg-white/10 text-white group-hover:bg-amber-400 group-hover:text-black active:scale-95'
@@ -1513,12 +1533,12 @@ export default function UniqueIndianPlayer({
                               >
                                 {isCurrentWorld && isPlaying ? (
                                   <>
-                                    <Sparkles size={13} className="shrink-0" />
-                                    <span>Playing & Open Vibe</span>
+                                    <Sparkles size={12} className="shrink-0" />
+                                    <span>Playing</span>
                                   </>
                                 ) : (
                                   <>
-                                    <Play size={12} fill="currentColor" className="shrink-0" />
+                                    <Play size={11} fill="currentColor" className="shrink-0" />
                                     <span>Play Vibe</span>
                                   </>
                                 )}
@@ -2157,10 +2177,10 @@ export default function UniqueIndianPlayer({
                       >
                         <Share2 size={13} /> Share VybZ with Friends
                       </button>
-                      {installPrompt && (
+                      {showInstallBtn && (
                         <button
                           type="button"
-                          onClick={handleInstallApp}
+                          onClick={handleInstallClick}
                           className="flex items-center justify-center gap-1.5 rounded-lg border border-white/10 bg-white/5 py-1.5 px-3 text-xs font-medium text-white hover:bg-white/10 active:scale-95 transition-all"
                         >
                           <Download size={13} /> Install Web App (PWA)
@@ -2245,6 +2265,76 @@ export default function UniqueIndianPlayer({
               className="mt-4 w-full rounded-xl bg-white/10 py-2 text-xs font-semibold text-white hover:bg-white/20"
             >
               Close
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* iOS PWA Install Modal Sheet */}
+      {showIOSInstallModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/85 backdrop-blur-sm p-4 animate-fade-in"
+          onClick={() => setShowIOSInstallModal(false)}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label="Install VybZ on iOS"
+            className="w-full max-w-sm rounded-3xl border border-white/15 bg-[#0f1522] p-5 sm:p-6 shadow-2xl text-white space-y-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center gap-3">
+              <div className="size-11 rounded-2xl bg-amber-400/10 border border-amber-400/30 p-1.5 shadow">
+                <img src="/logo.png" alt="VybZ" className="size-full object-contain" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <h3 className="text-base font-bold text-white">Install VybZ on iOS</h3>
+                <p className="text-xs text-amber-300 font-medium">Apple Safari Web App</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowIOSInstallModal(false)}
+                className="grid size-7 place-items-center rounded-full bg-white/10 text-white/70 hover:text-white"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="space-y-2.5 text-xs text-white/80 py-1">
+              <div className="flex items-start gap-3 rounded-xl bg-white/5 p-2.5">
+                <span className="grid size-6 place-items-center rounded-full bg-amber-400 text-black font-bold text-xs shrink-0">
+                  1
+                </span>
+                <p className="leading-relaxed">
+                  Safari ke bottom toolbar me <strong className="text-white">Share button</strong> (square box with arrow up <span className="inline-block px-1 bg-white/10 rounded">⎋</span>) par tap karein.
+                </p>
+              </div>
+
+              <div className="flex items-start gap-3 rounded-xl bg-white/5 p-2.5">
+                <span className="grid size-6 place-items-center rounded-full bg-amber-400 text-black font-bold text-xs shrink-0">
+                  2
+                </span>
+                <p className="leading-relaxed">
+                  Menu ko neeche scroll karein aur <strong className="text-white">&apos;Add to Home Screen&apos; (+)</strong> par tap karein.
+                </p>
+              </div>
+
+              <div className="flex items-start gap-3 rounded-xl bg-white/5 p-2.5">
+                <span className="grid size-6 place-items-center rounded-full bg-amber-400 text-black font-bold text-xs shrink-0">
+                  3
+                </span>
+                <p className="leading-relaxed">
+                  Top right me <strong className="text-white">&apos;Add&apos;</strong> dabayein. VybZ aapke iPhone par standalone ad-free app ban jayega!
+                </p>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setShowIOSInstallModal(false)}
+              className="w-full rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 py-2.5 text-xs font-bold text-black shadow active:scale-95 transition-transform"
+            >
+              Samajh Gaya (Done)
             </button>
           </div>
         </div>
