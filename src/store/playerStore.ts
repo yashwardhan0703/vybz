@@ -21,7 +21,7 @@ import {
 export type RepeatMode = 'none' | 'one' | 'all';
 export type ViewMode = 'studio' | 'vibe';
 export type StudioTab = 'explore' | 'artists' | 'playlists' | 'favorites';
-export type PlayerCategory = 'all' | 'trending' | 'artists' | 'playlists' | 'favorites';
+export type PlayerCategory = 'all' | 'trending' | 'vibes' | 'artists' | 'playlists' | 'favorites';
 
 interface PlayerState {
   // Mode & Tabs
