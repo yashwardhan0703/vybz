@@ -19,9 +19,10 @@ import {
   Trash2,
   Download,
   Clock,
+  RefreshCw,
 } from 'lucide-react';
 import { usePlayerStore, type PlayerCategory } from '../store/playerStore';
-import { TOP_25_TRENDING_INDIAN, type TrendingTrack } from '../data/trendingSongs';
+import type { TrendingTrack } from '../data/trendingSongs';
 import { ARTISTS_CATALOG, type Artist, type ArtistSong } from '../data/artistsData';
 import type { StoredTrack, UserPlaylist } from '../utils/localStorageHelper';
 import type { QueueTrack } from '../hooks/useYouTube';
@@ -102,6 +103,9 @@ export default function UniqueIndianPlayer({
     currentTrackId,
     isPlaying,
     currentWorld,
+    top25Tracks,
+    isTop25Refreshing,
+    refreshLiveTop25,
   } = usePlayerStore();
 
   // Lazy-initialize artist from URL hash to avoid synchronous setState in useEffect
@@ -148,6 +152,11 @@ export default function UniqueIndianPlayer({
       }
     } catch {}
   };
+
+  // Auto-sync live YouTube India Top 25 chart on app mount
+  useEffect(() => {
+    refreshLiveTop25();
+  }, [refreshLiveTop25]);
 
   // Listen to browser Back / Forward events for #artist/...
   useEffect(() => {
@@ -263,7 +272,7 @@ export default function UniqueIndianPlayer({
       else onPlay();
       return;
     }
-    const trendingQueue: QueueTrack[] = TOP_25_TRENDING_INDIAN.map((t) => ({
+    const trendingQueue: QueueTrack[] = top25Tracks.map((t) => ({
       id: t.id,
       title: `${t.title} (${t.movie})`,
       artist: t.singers,
@@ -271,7 +280,7 @@ export default function UniqueIndianPlayer({
       duration: t.duration,
     }));
     const trackIdx =
-      index !== undefined ? index : TOP_25_TRENDING_INDIAN.findIndex((t) => t.id === track.id);
+      index !== undefined ? index : top25Tracks.findIndex((t) => t.id === track.id);
     onPlayCustomVideoId(
       track.id,
       `${track.title} (${track.movie})`,
@@ -403,8 +412,8 @@ export default function UniqueIndianPlayer({
 
   const startIdx = (selectedPage - 1) * 5;
   const visibleTrendingSongs = isExpandAll
-    ? TOP_25_TRENDING_INDIAN
-    : TOP_25_TRENDING_INDIAN.slice(startIdx, startIdx + 5);
+    ? top25Tracks
+    : top25Tracks.slice(startIdx, startIdx + 5);
 
   const currentArtistTracks: ArtistSong[] =
     (selectedArtist ? artistTracksMap[selectedArtist.id] || getCachedArtistTracks(selectedArtist.id) : null) ||
@@ -1030,26 +1039,28 @@ export default function UniqueIndianPlayer({
                       className={`relative overflow-hidden rounded-2xl sm:rounded-3xl border ${themeStyles.borderGlow} bg-gradient-to-r ${themeStyles.heroGrad} p-4 sm:p-7 shadow-xl`}
                     >
                       <div className="relative z-10 max-w-2xl">
-                        <div className="flex items-center gap-1.5 text-[0.62rem] sm:text-xs font-bold uppercase tracking-widest text-amber-300">
+                        <div className="flex items-center gap-2 flex-wrap text-[0.62rem] sm:text-xs font-bold uppercase tracking-widest text-amber-300">
                           <TrendingUp size={13} />
-                          <span>Official vybz India Chart • Top 25</span>
+                          <span>Live YouTube Music India Chart • Top 25</span>
                         </div>
                         <h2 className="mt-1 sm:mt-2 text-xl sm:text-3xl font-black text-white leading-tight">
                           Top 25 Trending on vybz
                         </h2>
                         <p className="mt-1 text-xs sm:text-sm text-white/60">
-                          Curated Indian hits in 5-song chunks for instant, zero-lag listening.
+                          Real-time Indian chart synced live from YouTube Music India.
                         </p>
 
                         <div className="mt-3.5 sm:mt-5 flex items-center gap-2.5 flex-wrap">
                           <button
                             type="button"
                             onClick={() =>
-                              handleTogglePlayTrending(TOP_25_TRENDING_INDIAN[0], 0)
+                              top25Tracks[0] && handleTogglePlayTrending(top25Tracks[0], 0)
                             }
                             className={`flex items-center justify-center gap-1.5 rounded-full bg-gradient-to-r ${themeStyles.accentGradient} px-5 py-2 sm:py-2.5 text-xs font-bold text-black shadow hover:scale-105 active:scale-95 transition-transform`}
                           >
-                            {currentTrackId === TOP_25_TRENDING_INDIAN[0].id && isPlaying ? (
+                            {top25Tracks[0] &&
+                            currentTrackId === top25Tracks[0].id &&
+                            isPlaying ? (
                               <>
                                 <Pause size={14} fill="black" /> <span>Pause #1</span>
                               </>
@@ -1062,14 +1073,26 @@ export default function UniqueIndianPlayer({
                           <button
                             type="button"
                             onClick={() => {
-                              const r = Math.floor(
-                                Math.random() * TOP_25_TRENDING_INDIAN.length
-                              );
-                              handleTogglePlayTrending(TOP_25_TRENDING_INDIAN[r], r);
+                              if (top25Tracks.length === 0) return;
+                              const r = Math.floor(Math.random() * top25Tracks.length);
+                              handleTogglePlayTrending(top25Tracks[r], r);
                             }}
                             className="flex items-center justify-center gap-1.5 rounded-full border border-white/15 bg-white/5 px-4 py-2 sm:py-2.5 text-xs font-semibold text-white hover:bg-white/10 active:scale-95 transition-colors"
                           >
                             <Shuffle size={13} /> <span>Shuffle</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => refreshLiveTop25(true)}
+                            disabled={isTop25Refreshing}
+                            title="Fetch latest live YouTube India hits"
+                            className="flex items-center justify-center gap-1.5 rounded-full border border-amber-400/30 bg-amber-400/10 px-3.5 py-2 sm:py-2.5 text-xs font-semibold text-amber-300 hover:bg-amber-400/20 active:scale-95 transition-colors disabled:opacity-60"
+                          >
+                            <RefreshCw
+                              size={13}
+                              className={isTop25Refreshing ? 'animate-spin' : ''}
+                            />
+                            <span>{isTop25Refreshing ? 'Syncing...' : 'Refresh Chart'}</span>
                           </button>
                         </div>
                       </div>

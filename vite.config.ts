@@ -2,11 +2,30 @@ import { defineConfig, type Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import { VitePWA } from 'vite-plugin-pwa';
+import { fetchLiveIndiaTop25 } from './src/utils/ytTop25Fetcher.js';
 
 function youtubeSearchPlugin(): Plugin {
   return {
     name: 'youtube-search-api',
     configureServer(server) {
+      server.middlewares.use('/api/top25', async (_req, res) => {
+        try {
+          const chart = await fetchLiveIndiaTop25();
+          if (!chart) {
+            res.statusCode = 502;
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify({ error: 'Unable to fetch live India chart' }));
+            return;
+          }
+          res.setHeader('Content-Type', 'application/json');
+          res.end(JSON.stringify(chart));
+        } catch (err) {
+          res.statusCode = 500;
+          res.setHeader('Content-Type', 'application/json');
+          res.end(JSON.stringify({ error: String(err) }));
+        }
+      });
+
       server.middlewares.use('/api/search', async (req, res) => {
         try {
           const url = new URL(req.url || '', 'http://localhost');

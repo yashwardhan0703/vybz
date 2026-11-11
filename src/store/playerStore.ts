@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { WORLDS, DEFAULT_WORLD_ID } from '../data/worlds';
 import type { World } from '../data/worlds';
+import { TOP_25_TRENDING_INDIAN, type TrendingTrack } from '../data/trendingSongs';
 import {
   getStoredLikedSongs,
   saveStoredLikedSongs,
@@ -32,6 +33,12 @@ interface PlayerState {
   // Live Queue State (mirrored from YouTube engine for UI)
   playbackQueue: PersistedQueueTrack[];
   playbackQueueIndex: number;
+
+  // Live Top 25 India Chart
+  top25Tracks: TrendingTrack[];
+  top25LastUpdated: number | null;
+  isTop25Refreshing: boolean;
+  refreshLiveTop25: (force?: boolean) => Promise<void>;
 
   // World (Ambient Vibe Mode)
   currentWorldId: string;
@@ -108,6 +115,27 @@ interface PlayerState {
   closeAll: () => void;
 }
 
+const TOP25_CACHE_KEY = 'vybz_live_top25_v1';
+const TOP25_TTL_MS = 30 * 60 * 1000;
+
+function getCachedTop25(): { tracks: TrendingTrack[]; updatedAt: number | null } {
+  if (typeof window === 'undefined') {
+    return { tracks: TOP_25_TRENDING_INDIAN, updatedAt: null };
+  }
+  try {
+    const raw = localStorage.getItem(TOP25_CACHE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed?.results) && parsed.results.length >= 10) {
+        return { tracks: parsed.results, updatedAt: parsed.updatedAt || null };
+      }
+    }
+  } catch {}
+  return { tracks: TOP_25_TRENDING_INDIAN, updatedAt: null };
+}
+
+const initialTop25 = getCachedTop25();
+
 const persistedState = typeof window !== 'undefined' ? getStoredPlaybackState() : null;
 const initialWorld =
   (persistedState?.currentWorldId && WORLDS.find((w) => w.id === persistedState.currentWorldId)) ||
@@ -123,6 +151,50 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
 
   playbackQueue: persistedState?.queue ?? [],
   playbackQueueIndex: persistedState?.queueIndex ?? 0,
+
+  top25Tracks: initialTop25.tracks,
+  top25LastUpdated: initialTop25.updatedAt,
+  isTop25Refreshing: false,
+
+  refreshLiveTop25: async (force = false) => {
+    const state = get();
+    if (state.isTop25Refreshing) return;
+    if (
+      !force &&
+      state.top25LastUpdated &&
+      Date.now() - state.top25LastUpdated < TOP25_TTL_MS
+    ) {
+      return;
+    }
+
+    set({ isTop25Refreshing: true });
+    try {
+      let res = await fetch('/api/top25');
+      if (!res.ok) {
+        res = await fetch('https://vybz.7yashshakya.workers.dev/api/top25');
+      }
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data?.results) && data.results.length >= 10) {
+          const updatedAt = data.updatedAt || Date.now();
+          set({
+            top25Tracks: data.results,
+            top25LastUpdated: updatedAt,
+          });
+          try {
+            localStorage.setItem(
+              TOP25_CACHE_KEY,
+              JSON.stringify({ results: data.results, updatedAt })
+            );
+          } catch {}
+        }
+      }
+    } catch {
+      // Keep fallback or cached chart cleanly when offline
+    } finally {
+      set({ isTop25Refreshing: false });
+    }
+  },
 
   currentWorldId: initialWorld.id,
   currentWorld: initialWorld,

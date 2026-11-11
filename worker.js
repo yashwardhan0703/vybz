@@ -1,6 +1,39 @@
+import { fetchLiveIndiaTop25 } from './src/utils/ytTop25Fetcher.js';
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+
+    // 0. Live YouTube Music India Top 25 Chart Endpoint
+    if (url.pathname === '/api/top25') {
+      try {
+        const chart = await fetchLiveIndiaTop25();
+        if (!chart) {
+          return new Response(JSON.stringify({ error: 'Unable to fetch live India chart' }), {
+            status: 502,
+            headers: {
+              'Content-Type': 'application/json',
+              'Access-Control-Allow-Origin': '*',
+            },
+          });
+        }
+        return new Response(JSON.stringify(chart), {
+          headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*',
+            'Cache-Control': 'public, max-age=1800',
+          },
+        });
+      } catch (err) {
+        return new Response(JSON.stringify({ error: String(err) }), {
+          status: 500,
+          headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*',
+          },
+        });
+      }
+    }
 
     // 1. YouTube Search API Endpoint
     if (url.pathname === '/api/search') {

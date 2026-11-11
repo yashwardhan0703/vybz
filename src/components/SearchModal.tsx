@@ -2,7 +2,6 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { Search, X, Play, Music, Sparkles, Loader2, PlayCircle } from 'lucide-react';
 import { usePlayerStore } from '../store/playerStore';
 import { THEMES } from '../data/worlds';
-import { TOP_25_TRENDING_INDIAN } from '../data/trendingSongs';
 import { ARTISTS_CATALOG } from '../data/artistsData';
 import { getLocalVibeTracks } from '../utils/vibeRecommender';
 import { handleArtworkError } from '../utils/mediaHelpers';
@@ -151,9 +150,9 @@ export default function SearchModal({ onPlayCustomVideoId }: SearchModalProps) {
       setApiOffline(true);
     }
 
-    // 3. Match from Top 25 Trending Indian Hits
+    // 3. Match from Live Top 25 Trending Indian Hits
     const lower = q.toLowerCase();
-    TOP_25_TRENDING_INDIAN.forEach((track) => {
+    usePlayerStore.getState().top25Tracks.forEach((track) => {
       if (
         track.title.toLowerCase().includes(lower) ||
         track.singers.toLowerCase().includes(lower) ||

@@ -1,7 +1,6 @@
 /// <reference types="youtube" />
 import { useEffect, useRef, useCallback } from 'react';
 import { usePlayerStore } from '../store/playerStore';
-import { TOP_25_TRENDING_INDIAN } from '../data/trendingSongs';
 import { fetchRelatedVibeQueue, getLocalVibeTracks } from '../utils/vibeRecommender';
 import { getStoredPlaybackState, saveStoredPlaybackState } from '../utils/localStorageHelper';
 
@@ -820,11 +819,12 @@ export function useYouTube(containerRef: React.RefObject<HTMLDivElement | null>)
         const resolvedArtist = artist || 'YouTube Music';
         const resolvedThumb = thumbnail || `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`;
 
+        const liveTop25 = usePlayerStore.getState().top25Tracks;
         // Immediately set the exact duration if known
         const knownDur =
           initialDuration ||
           contextQueue?.find((q) => q.id === videoId)?.duration ||
-          TOP_25_TRENDING_INDIAN.find((t) => t.id === videoId)?.duration;
+          liveTop25.find((t) => t.id === videoId)?.duration;
         const initSec = parseDurationToSeconds(knownDur);
         if (initSec > 0) {
           setDuration(initSec);
@@ -858,9 +858,9 @@ export function useYouTube(containerRef: React.RefObject<HTMLDivElement | null>)
           !queueRef.current.some((q) => q.id === videoId)
         ) {
           // If song is from Top 25
-          const topIdx = TOP_25_TRENDING_INDIAN.findIndex((t) => t.id === videoId);
+          const topIdx = liveTop25.findIndex((t) => t.id === videoId);
           if (topIdx !== -1) {
-            queueRef.current = TOP_25_TRENDING_INDIAN.map((t) => ({
+            queueRef.current = liveTop25.map((t) => ({
               id: t.id,
               title: `${t.title} (${t.movie})`,
               artist: t.singers,
@@ -1052,11 +1052,12 @@ export function useYouTube(containerRef: React.RefObject<HTMLDivElement | null>)
     }
 
     // Default fallback to Top 25
-    const top25Idx = TOP_25_TRENDING_INDIAN.findIndex((t) => t.id === curId);
-    const nextTop25Idx = (top25Idx + 1) % TOP_25_TRENDING_INDIAN.length;
-    const nextSong = TOP_25_TRENDING_INDIAN[nextTop25Idx];
+    const liveTop25 = usePlayerStore.getState().top25Tracks;
+    const top25Idx = liveTop25.findIndex((t) => t.id === curId);
+    const nextTop25Idx = (top25Idx + 1) % liveTop25.length;
+    const nextSong = liveTop25[nextTop25Idx];
 
-    const top25Queue: QueueTrack[] = TOP_25_TRENDING_INDIAN.map((t) => ({
+    const top25Queue: QueueTrack[] = liveTop25.map((t) => ({
       id: t.id,
       title: `${t.title} (${t.movie})`,
       artist: t.singers,
