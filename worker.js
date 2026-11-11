@@ -355,7 +355,18 @@ export default {
 
     // 3. Static Assets serving via Cloudflare Assets
     if (env && env.ASSETS && typeof env.ASSETS.fetch === 'function') {
-      return env.ASSETS.fetch(request);
+      const response = await env.ASSETS.fetch(request);
+      // Cache hashed static assets for 1 year (instant 0ms repeat load)
+      if (url.pathname.startsWith('/assets/')) {
+        const headers = new Headers(response.headers);
+        headers.set('Cache-Control', 'public, max-age=31536000, immutable');
+        return new Response(response.body, {
+          status: response.status,
+          statusText: response.statusText,
+          headers,
+        });
+      }
+      return response;
     }
 
     return fetch(request);
