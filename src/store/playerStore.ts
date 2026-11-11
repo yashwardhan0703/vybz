@@ -171,6 +171,9 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
     try {
       let res = await fetch('/api/top25');
       if (!res.ok) {
+        res = await fetch('https://vybzmusic.online/api/top25');
+      }
+      if (!res.ok) {
         res = await fetch('https://vybz.7yashshakya.workers.dev/api/top25');
       }
       if (res.ok) {
