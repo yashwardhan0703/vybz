@@ -190,9 +190,10 @@ export default function UniqueIndianPlayer({
   const selectedArtistId = selectedArtist?.id;
   const selectedArtistName = selectedArtist?.name;
 
-  // Auto-search real YouTube songs when an artist is selected (if not already cached)
+  // Auto-search real YouTube songs when an artist is selected (if not already having 20 curated tracks)
   useEffect(() => {
     if (!selectedArtistId || !selectedArtistName) return;
+    if (selectedArtist?.topTracks && selectedArtist.topTracks.length >= 20) return;
     if (getCachedArtistTracks(selectedArtistId)) return;
 
     let isMounted = true;
@@ -254,7 +255,7 @@ export default function UniqueIndianPlayer({
     return () => {
       isMounted = false;
     };
-  }, [selectedArtistId, selectedArtistName]);
+  }, [selectedArtistId, selectedArtistName, selectedArtist?.topTracks]);
 
   const handleSelectCategory = (cat: PlayerCategory) => {
     setActiveCategory(cat);
@@ -416,10 +417,12 @@ export default function UniqueIndianPlayer({
     : top25Tracks.slice(startIdx, startIdx + 5);
 
   const currentArtistTracks: ArtistSong[] =
-    (selectedArtist ? artistTracksMap[selectedArtist.id] || getCachedArtistTracks(selectedArtist.id) : null) ||
-    (selectedArtist?.topTracks && selectedArtist.topTracks.length > 0
+    (selectedArtist?.topTracks && selectedArtist.topTracks.length >= 20
       ? selectedArtist.topTracks
-      : []);
+      : (selectedArtist ? artistTracksMap[selectedArtist.id] || getCachedArtistTracks(selectedArtist.id) : null) ||
+        (selectedArtist?.topTracks && selectedArtist.topTracks.length > 0
+          ? selectedArtist.topTracks
+          : []));
 
   const artistStartIdx = (artistPage - 1) * 5;
   const visibleArtistTracks = isArtistExpandAll
