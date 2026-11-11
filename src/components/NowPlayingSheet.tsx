@@ -258,21 +258,21 @@ export default function NowPlayingSheet({
         </div>
       </header>
 
-      {/* Main Content Area: Responsive Split on md+ and Single Scrollable Pane on Mobile */}
-      <div className="relative z-10 flex-1 min-h-0 overflow-y-auto px-4 py-4 sm:px-8 sm:py-6 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
-        <div className="mx-auto flex h-full max-w-5xl flex-col md:grid md:grid-cols-12 md:gap-8 items-center">
-          {/* LEFT / PLAYER PANEL */}
+      {/* Main Content Area: Responsive Split on md+ and Full Proportional Height on Mobile */}
+      <div className="relative z-10 flex-1 min-h-0 flex flex-col md:grid md:grid-cols-12 md:gap-8 px-4 py-3 sm:px-8 sm:py-6 pb-[max(1rem,env(safe-area-inset-bottom))] overflow-hidden">
+        {/* LEFT / PLAYER PANEL (Proportionally filled on mobile, left column on desktop) */}
+        <div
+          className={`w-full md:col-span-6 lg:col-span-5 flex-1 min-h-0 flex-col justify-between max-w-md mx-auto ${
+            mobilePanel === 'queue' ? 'hidden md:flex' : 'flex'
+          }`}
+        >
+          {/* Square Album Artwork - Expands proportionally to fill available vertical space */}
           <div
-            className={`w-full md:col-span-6 lg:col-span-5 flex flex-col items-center justify-center ${
-              mobilePanel === 'queue' ? 'hidden md:flex' : 'flex'
-            }`}
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleArtworkTouchEnd}
+            className="flex-1 min-h-[170px] max-h-[48vh] flex items-center justify-center py-2 sm:py-4 select-none cursor-grab active:cursor-grabbing"
           >
-            {/* Square Album Artwork (Swipe left/right for next/prev, swipe down to minimize) */}
-            <div
-              onTouchStart={handleTouchStart}
-              onTouchEnd={handleArtworkTouchEnd}
-              className="relative w-full max-w-[230px] xs:max-w-[280px] sm:max-w-[320px] aspect-square overflow-hidden rounded-2xl border border-white/10 bg-white/5 shadow-[0_24px_60px_rgba(0,0,0,0.85)] select-none"
-            >
+            <div className="relative w-full max-w-[min(82vw,340px)] aspect-square overflow-hidden rounded-2xl sm:rounded-3xl border border-white/10 bg-white/5 shadow-[0_20px_50px_rgba(0,0,0,0.85)]">
               <img
                 src={displayThumbnail}
                 alt={displayTitle}
@@ -280,11 +280,14 @@ export default function NowPlayingSheet({
                 className="size-full object-cover"
               />
             </div>
+          </div>
 
+          {/* Bottom Controls Area - Anchored cleanly at the bottom */}
+          <div className="w-full shrink-0 space-y-3 sm:space-y-4 pt-1 pb-1">
             {/* Track Info + Like & Add to Playlist */}
-            <div className="mt-5 w-full max-w-sm flex items-start justify-between gap-3">
+            <div className="w-full flex items-center justify-between gap-3">
               <div className="min-w-0 flex-1">
-                <h2 translate="no" className="notranslate truncate text-lg sm:text-xl font-bold text-white leading-snug">
+                <h2 translate="no" className="notranslate truncate text-lg sm:text-xl font-bold text-white leading-tight">
                   {displayTitle}
                 </h2>
                 <p translate="no" className="notranslate truncate text-xs sm:text-sm text-white/60 mt-0.5">
@@ -305,25 +308,25 @@ export default function NowPlayingSheet({
                     })
                   }
                   aria-label={isLiked ? 'Remove from Liked Songs' : 'Save to Liked Songs'}
-                  className="grid size-10 place-items-center rounded-full text-white/60 hover:bg-white/5 hover:text-rose-500 active:scale-95 transition-all"
+                  className="grid size-10 place-items-center rounded-full text-white/65 hover:bg-white/5 hover:text-rose-500 active:scale-90 transition-all"
                 >
-                  <Heart size={20} className={isLiked ? 'fill-rose-500 text-rose-500' : ''} />
+                  <Heart size={22} className={isLiked ? 'fill-rose-500 text-rose-500' : ''} />
                 </button>
 
                 <button
                   type="button"
                   onClick={() => setShowPlaylistPicker((prev) => !prev)}
                   aria-label="Add to Playlist"
-                  className="grid size-10 place-items-center rounded-full text-white/60 hover:bg-white/5 hover:text-amber-400 active:scale-95 transition-all"
+                  className="grid size-10 place-items-center rounded-full text-white/65 hover:bg-white/5 hover:text-amber-400 active:scale-90 transition-all"
                 >
-                  <Plus size={20} />
+                  <Plus size={22} />
                 </button>
               </div>
             </div>
 
             {/* Inline Quick Playlist Picker */}
             {showPlaylistPicker && (
-              <div className="mt-3 w-full max-w-sm rounded-2xl border border-white/10 bg-[#0e1420] p-3 shadow-xl">
+              <div className="w-full rounded-2xl border border-white/10 bg-[#0e1420] p-3 shadow-xl">
                 <p className="text-[0.7rem] font-semibold uppercase tracking-wider text-amber-400 mb-2">
                   Save to Playlist
                 </p>
@@ -356,7 +359,7 @@ export default function NowPlayingSheet({
             )}
 
             {/* Seek Bar */}
-            <div className="mt-4 w-full max-w-sm">
+            <div className="w-full">
               <input
                 type="range"
                 min={0}
@@ -364,7 +367,7 @@ export default function NowPlayingSheet({
                 value={Math.min(Math.floor(currentTime), duration > 0 ? Math.floor(duration) : 100)}
                 aria-label="Seek track"
                 onChange={(e) => onSeek(Number(e.target.value))}
-                className="world-range h-4 w-full cursor-pointer"
+                className="world-range h-3 sm:h-4 w-full cursor-pointer"
                 style={{
                   '--world-primary': themeColor,
                   '--range-progress': `${progress}%`,
@@ -376,41 +379,41 @@ export default function NowPlayingSheet({
               </div>
             </div>
 
-            {/* Playback Controls */}
-            <div className="mt-4 w-full max-w-sm flex items-center justify-between">
+            {/* Playback Controls (Shuffle, Prev, Play/Pause, Next, Repeat) */}
+            <div className="w-full flex items-center justify-between px-1 sm:px-3">
               <button
                 type="button"
                 onClick={toggleShuffle}
                 aria-label="Toggle Shuffle"
                 aria-pressed={isShuffle}
-                className="grid size-11 place-items-center rounded-full hover:bg-white/5 active:scale-95 transition-all"
+                className="grid size-11 place-items-center rounded-full hover:bg-white/5 active:scale-90 transition-all"
                 style={{ color: isShuffle ? themeColor : 'rgba(255,255,255,0.65)' }}
               >
-                <Shuffle size={19} />
+                <Shuffle size={20} />
               </button>
 
               <button
                 type="button"
                 onClick={onPrev}
                 aria-label="Previous track"
-                className="grid size-12 place-items-center rounded-full text-white hover:bg-white/5 active:scale-95 transition-all"
+                className="grid size-12 place-items-center rounded-full text-white hover:bg-white/5 active:scale-90 transition-all"
               >
-                <SkipBack size={24} fill="currentColor" />
+                <SkipBack size={26} fill="currentColor" />
               </button>
 
               <button
                 type="button"
                 onClick={isPlaying ? onPause : onPlay}
                 aria-label={isPlaying ? 'Pause' : 'Play'}
-                className="grid size-16 place-items-center rounded-full text-black shadow-[0_8px_28px_rgba(245,158,11,0.45)] hover:scale-105 active:scale-95 transition-transform"
+                className="grid size-16 sm:size-[4.25rem] place-items-center rounded-full text-black shadow-[0_8px_30px_rgba(245,158,11,0.5)] hover:scale-105 active:scale-95 transition-all"
                 style={{ backgroundColor: themeColor }}
               >
                 {isLoading || isTuning ? (
-                  <Loader2 size={26} className="animate-spin text-black" />
+                  <Loader2 size={28} className="animate-spin text-black" />
                 ) : isPlaying ? (
-                  <Pause size={26} fill="currentColor" />
+                  <Pause size={28} fill="currentColor" />
                 ) : (
-                  <Play size={26} fill="currentColor" className="translate-x-0.5" />
+                  <Play size={28} fill="currentColor" className="translate-x-0.5" />
                 )}
               </button>
 
@@ -418,25 +421,25 @@ export default function NowPlayingSheet({
                 type="button"
                 onClick={onNext}
                 aria-label="Next track"
-                className="grid size-12 place-items-center rounded-full text-white hover:bg-white/5 active:scale-95 transition-all"
+                className="grid size-12 place-items-center rounded-full text-white hover:bg-white/5 active:scale-90 transition-all"
               >
-                <SkipForward size={24} fill="currentColor" />
+                <SkipForward size={26} fill="currentColor" />
               </button>
 
               <button
                 type="button"
                 onClick={cycleRepeat}
                 aria-label={`Repeat mode: ${repeatMode}`}
-                className="grid size-11 place-items-center rounded-full hover:bg-white/5 active:scale-95 transition-all"
+                className="grid size-11 place-items-center rounded-full hover:bg-white/5 active:scale-90 transition-all"
                 style={{ color: repeatMode !== 'none' ? themeColor : 'rgba(255,255,255,0.65)' }}
               >
-                {repeatMode === 'one' ? <Repeat1 size={19} /> : <Repeat size={19} />}
+                {repeatMode === 'one' ? <Repeat1 size={20} /> : <Repeat size={20} />}
               </button>
             </div>
 
-            {/* Volume + Mobile Vibe Quick Switch */}
-            <div className="mt-5 w-full max-w-sm flex items-center justify-between gap-4 pt-3 border-t border-white/5">
-              <div className="flex flex-1 items-center gap-2.5">
+            {/* Bottom Actions Row: Volume Slider + Vibe Mode Switch */}
+            <div className="w-full flex items-center justify-between gap-3 pt-2.5 border-t border-white/5">
+              <div className="flex flex-1 items-center gap-2 max-w-[200px]">
                 <button
                   type="button"
                   onClick={toggleMute}
@@ -452,7 +455,7 @@ export default function NowPlayingSheet({
                   value={isMuted ? 0 : volume}
                   aria-label="Volume"
                   onChange={(e) => setVolume(Number(e.target.value))}
-                  className="world-range h-3 flex-1 cursor-pointer"
+                  className="world-range h-2 flex-1 cursor-pointer"
                   style={{
                     '--world-primary': themeColor,
                     '--range-progress': `${isMuted ? 0 : volume}%`,
@@ -460,26 +463,38 @@ export default function NowPlayingSheet({
                 />
               </div>
 
-              <button
-                type="button"
-                onClick={() => {
-                  handleClose();
-                  toggleViewMode();
-                }}
-                className="sm:hidden flex items-center gap-1 rounded-full border border-amber-400/35 bg-amber-400/15 px-3 py-1.5 text-[0.7rem] font-semibold text-amber-300 shrink-0"
-              >
-                <Sparkles size={12} />
-                <span>{viewMode === 'vibe' ? 'Discovery' : 'Vibe'}</span>
-              </button>
+              <div className="flex items-center gap-1.5 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleClose();
+                    toggleViewMode();
+                  }}
+                  className="flex items-center gap-1.5 rounded-full border border-amber-400/35 bg-amber-400/15 px-3 py-1.5 text-xs font-semibold text-amber-300 hover:bg-amber-400/25 active:scale-95 transition-all"
+                >
+                  <Sparkles size={13} />
+                  <span>{viewMode === 'vibe' ? 'Discovery' : 'Vibe'}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setMobilePanel('queue')}
+                  aria-label="Open Queue"
+                  className="md:hidden grid size-8 place-items-center rounded-full bg-white/5 text-white/70 hover:bg-white/10 hover:text-white active:scale-95 transition-all"
+                >
+                  <ListMusic size={16} />
+                </button>
+              </div>
             </div>
           </div>
+        </div>
 
-          {/* RIGHT / UP-NEXT QUEUE PANEL */}
-          <div
-            className={`w-full md:col-span-6 lg:col-span-7 md:flex md:flex-col md:h-full md:max-h-[75dvh] rounded-2xl border border-white/10 bg-[#0b1019] p-3 sm:p-5 ${
-              mobilePanel === 'queue' ? 'flex flex-col flex-1 min-h-[300px]' : 'hidden md:flex'
-            }`}
-          >
+        {/* RIGHT / UP-NEXT QUEUE PANEL */}
+        <div
+          className={`w-full md:col-span-6 lg:col-span-7 md:flex md:flex-col md:h-full md:max-h-[75dvh] rounded-2xl border border-white/10 bg-[#0b1019] p-3 sm:p-5 ${
+            mobilePanel === 'queue' ? 'flex flex-col flex-1 min-h-0 h-full' : 'hidden md:flex'
+          }`}
+        >
             <div className="flex items-center justify-between pb-3 border-b border-white/10 shrink-0">
               <div>
                 <p className="font-mono text-[0.62rem] uppercase tracking-[0.2em] text-amber-400">
@@ -558,7 +573,6 @@ export default function NowPlayingSheet({
           </div>
         </div>
       </div>
-    </div>
   );
 }
 
