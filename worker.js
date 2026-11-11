@@ -356,9 +356,10 @@ export default {
     // 3. Static Assets serving via Cloudflare Assets
     if (env && env.ASSETS && typeof env.ASSETS.fetch === 'function') {
       const response = await env.ASSETS.fetch(request);
-      // Cache hashed static assets for 1 year (instant 0ms repeat load)
+      const headers = new Headers(response.headers);
+
+      // Cache hashed static assets (JS chunks, CSS, fonts) for 1 year (instant 0ms repeat load)
       if (url.pathname.startsWith('/assets/')) {
-        const headers = new Headers(response.headers);
         headers.set('Cache-Control', 'public, max-age=31536000, immutable');
         return new Response(response.body, {
           status: response.status,
@@ -366,6 +367,25 @@ export default {
           headers,
         });
       }
+
+      // Root HTML, Service Worker & Manifest: NEVER stale cache (always check fresh live version)
+      if (
+        url.pathname === '/' ||
+        url.pathname.endsWith('.html') ||
+        url.pathname.endsWith('sw.js') ||
+        url.pathname.endsWith('registerSW.js') ||
+        url.pathname.endsWith('.webmanifest')
+      ) {
+        headers.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+        headers.set('Pragma', 'no-cache');
+        headers.set('Expires', '0');
+        return new Response(response.body, {
+          status: response.status,
+          statusText: response.statusText,
+          headers,
+        });
+      }
+
       return response;
     }
 
