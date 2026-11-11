@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ListMusic, LayoutGrid, Share2, Search, Disc3 } from 'lucide-react';
+import { ListMusic, LayoutGrid, Share2, Search, Home } from 'lucide-react';
 import { useOnlineCount } from '../hooks/useOnlineCount';
 import { usePlayerStore } from '../store/playerStore';
 
@@ -46,7 +46,7 @@ export default function Header() {
     return () => window.removeEventListener('keydown', handleKey);
   }, [toggleSearch]);
 
-  const shareText = `🎵 ${currentWorld.nameHindi} - ${currentWorld.subtitle}\n"${currentWorld.subQuote}"\nSunoo yeh playlist abhi vybz par!\nhttps://vybz.in/theme/${currentWorld.id}`;
+  const shareText = `🎵 ${currentWorld.nameHindi} - ${currentWorld.subtitle}\n"${currentWorld.subQuote}"\nSunoo yeh vibe playlist abhi VybZ par!\nhttps://www.vybzmusic.online/#vibe`;
 
   return (
     <header className="relative z-30 flex items-center justify-between gap-2 px-3 sm:px-8 pt-[max(0.75rem,env(safe-area-inset-top))] sm:pt-4">
@@ -72,15 +72,15 @@ export default function Header() {
 
       {/* Top Right: Search, Tracks, PlayLists, Share */}
       <nav aria-label="Quick actions" className="flex items-center gap-2 xs:gap-3 sm:gap-5 shrink-0">
-        {/* Top 25 Music Player button */}
+        {/* Return to Discover Home */}
         <button
           type="button"
           onClick={toggleViewMode}
-          aria-label="Open Top 25 Music Player"
+          aria-label="Return to Discover Home"
           className="group flex flex-col items-center gap-0.5 text-amber-300 transition-colors hover:text-amber-200 focus-visible:outline-none"
         >
-          <Disc3 size={17} className="transition-transform group-hover:scale-110 animate-spin text-amber-400" style={{ animationDuration: '6s' }} />
-          <span className="text-[0.62rem] font-bold tracking-wider">Top 25</span>
+          <Home size={17} className="transition-transform group-hover:scale-110 text-amber-400" />
+          <span className="text-[0.62rem] font-bold tracking-wider">Home</span>
         </button>
 
         {/* Search (Spotify style) */}

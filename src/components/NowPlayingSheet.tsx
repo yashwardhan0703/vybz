@@ -16,9 +16,10 @@ import {
   Volume2,
   VolumeX,
   Check,
+  Share2,
 } from 'lucide-react';
 import { usePlayerStore } from '../store/playerStore';
-import { formatTime, handleArtworkError } from '../utils/mediaHelpers';
+import { formatTime, handleArtworkError, shareTrackOrApp } from '../utils/mediaHelpers';
 
 interface NowPlayingSheetProps {
   onPlay: () => void;
@@ -76,7 +77,16 @@ export default function NowPlayingSheet({
   const [mobilePanel, setMobilePanel] = useState<'player' | 'queue'>('player');
   const [showPlaylistPicker, setShowPlaylistPicker] = useState(false);
   const [addedToPlaylistId, setAddedToPlaylistId] = useState<string | null>(null);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
+
+  const handleShareCurrentTrack = async () => {
+    const res = await shareTrackOrApp(displayTitle, displayArtist);
+    if (res === 'copied') {
+      setToastMessage('Link copied to clipboard!');
+      setTimeout(() => setToastMessage(null), 2500);
+    }
+  };
 
   // Mobile gesture & browser back button integration
   useEffect(() => {
@@ -321,8 +331,27 @@ export default function NowPlayingSheet({
                 >
                   <Plus size={22} />
                 </button>
+
+                <button
+                  type="button"
+                  onClick={handleShareCurrentTrack}
+                  aria-label="Share song"
+                  title="Share to WhatsApp / Copy link"
+                  className="grid size-10 place-items-center rounded-full text-white/65 hover:bg-white/5 hover:text-amber-400 active:scale-90 transition-all"
+                >
+                  <Share2 size={20} />
+                </button>
               </div>
             </div>
+
+            {/* Toast Notification */}
+            {toastMessage && (
+              <div className="flex items-center justify-center">
+                <span className="rounded-full bg-amber-400 px-3.5 py-1 text-xs font-bold text-black shadow-lg animate-fade-in">
+                  {toastMessage}
+                </span>
+              </div>
+            )}
 
             {/* Inline Quick Playlist Picker */}
             {showPlaylistPicker && (

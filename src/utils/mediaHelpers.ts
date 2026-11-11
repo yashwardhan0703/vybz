@@ -41,3 +41,43 @@ export function cleanSongTitle(raw: string): string {
     .trim();
 }
 
+/** Shares a track or app link with WhatsApp fallback and clipboard copy */
+export async function shareTrackOrApp(
+  title?: string,
+  artist?: string
+): Promise<'shared' | 'copied'> {
+  const songTitle = title ? cleanSongTitle(title) : 'Top Indian Hits';
+  const songArtist = artist || 'VybZ';
+  const shareTitle = `${songTitle} – ${songArtist} on VybZ`;
+  const shareText = title
+    ? `Listen to "${songTitle}" by ${songArtist} ad-free on VybZ Music:`
+    : 'Listen to India’s Top 25 hits and ambient nostalgic vibes ad-free on VybZ Music:';
+  const shareUrl = 'https://vybzmusic.online';
+
+  if (typeof navigator !== 'undefined' && typeof navigator.share === 'function') {
+    try {
+      await navigator.share({
+        title: shareTitle,
+        text: shareText,
+        url: shareUrl,
+      });
+      return 'shared';
+    } catch {
+      // User cancelled or share dismissed
+    }
+  }
+
+  if (typeof navigator !== 'undefined' && navigator.clipboard) {
+    try {
+      await navigator.clipboard.writeText(`${shareText} ${shareUrl}`);
+      return 'copied';
+    } catch {}
+  }
+
+  if (typeof window !== 'undefined') {
+    const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(`${shareText} ${shareUrl}`)}`;
+    window.open(waUrl, '_blank', 'noopener,noreferrer');
+  }
+  return 'copied';
+}
+

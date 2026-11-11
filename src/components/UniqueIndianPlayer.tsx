@@ -20,16 +20,19 @@ import {
   Download,
   Clock,
   RefreshCw,
+  Share2,
 } from 'lucide-react';
 import { usePlayerStore, type PlayerCategory } from '../store/playerStore';
 import type { TrendingTrack } from '../data/trendingSongs';
 import { ARTISTS_CATALOG, type Artist, type ArtistSong } from '../data/artistsData';
+import { WORLDS, type ThemeWorld } from '../data/worlds';
 import type { StoredTrack, UserPlaylist } from '../utils/localStorageHelper';
 import type { QueueTrack } from '../hooks/useYouTube';
 import {
   SAFE_ARTWORK_FALLBACK,
   handleArtworkError,
   cleanSongTitle,
+  shareTrackOrApp,
 } from '../utils/mediaHelpers';
 
 interface UniqueIndianPlayerProps {
@@ -99,14 +102,54 @@ export default function UniqueIndianPlayer({
     removeFromPlaylist,
     recentHistory,
     toggleSearch,
+    viewMode,
+    setViewMode,
     toggleViewMode,
     currentTrackId,
     isPlaying,
     currentWorld,
+    setWorld,
     top25Tracks,
     isTop25Refreshing,
     refreshLiveTop25,
   } = usePlayerStore();
+
+  const [shareToast, setShareToast] = useState<string | null>(null);
+
+  // Handler for playing a Vibe Station directly and entering its ambient visual world
+  const handlePlayVibeStation = (world: ThemeWorld) => {
+    setWorld(world.id);
+    const first = world.tracks?.[0];
+    if (first && (currentTrackId !== first.id || !isPlaying)) {
+      const q: QueueTrack[] = (world.tracks || []).map((t) => ({
+        id: t.id,
+        title: t.title,
+        artist: t.artist || world.name,
+        thumbnail: `https://img.youtube.com/vi/${t.id}/mqdefault.jpg`,
+      }));
+      onPlayCustomVideoId(
+        first.id,
+        first.title,
+        first.artist || world.name,
+        `https://img.youtube.com/vi/${first.id}/mqdefault.jpg`,
+        q,
+        0,
+        false
+      );
+    }
+    if (viewMode !== 'vibe') {
+      setViewMode('vibe');
+      window.location.hash = 'vibe';
+    }
+  };
+
+  const handleShareTrack = async (title?: string, artist?: string) => {
+    const res = await shareTrackOrApp(title, artist);
+    if (res === 'copied') {
+      setShareToast('Link copied! Ready to share with friends 🎉');
+      setTimeout(() => setShareToast(null), 3000);
+    }
+  };
 
   // Lazy-initialize artist from URL hash to avoid synchronous setState in useEffect
   const [selectedArtist, setSelectedArtist] = useState<Artist | null>(getArtistFromHash);
@@ -664,18 +707,6 @@ export default function UniqueIndianPlayer({
             >
               <Search size={16} />
             </button>
-
-            {/* Vibe Mode Quick Switch */}
-            <button
-              type="button"
-              onClick={toggleViewMode}
-              className="flex items-center gap-1.5 rounded-xl sm:rounded-full border border-amber-400/40 bg-gradient-to-r from-amber-500/20 via-orange-500/15 to-amber-500/10 px-2.5 sm:px-4 py-1.5 sm:py-2 text-[0.72rem] sm:text-xs font-bold text-amber-300 hover:border-amber-400 active:scale-95 transition-all shrink-0"
-              title="Switch to Ambient Vibe Mode (Chai Tapri / Salon / Bartan Time)"
-            >
-              <Sparkles size={13} className="text-amber-400 shrink-0" />
-              <span className="sm:hidden">Vibe</span>
-              <span className="hidden sm:inline">Vibe Mode</span>
-            </button>
           </div>
         </header>
 
@@ -727,7 +758,24 @@ export default function UniqueIndianPlayer({
                     >
                       {selectedArtist.name}
                     </h2>
-                    <p className="mt-1 text-xs sm:text-sm text-white/60">{selectedArtist.tagline}</p>
+                    <p className="mt-1 text-xs sm:text-sm text-amber-300/90 font-medium">{selectedArtist.tagline}</p>
+                    <p className="mt-2 text-xs sm:text-[0.82rem] text-white/70 max-w-2xl leading-relaxed">
+                      Stream {selectedArtist.name}&apos;s all-time Top 20 blockbuster hits, Bollywood classics, romantic anthems, and iconic melodies in high-definition ad-free audio.
+                    </p>
+                    <div className="mt-2.5 flex items-center gap-1.5 flex-wrap">
+                      <span className="rounded-md bg-white/5 border border-white/10 px-2 py-0.5 text-[0.62rem] font-mono text-white/60">
+                        #Top20Hits
+                      </span>
+                      <span className="rounded-md bg-white/5 border border-white/10 px-2 py-0.5 text-[0.62rem] font-mono text-white/60">
+                        #BollywoodMusic
+                      </span>
+                      <span className="rounded-md bg-white/5 border border-white/10 px-2 py-0.5 text-[0.62rem] font-mono text-white/60">
+                        #AdFreeAudio
+                      </span>
+                      <span className="rounded-md bg-amber-400/10 border border-amber-400/25 px-2 py-0.5 text-[0.62rem] font-mono text-amber-300">
+                        #VybZExclusive
+                      </span>
+                    </div>
                     <div className="mt-4 flex flex-col xs:flex-row items-stretch xs:items-center justify-center sm:justify-start gap-2.5">
                       <button
                         type="button"
@@ -1033,6 +1081,126 @@ export default function UniqueIndianPlayer({
                 )}
 
                 {/* ========================================================
+                    MOOD & VIBE STATIONS SHELF (SEO & Nostalgic Radios)
+                   ======================================================== */}
+                {activeCategory === 'all' && (
+                  <section className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Sparkles size={16} className="text-amber-400" />
+                        <h2 className="text-sm sm:text-base font-bold text-white">
+                          Curated Mood & Vibe Stations
+                        </h2>
+                        <span className="rounded-full bg-amber-400/15 border border-amber-400/30 px-2 py-0.5 text-[0.62rem] font-bold text-amber-300">
+                          Ambient Radios
+                        </span>
+                      </div>
+                      <span className="font-mono text-[0.62rem] text-white/40 uppercase tracking-wider hidden xs:inline">
+                        7 Desi Vibes
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-3.5">
+                      {WORLDS.map((world) => {
+                        const isCurrentWorld = currentWorld.id === world.id;
+                        return (
+                          <div
+                            key={`vibe-${world.id}`}
+                            onClick={() => handlePlayVibeStation(world)}
+                            role="button"
+                            tabIndex={0}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' || e.key === ' ') {
+                                e.preventDefault();
+                                handlePlayVibeStation(world);
+                              }
+                            }}
+                            className={`group relative overflow-hidden rounded-2xl border p-3.5 sm:p-4 flex flex-col justify-between transition-all select-none cursor-pointer hover:scale-[1.02] active:scale-[0.99] ${
+                              isCurrentWorld
+                                ? 'border-amber-400/60 bg-[#141b2a] shadow-lg shadow-amber-500/15 ring-1 ring-amber-400/30'
+                                : 'border-white/10 bg-[#0d131f] hover:border-amber-400/40 hover:bg-[#121927]'
+                            }`}
+                          >
+                            {/* Background ambient subtle image accent */}
+                            <div
+                              className="pointer-events-none absolute inset-0 opacity-20 group-hover:opacity-35 transition-opacity bg-cover bg-center"
+                              style={{ backgroundImage: `url(${world.bg})` }}
+                            />
+                            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#0d131f] via-[#0d131f]/85 to-transparent" />
+
+                            <div className="relative z-10">
+                              <div className="flex items-center justify-between">
+                                <span
+                                  className="size-8 sm:size-9 grid place-items-center rounded-xl text-base shadow"
+                                  style={{
+                                    backgroundColor: `${world.themeColor}25`,
+                                    border: `1px solid ${world.themeColor}50`,
+                                  }}
+                                >
+                                  {world.id === 'chai_tapri'
+                                    ? '☕'
+                                    : world.id === 'monsoon_barish'
+                                      ? '🌧️'
+                                      : world.id === 'highway_dhaba'
+                                        ? '🌙'
+                                        : world.id === 'deluxe_salon'
+                                          ? '✂️'
+                                          : world.id === 'sufi_ghazal'
+                                            ? '🕊️'
+                                            : world.id === 'corporate_majdoor'
+                                              ? '💻'
+                                              : '🧹'}
+                                </span>
+                                <span className="font-mono text-[0.6rem] uppercase tracking-wider text-white/40">
+                                  {world.tracks.length} Songs
+                                </span>
+                              </div>
+
+                              <h3 className="mt-3 text-sm sm:text-base font-bold text-white leading-snug group-hover:text-amber-300 transition-colors">
+                                {world.nameHindi}
+                              </h3>
+                              <p className="font-mono text-[0.68rem] text-amber-400/90 font-medium truncate mt-0.5">
+                                {world.name}
+                              </p>
+                              <p className="text-[0.68rem] sm:text-xs text-white/55 line-clamp-2 mt-1 leading-relaxed">
+                                {world.tagline || world.subtitle}
+                              </p>
+                            </div>
+
+                            <div className="relative z-10 mt-3.5 pt-2.5 border-t border-white/5">
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handlePlayVibeStation(world);
+                                }}
+                                className={`w-full flex items-center justify-center gap-1.5 rounded-xl py-2 px-3 text-xs font-bold transition-all shadow-md ${
+                                  isCurrentWorld && isPlaying
+                                    ? 'bg-amber-400 text-black shadow-amber-400/30'
+                                    : 'bg-white/10 text-white group-hover:bg-amber-400 group-hover:text-black active:scale-95'
+                                }`}
+                              >
+                                {isCurrentWorld && isPlaying ? (
+                                  <>
+                                    <Sparkles size={13} className="shrink-0" />
+                                    <span>Playing & Open Vibe</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <Play size={12} fill="currentColor" className="shrink-0" />
+                                    <span>Play Vibe</span>
+                                  </>
+                                )}
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </section>
+                )}
+
+                {/* ========================================================
                     SECTION 1: TOP 25 TRENDING INDIAN SONGS
                    ======================================================== */}
                 {(activeCategory === 'all' || activeCategory === 'trending') && (
@@ -1044,13 +1212,13 @@ export default function UniqueIndianPlayer({
                       <div className="relative z-10 max-w-2xl">
                         <div className="flex items-center gap-2 flex-wrap text-[0.62rem] sm:text-xs font-bold uppercase tracking-widest text-amber-300">
                           <TrendingUp size={13} />
-                          <span>Live YouTube Music India Chart • Top 25</span>
+                          <span>Official VybZ India Chart • Top 25 Daily</span>
                         </div>
                         <h2 className="mt-1 sm:mt-2 text-xl sm:text-3xl font-black text-white leading-tight">
                           Top 25 Trending on vybz
                         </h2>
-                        <p className="mt-1 text-xs sm:text-sm text-white/60">
-                          Real-time Indian chart synced live from YouTube Music India.
+                        <p className="mt-1 text-xs sm:text-sm text-white/75 max-w-xl leading-relaxed">
+                          Official real-time Indian music charts streaming today&apos;s top daily trending songs across Bollywood, Punjabi, and Indian Pop. 100% ad-free with zero buffer.
                         </p>
 
                         <div className="mt-3.5 sm:mt-5 flex items-center gap-2.5 flex-wrap">
@@ -1092,11 +1260,26 @@ export default function UniqueIndianPlayer({
                             className="flex items-center justify-center gap-1.5 rounded-full border border-amber-400/30 bg-amber-400/10 px-3.5 py-2 sm:py-2.5 text-xs font-semibold text-amber-300 hover:bg-amber-400/20 active:scale-95 transition-colors disabled:opacity-60"
                           >
                             <RefreshCw
-                              size={13}
+                              size={12}
                               className={isTop25Refreshing ? 'animate-spin' : ''}
                             />
-                            <span>{isTop25Refreshing ? 'Syncing...' : 'Refresh Chart'}</span>
+                            <span>{isTop25Refreshing ? 'Syncing...' : 'Refresh'}</span>
                           </button>
+                        </div>
+
+                        {/* Live Trending SEO Pill Badges */}
+                        <div className="mt-4 pt-3.5 border-t border-white/10 flex items-center gap-1.5 flex-wrap">
+                          <span className="text-[0.62rem] uppercase font-mono font-bold tracking-wider text-amber-300 mr-1">
+                            🔥 Hot Today:
+                          </span>
+                          {top25Tracks.slice(0, 5).map((song) => (
+                            <span
+                              key={`hot-${song.id}`}
+                              className="rounded-full bg-black/40 border border-white/10 px-2.5 py-0.5 text-[0.62rem] text-white/80 font-medium"
+                            >
+                              {song.title} {song.movie ? `(${song.movie})` : ''}
+                            </span>
+                          ))}
                         </div>
                       </div>
                     </div>
@@ -1796,9 +1979,192 @@ export default function UniqueIndianPlayer({
                 )}
               </>
             )}
+
+            {/* ========================================================
+                COMPREHENSIVE SEO & DISCOVERY FOOTER
+               ======================================================== */}
+            <footer className="mt-14 border-t border-white/10 pt-10 pb-8 text-white/60 space-y-8 select-none">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                {/* Column 1: Brand Info */}
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <div className="size-8 rounded-xl bg-amber-400 text-black font-black grid place-items-center text-base shadow-md">
+                      V
+                    </div>
+                    <div>
+                      <span className="text-base font-black text-white tracking-tight">
+                        vybz<span className="text-amber-400">.</span>
+                      </span>
+                      <p className="font-mono text-[0.6rem] uppercase tracking-widest text-amber-400/80">
+                        Indian Audio Hub
+                      </p>
+                    </div>
+                  </div>
+                  <p className="text-xs text-white/60 leading-relaxed">
+                    India&apos;s premium modern music platform. Stream daily Top 25 trending hits, 50+ legendary Bollywood and Punjabi artists, and ambient nostalgic vibe stations.
+                  </p>
+                  <div className="flex items-center gap-2 text-xs text-amber-400 font-semibold flex-wrap">
+                    <span>⚡ 100% Ad-Free</span>
+                    <span>•</span>
+                    <span>🎧 0ms Buffer</span>
+                    <span>•</span>
+                    <span>📱 PWA & APK</span>
+                  </div>
+                </div>
+
+                {/* Column 2: Ambient Vibe Stations */}
+                <div className="space-y-2.5">
+                  <h3 className="font-mono text-xs uppercase tracking-wider text-white font-bold">
+                    Mood & Vibe Stations
+                  </h3>
+                  <ul className="space-y-1.5 text-xs text-white/55">
+                    <li>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const w = WORLDS.find((x) => x.id === 'chai_tapri');
+                          if (w) handlePlayVibeStation(w);
+                        }}
+                        className="hover:text-amber-300 transition-colors text-left"
+                      >
+                        ☕ Chai Tapri Radio (Garam Chai & Purane Gaane)
+                      </button>
+                    </li>
+                    <li>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const w = WORLDS.find((x) => x.id === 'monsoon_barish');
+                          if (w) handlePlayVibeStation(w);
+                        }}
+                        className="hover:text-amber-300 transition-colors text-left"
+                      >
+                        🌧️ Monsoon Baarish (Rain & Romantic Geeta)
+                      </button>
+                    </li>
+                    <li>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const w = WORLDS.find((x) => x.id === 'highway_dhaba');
+                          if (w) handlePlayVibeStation(w);
+                        }}
+                        className="hover:text-amber-300 transition-colors text-left"
+                      >
+                        🌙 Late Night Highway Dhaba (Truck Radio)
+                      </button>
+                    </li>
+                    <li>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const w = WORLDS.find((x) => x.id === 'deluxe_salon');
+                          if (w) handlePlayVibeStation(w);
+                        }}
+                        className="hover:text-amber-300 transition-colors text-left"
+                      >
+                        ✂️ Deluxe 90s Salon (Ustaad Ji Specials)
+                      </button>
+                    </li>
+                    <li>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const w = WORLDS.find((x) => x.id === 'sufi_ghazal');
+                          if (w) handlePlayVibeStation(w);
+                        }}
+                        className="hover:text-amber-300 transition-colors text-left"
+                      >
+                        🕊️ Sufi & Sukoon (Qawwali & Roohani Ghazal)
+                      </button>
+                    </li>
+                    <li>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const w = WORLDS.find((x) => x.id === 'corporate_majdoor');
+                          if (w) handlePlayVibeStation(w);
+                        }}
+                        className="hover:text-amber-300 transition-colors text-left"
+                      >
+                        💻 Corporate Chill (Lo-Fi Study & Focus)
+                      </button>
+                    </li>
+                  </ul>
+                </div>
+
+                {/* Column 3: Top Artist Discographies */}
+                <div className="space-y-2.5">
+                  <h3 className="font-mono text-xs uppercase tracking-wider text-white font-bold">
+                    Top Artists (20 Hits Each)
+                  </h3>
+                  <ul className="grid grid-cols-2 gap-x-2 gap-y-1.5 text-xs text-white/55">
+                    {ARTISTS_CATALOG.slice(0, 10).map((a) => (
+                      <li key={`footer-art-${a.id}`}>
+                        <button
+                          type="button"
+                          onClick={() => openArtist(a)}
+                          className="hover:text-amber-300 transition-colors text-left truncate w-full"
+                        >
+                          {a.name}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {/* Column 4: Platform & Share */}
+                <div className="space-y-2.5">
+                  <h3 className="font-mono text-xs uppercase tracking-wider text-white font-bold">
+                    Quick Actions & App
+                  </h3>
+                  <div className="space-y-2">
+                    <button
+                      type="button"
+                      onClick={() => handleShareTrack()}
+                      className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 py-2 px-3 text-xs font-bold text-black shadow active:scale-95 transition-all"
+                    >
+                      <Share2 size={14} /> Share VybZ with Friends
+                    </button>
+                    {installPrompt && (
+                      <button
+                        type="button"
+                        onClick={handleInstallApp}
+                        className="flex w-full items-center justify-center gap-2 rounded-xl border border-white/15 bg-white/5 py-2 px-3 text-xs font-semibold text-white hover:bg-white/10 active:scale-95 transition-all"
+                      >
+                        <Download size={14} /> Install Web App (PWA)
+                      </button>
+                    )}
+                    <p className="text-[0.68rem] text-white/45 leading-relaxed pt-1">
+                      Open in Android or iPhone browser to install VybZ directly as a standalone app with zero storage usage.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="border-t border-white/5 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-white/40">
+                <p>© 2026 VybZ Music • Official India Audio Hub • https://vybzmusic.online</p>
+                <div className="flex items-center gap-4 text-[0.68rem]">
+                  <span>Crafted for Indian Music Lovers ❤️</span>
+                  <span>•</span>
+                  <span>No Subscriptions</span>
+                  <span>•</span>
+                  <span>No Ads</span>
+                </div>
+              </div>
+            </footer>
           </div>
         </main>
       </div>
+
+      {/* Floating Share Toast */}
+      {shareToast && (
+        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 pointer-events-none">
+          <span className="rounded-full bg-amber-400 px-4 py-1.5 text-xs font-bold text-black shadow-xl animate-fade-in flex items-center gap-1.5">
+            <Sparkles size={13} /> {shareToast}
+          </span>
+        </div>
+      )}
 
       {/* ========================================================
           ADD TO PLAYLIST MODAL

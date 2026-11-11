@@ -14,9 +14,10 @@ import {
   Heart,
   Maximize2,
   ChevronUp,
+  Share2,
 } from 'lucide-react';
 import { usePlayerStore } from '../store/playerStore';
-import { formatTime, handleArtworkError } from '../utils/mediaHelpers';
+import { formatTime, handleArtworkError, shareTrackOrApp } from '../utils/mediaHelpers';
 
 interface BottomPlayerProps {
   onPlay: () => void;
@@ -130,6 +131,11 @@ export default function BottomPlayer({
       thumbnail: displayThumbnail,
       duration: duration > 0 ? formatTime(duration) : undefined,
     });
+  };
+
+  const handleShare = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    shareTrackOrApp(displayTitle, displayArtist);
   };
 
   return (
@@ -366,6 +372,16 @@ export default function BottomPlayer({
 
         {/* Right Zone (25%): Queue, Volume, Expand */}
         <div className="col-span-3 flex items-center justify-end gap-2 lg:gap-3">
+          <button
+            type="button"
+            onClick={handleShare}
+            aria-label="Share current song"
+            title="Share to WhatsApp / Copy link"
+            className="grid size-8 place-items-center rounded-lg text-white/65 hover:bg-white/10 hover:text-amber-400 transition-colors"
+          >
+            <Share2 size={16} />
+          </button>
+
           <button
             type="button"
             onClick={toggleTrackList}
