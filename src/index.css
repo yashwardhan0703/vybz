@@ -13,6 +13,8 @@
 
 /* ─── Tailwind Theme ─────────────────────────────────────── */
 @theme {
+  --breakpoint-xs: 24rem;
+
   --color-world-bg: var(--world-bg);
   --color-world-bg2: var(--world-bg2);
   --color-world-primary: var(--world-primary);
@@ -180,14 +182,24 @@ body {
   }
 }
 
+.animate-fade-in {
+  animation: fade-in 0.25s ease-out both;
+}
+
 /* ─── World player surface ───────────────────────────────── */
 .world-player-surface {
   transition: border-color 0.4s ease, box-shadow 0.4s ease;
 }
 
-/* ─── Scrollbar ──────────────────────────────────────────── */
+/* ─── Scrollbar (Chrome, Edge, Safari & Firefox) ─────────── */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(245, 158, 11, 0.35) transparent;
+}
+
 ::-webkit-scrollbar {
-  width: 4px;
+  width: 5px;
+  height: 5px;
 }
 
 ::-webkit-scrollbar-track {

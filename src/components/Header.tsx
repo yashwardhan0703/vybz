@@ -49,9 +49,9 @@ export default function Header() {
   const shareText = `🎵 ${currentWorld.nameHindi} - ${currentWorld.subtitle}\n"${currentWorld.subQuote}"\nSunoo yeh playlist abhi vybz par!\nhttps://vybz.in/theme/${currentWorld.id}`;
 
   return (
-    <header className="relative z-30 flex items-center justify-between px-3 sm:px-8 pt-3 sm:pt-4">
+    <header className="relative z-30 flex items-center justify-between gap-2 px-3 sm:px-8 pt-[max(0.75rem,env(safe-area-inset-top))] sm:pt-4">
       {/* Top Left: Live Digital Clock */}
-      <div className="font-mono text-[0.68rem] sm:text-sm font-semibold tracking-wider text-white/80 drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
+      <div className="font-mono text-[0.65rem] sm:text-sm font-semibold tracking-wider text-white/85 drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)] shrink-0">
         {time || '7:28:13 pm'}
       </div>
 
@@ -60,7 +60,7 @@ export default function Header() {
         type="button"
         onClick={toggleWorldSwitcher}
         aria-label="Online listeners"
-        className="hidden xs:flex items-center gap-1.5 sm:gap-2 rounded-full px-2 sm:px-3 py-1 font-mono text-[0.65rem] sm:text-xs font-medium tracking-wide text-white/90 drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)] hover:text-white transition-opacity"
+        className="hidden sm:flex items-center gap-1.5 sm:gap-2 rounded-full px-2 sm:px-3 py-1 font-mono text-[0.65rem] sm:text-xs font-medium tracking-wide text-white/90 drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)] hover:text-white transition-opacity shrink-0"
       >
         <span className="relative flex size-2">
           <span className="absolute inline-flex size-full animate-ping rounded-full bg-amber-400 opacity-75" />
@@ -71,7 +71,7 @@ export default function Header() {
       </button>
 
       {/* Top Right: Search, Tracks, PlayLists, Share */}
-      <nav aria-label="Quick actions" className="flex items-center gap-2.5 sm:gap-5">
+      <nav aria-label="Quick actions" className="flex items-center gap-2 xs:gap-3 sm:gap-5 shrink-0">
         {/* Top 25 Music Player button */}
         <button
           type="button"

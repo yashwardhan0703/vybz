@@ -11,21 +11,38 @@ import TrackList from './components/TrackList';
 import SearchModal from './components/SearchModal';
 import UniqueIndianPlayer from './components/UniqueIndianPlayer';
 import RadioTuningOverlay from './components/RadioTuningOverlay';
+import MobileBottomNav from './components/MobileBottomNav';
+import NowPlayingSheet from './components/NowPlayingSheet';
 
 function AppLayout() {
   const { currentWorld, isPlaying, viewMode, setViewMode } = usePlayerStore();
   const playerContainerRef = useRef<HTMLDivElement | null>(null);
-  const { play, pause, next, prev, seekTo, playAt, playCustomVideoId, playSearchQuery } =
-    useYouTube(playerContainerRef);
+  const {
+    play,
+    pause,
+    next,
+    prev,
+    seekTo,
+    playAt,
+    playFromQueueIndex,
+    playCustomVideoId,
+    playSearchQuery,
+  } = useYouTube(playerContainerRef);
 
-  // Sync Vibe / Studio mode with browser back/forward buttons
+  // Sync Vibe / Studio mode with browser back/forward buttons without breaking modal hashes
   useEffect(() => {
     const handlePopState = () => {
       const hash = window.location.hash;
       const currentMode = usePlayerStore.getState().viewMode;
+      const isModalHash =
+        hash.includes('search') ||
+        hash.includes('queue') ||
+        hash.includes('themes') ||
+        hash.includes('now-playing');
+
       if (hash === '#vibe' && currentMode !== 'vibe') {
         setViewMode('vibe');
-      } else if (!hash.includes('vibe') && currentMode === 'vibe') {
+      } else if (!hash.includes('vibe') && !isModalHash && currentMode === 'vibe') {
         setViewMode('studio');
       }
     };
@@ -37,51 +54,45 @@ function AppLayout() {
   return (
     <div
       data-world-id={currentWorld.id}
-      className="relative flex h-[100dvh] w-full flex-col overflow-hidden select-none bg-black text-white"
+      className="relative flex h-[100dvh] w-full flex-col overflow-hidden select-none bg-[#070a10] text-white"
       style={{
         '--world-primary': currentWorld.themeColor || '#f59e0b',
       } as React.CSSProperties}
     >
       {/* ========================================================
-          MODE 1: UNIQUE INDIAN MUSIC PLAYER (Top 25 + Popular Artists)
+          PRIMARY CONTENT AREA (Never overlapped by player)
          ======================================================== */}
-      {viewMode === 'studio' && (
-        <UniqueIndianPlayer
-          key="view-studio"
-          onPlayCustomVideoId={playCustomVideoId}
-          onPlayAt={playAt}
-          onPlay={play}
-          onPause={pause}
-        />
-      )}
+      <div className="relative flex flex-1 min-h-0 flex-col overflow-hidden">
+        {viewMode === 'studio' && (
+          <UniqueIndianPlayer
+            key="view-studio"
+            onPlayCustomVideoId={playCustomVideoId}
+            onPlayAt={playAt}
+            onPlay={play}
+            onPause={pause}
+          />
+        )}
+
+        {viewMode === 'vibe' && (
+          <div key="view-vibe" className="relative flex flex-1 min-h-0 flex-col overflow-hidden animate-fade-in">
+            {/* 1. Cinematic Background Image */}
+            <WorldBackground />
+
+            {/* 2. Top Header Navigation */}
+            <Header />
+
+            {/* 3. Main Center Hero & Right Chalkboard */}
+            <main className="relative flex-1 min-h-0 overflow-y-auto flex flex-col items-center justify-center px-4 py-6">
+              <CenterHero />
+              <TodayPlaylistBoard onPlayAt={playAt} />
+            </main>
+          </div>
+        )}
+      </div>
 
       {/* ========================================================
-          MODE 2: RETRO AMBIENT VIBE VIEW (Chai Tapri / Salon / Bartan Time)
+          DOCKED PERSISTENT PLAYER + MOBILE NAVIGATION
          ======================================================== */}
-      {viewMode === 'vibe' && (
-        <div key="view-vibe" className="relative flex flex-1 flex-col overflow-hidden animate-fade-in">
-          {/* 1. Cinematic Background Image */}
-          <WorldBackground />
-
-          {/* 2. Top Header Navigation */}
-          <Header />
-
-          {/* 3. Main Center Hero & Right Chalkboard */}
-          <main className="relative flex flex-1 flex-col items-center justify-center px-4 pb-28 pt-4">
-            {/* Center Title, Subtitle, Dialogue Pill & Sub-quote */}
-            <CenterHero />
-
-            {/* Right Wall: Hanging "Today's Playlist" Chalkboard */}
-            <TodayPlaylistBoard onPlayAt={playAt} />
-          </main>
-        </div>
-      )}
-
-      {/* ========================================================
-          PERSISTENT ACROSS BOTH MODES (Music never stops)
-         ======================================================== */}
-
-      {/* Bottom Floating Music Player with Like/Favorite Button */}
       <BottomPlayer
         onPlay={play}
         onPause={pause}
@@ -90,9 +101,19 @@ function AppLayout() {
         onSeek={seekTo}
       />
 
-      {/* Modals & Overlays */}
+      {viewMode === 'studio' && <MobileBottomNav />}
+
+      {/* Modals & Expandable Full-Screen Now Playing Sheet */}
+      <NowPlayingSheet
+        onPlay={play}
+        onPause={pause}
+        onNext={next}
+        onPrev={prev}
+        onSeek={seekTo}
+        onPlayQueueIndex={playFromQueueIndex}
+      />
       <PlaylistsModal />
-      <TrackList onPlayAt={playAt} />
+      <TrackList onPlayAt={playFromQueueIndex} />
       <SearchModal
         onPlayCustomVideoId={playCustomVideoId}
         onPlaySearchQuery={playSearchQuery}

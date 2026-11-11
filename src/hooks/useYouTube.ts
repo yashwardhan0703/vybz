@@ -109,6 +109,7 @@ export function useYouTube(containerRef: React.RefObject<HTMLDivElement | null>)
     setCurrentTime,
     setDuration,
     setTrackInfo,
+    setPlaybackQueue,
   } = usePlayerStore();
 
   currentWorldRef.current = currentWorld;
@@ -779,12 +780,20 @@ export function useYouTube(containerRef: React.RefObject<HTMLDivElement | null>)
         queueRef.current = [];
         queueIndexRef.current = -1;
         const trackIds = currentWorldRef.current.tracks?.map((t) => t.id) ?? [];
+        const worldQueue: QueueTrack[] =
+          currentWorldRef.current.tracks?.map((t) => ({
+            id: t.id,
+            title: t.title,
+            artist: t.artist || currentWorldRef.current.name,
+            thumbnail: `https://img.youtube.com/vi/${t.id}/mqdefault.jpg`,
+          })) ?? [];
+        setPlaybackQueue(worldQueue, index);
         p.loadPlaylist(trackIds, index, 0);
         setTimeout(updateTrackMeta, 600);
         persistState();
       } catch {}
     },
-    [setIsLoading, setCurrentTime, updateTrackMeta, persistState]
+    [setIsLoading, setCurrentTime, setPlaybackQueue, updateTrackMeta, persistState]
   );
 
   const playCustomVideoId = useCallback(
@@ -899,6 +908,7 @@ export function useYouTube(containerRef: React.RefObject<HTMLDivElement | null>)
           resolvedThumb,
           videoId
         );
+        setPlaybackQueue([...queueRef.current], Math.max(0, queueIndexRef.current));
         syncMediaSession(
           resolvedTitle,
           resolvedArtist,
@@ -930,13 +940,14 @@ export function useYouTube(containerRef: React.RefObject<HTMLDivElement | null>)
                 resolvedThumb,
                 videoId
               );
+              setPlaybackQueue([...queueRef.current], 0);
               persistState();
             }
           });
         }
       } catch {}
     },
-    [setCurrentTime, setDuration, setIsLoading, setTrackInfo, syncMediaSession, persistState]
+    [setCurrentTime, setDuration, setIsLoading, setTrackInfo, setPlaybackQueue, syncMediaSession, persistState]
   );
 
   // Play next track (Automatic autoplay or Next button)
@@ -984,6 +995,7 @@ export function useYouTube(containerRef: React.RefObject<HTMLDivElement | null>)
             const fresh = more.filter((m) => !existingIds.has(m.id));
             if (fresh.length > 0) {
               queueRef.current = [...queueRef.current, ...fresh];
+              setPlaybackQueue([...queueRef.current], queueIndexRef.current);
             }
           }
         });
@@ -1062,7 +1074,7 @@ export function useYouTube(containerRef: React.RefObject<HTMLDivElement | null>)
       false,
       nextSong.duration
     );
-  }, [playCustomVideoId, updateTrackMeta]);
+  }, [playCustomVideoId, updateTrackMeta, setPlaybackQueue]);
 
   // Play previous track
   const playPrevTrack = useCallback(() => {
@@ -1144,6 +1156,28 @@ export function useYouTube(containerRef: React.RefObject<HTMLDivElement | null>)
     [setIsLoading, setTrackInfo, persistState]
   );
 
+  const playFromQueueIndex = useCallback(
+    (index: number) => {
+      const q = queueRef.current;
+      if (q.length > 0 && q[index]) {
+        const target = q[index];
+        playCustomVideoId(
+          target.id,
+          target.title,
+          target.artist,
+          target.thumbnail,
+          q,
+          index,
+          isVibeRadioModeRef.current,
+          target.duration
+        );
+        return;
+      }
+      playAt(index);
+    },
+    [playCustomVideoId, playAt]
+  );
+
   return {
     play,
     pause,
@@ -1151,6 +1185,7 @@ export function useYouTube(containerRef: React.RefObject<HTMLDivElement | null>)
     prev: playPrevTrack,
     seekTo,
     playAt,
+    playFromQueueIndex,
     playCustomVideoId,
     playSearchQuery,
   };

@@ -5,6 +5,7 @@ import { THEMES } from '../data/worlds';
 import { TOP_25_TRENDING_INDIAN } from '../data/trendingSongs';
 import { ARTISTS_CATALOG } from '../data/artistsData';
 import { getLocalVibeTracks } from '../utils/vibeRecommender';
+import { handleArtworkError } from '../utils/mediaHelpers';
 
 export interface SearchResultItem {
   id: string;
@@ -56,6 +57,7 @@ export default function SearchModal({ onPlayCustomVideoId }: SearchModalProps) {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchResultItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [apiOffline, setApiOffline] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
 
   const inputRef = useRef<HTMLInputElement>(null);
@@ -105,6 +107,7 @@ export default function SearchModal({ onPlayCustomVideoId }: SearchModalProps) {
     }
 
     setIsLoading(true);
+    setApiOffline(false);
 
     // 1. Direct YouTube link or ID check
     const directYtId = extractYouTubeId(q);
@@ -141,9 +144,11 @@ export default function SearchModal({ onPlayCustomVideoId }: SearchModalProps) {
             });
           }
         }
+      } else {
+        setApiOffline(true);
       }
     } catch {
-      // If dev server endpoint is not reachable, fallback gracefully
+      setApiOffline(true);
     }
 
     // 3. Match from Top 25 Trending Indian Hits
@@ -292,7 +297,7 @@ export default function SearchModal({ onPlayCustomVideoId }: SearchModalProps) {
       <div
         role="dialog"
         aria-label="YouTube Music & Lyrics Search"
-        className="fixed inset-x-2.5 top-4 sm:top-16 z-50 mx-auto w-auto sm:w-[94vw] max-w-2xl sm:inset-x-auto sm:left-1/2 sm:-translate-x-1/2 overflow-hidden rounded-2xl border border-white/15 bg-[#0e1215]/95 shadow-[0_30px_90px_rgba(0,0,0,0.98)] backdrop-blur-2xl"
+        className="fixed inset-x-2.5 top-[max(0.75rem,env(safe-area-inset-top))] sm:top-14 z-50 mx-auto w-auto sm:w-[94vw] max-w-2xl sm:inset-x-auto sm:left-1/2 sm:-translate-x-1/2 flex flex-col max-h-[calc(100dvh-1.5rem)] sm:max-h-[80dvh] overflow-hidden rounded-2xl border border-white/15 bg-[#0e1215]/98 shadow-[0_30px_90px_rgba(0,0,0,0.98)] backdrop-blur-2xl"
       >
         {/* Top Search Input Box */}
         <div className="flex items-center gap-2 sm:gap-3 border-b border-white/10 px-3 py-2.5 sm:px-5 sm:py-3.5">
@@ -334,7 +339,7 @@ export default function SearchModal({ onPlayCustomVideoId }: SearchModalProps) {
 
         {/* Quick Discovery Tags (shown when query is empty) */}
         {!query && (
-          <div className="p-4 sm:p-5">
+          <div className="p-4 sm:p-5 overflow-y-auto">
             <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-white/50 mb-3">
               <Sparkles size={13} style={{ color: themeColor }} />
               <span>Try Searching By Lyrics or Song Name</span>
@@ -359,7 +364,12 @@ export default function SearchModal({ onPlayCustomVideoId }: SearchModalProps) {
 
         {/* Search Results List */}
         {query && (
-          <div className="max-h-[60vh] sm:max-h-[58vh] overflow-y-auto p-1.5 sm:p-3 divide-y divide-white/5">
+          <div className="flex-1 min-h-0 overflow-y-auto p-1.5 sm:p-3 divide-y divide-white/5">
+            {apiOffline && (
+              <div className="mb-2 rounded-xl border border-amber-500/25 bg-amber-500/10 px-3 py-2 text-[0.7rem] text-amber-200/90">
+                Live search unreachable — showing cached library &amp; Top 25 matches.
+              </div>
+            )}
             {results.map((item, idx) => {
               const isSelected = idx === selectedIndex;
               return (
@@ -372,15 +382,13 @@ export default function SearchModal({ onPlayCustomVideoId }: SearchModalProps) {
                 >
                   {/* Left: Thumbnail & Song Info */}
                   <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
-                    <div className="relative size-10 sm:size-12 shrink-0 overflow-hidden rounded-lg bg-neutral-800 shadow">
+                    <div className="relative size-10 sm:size-12 shrink-0 overflow-hidden rounded-lg bg-neutral-800 shadow aspect-square">
                       <img
                         src={item.thumbnail}
                         alt=""
+                        loading="lazy"
                         className="size-full object-cover"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).src =
-                            'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=600&q=80';
-                        }}
+                        onError={handleArtworkError}
                       />
                       {/* Play overlay icon on hover */}
                       <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
@@ -389,7 +397,7 @@ export default function SearchModal({ onPlayCustomVideoId }: SearchModalProps) {
                     </div>
 
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-xs sm:text-sm font-semibold text-white group-hover:text-teal-300 transition-colors">
+                      <p className="truncate text-xs sm:text-sm font-semibold text-white group-hover:text-amber-300 transition-colors">
                         {item.title}
                       </p>
                       <p className="truncate text-[0.68rem] sm:text-xs text-white/55 mt-0.5 flex items-center gap-1.5">
@@ -409,7 +417,7 @@ export default function SearchModal({ onPlayCustomVideoId }: SearchModalProps) {
                     <button
                       type="button"
                       aria-label="Play song"
-                      className="grid size-8 sm:size-9 place-items-center rounded-full bg-white/10 text-white group-hover:bg-teal-400 group-hover:text-black transition-colors"
+                      className="grid size-8 sm:size-9 place-items-center rounded-full bg-white/10 text-white group-hover:bg-amber-400 group-hover:text-black transition-colors"
                     >
                       <Play size={13} fill="currentColor" className="ml-0.5" />
                     </button>
@@ -422,7 +430,7 @@ export default function SearchModal({ onPlayCustomVideoId }: SearchModalProps) {
               <div className="py-10 text-center">
                 <Music size={32} className="mx-auto text-white/20 mb-2" />
                 <p className="text-sm text-white/60">
-                  No matching songs found on YouTube. Try different words or lyrics!
+                  No matching songs found. Try different words or lyrics!
                 </p>
               </div>
             )}
@@ -430,15 +438,15 @@ export default function SearchModal({ onPlayCustomVideoId }: SearchModalProps) {
         )}
 
         {/* Modal Footer */}
-        <div className="flex items-center justify-between border-t border-white/10 px-4 py-2.5 text-[0.7rem] text-white/40">
-          <div className="flex items-center gap-2">
+        <div className="flex items-center justify-between border-t border-white/10 px-4 py-2 text-[0.68rem] text-white/40 shrink-0">
+          <div className="hidden sm:flex items-center gap-2">
             <span>Navigation:</span>
             <kbd className="rounded bg-white/10 px-1.5 py-0.5 font-mono">↑</kbd>
             <kbd className="rounded bg-white/10 px-1.5 py-0.5 font-mono">↓</kbd>
             <span>Play:</span>
             <kbd className="rounded bg-white/10 px-1.5 py-0.5 font-mono">Enter</kbd>
           </div>
-          <span>YouTube Real-Time Search & Playback</span>
+          <span className="ml-auto sm:ml-0">YouTube Real-Time Search &amp; Playback</span>
         </div>
       </div>
     </>

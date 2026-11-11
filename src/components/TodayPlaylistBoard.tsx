@@ -12,7 +12,7 @@ export default function TodayPlaylistBoard({ onPlayAt }: TodayPlaylistBoardProps
   return (
     <aside
       aria-label="Today's Playlist Chalkboard"
-      className="hidden lg:block absolute right-8 top-28 z-20 w-64 select-none"
+      className="hidden lg:block absolute right-6 xl:right-10 top-1/2 -translate-y-1/2 z-20 w-60 xl:w-64 select-none"
     >
       {/* Hanging rope shadow & pin */}
       <div className="mx-auto h-3 w-1 rounded-t bg-stone-700/60 shadow" />

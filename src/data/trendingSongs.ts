@@ -42,13 +42,13 @@ export const TOP_25_TRENDING_INDIAN: TrendingTrack[] = [
   },
   {
     rank: 4,
-    id: '5uY3z5U_ayY',
+    id: 'Etkd-07gnxM',
     title: 'O Maahi',
     movie: 'Dunki',
     singers: 'Arijit Singh, Pritam',
-    duration: '3:53',
+    duration: '4:06',
     tag: '💖 Romantic Chartbuster',
-    thumbnail: 'https://img.youtube.com/vi/5uY3z5U_ayY/mqdefault.jpg',
+    thumbnail: 'https://img.youtube.com/vi/Etkd-07gnxM/mqdefault.jpg',
   },
   {
     rank: 5,

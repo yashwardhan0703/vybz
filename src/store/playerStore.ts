@@ -14,17 +14,24 @@ import {
   saveStoredPlaybackState,
   type StoredTrack,
   type UserPlaylist,
+  type PersistedQueueTrack,
 } from '../utils/localStorageHelper';
 
 export type RepeatMode = 'none' | 'one' | 'all';
 export type ViewMode = 'studio' | 'vibe';
 export type StudioTab = 'explore' | 'artists' | 'playlists' | 'favorites';
+export type PlayerCategory = 'all' | 'trending' | 'artists' | 'playlists' | 'favorites';
 
 interface PlayerState {
   // Mode & Tabs
   viewMode: ViewMode;
   activeTab: StudioTab;
+  activeCategory: PlayerCategory;
   activeArtistId: string | null;
+
+  // Live Queue State (mirrored from YouTube engine for UI)
+  playbackQueue: PersistedQueueTrack[];
+  playbackQueueIndex: number;
 
   // World (Ambient Vibe Mode)
   currentWorldId: string;
@@ -59,12 +66,15 @@ interface PlayerState {
   isTrackListOpen: boolean;
   isWorldSwitcherOpen: boolean;
   isSearchOpen: boolean;
+  isNowPlayingOpen: boolean;
 
   // Actions - Modes & Nav
   setViewMode: (mode: ViewMode) => void;
   toggleViewMode: () => void;
   setActiveTab: (tab: StudioTab) => void;
+  setActiveCategory: (category: PlayerCategory) => void;
   setActiveArtistId: (artistId: string | null) => void;
+  setPlaybackQueue: (queue: PersistedQueueTrack[], index?: number) => void;
 
   // Actions - World
   setWorld: (worldId: string) => void;
@@ -93,6 +103,8 @@ interface PlayerState {
   toggleWorldSwitcher: () => void;
   toggleSearch: () => void;
   setSearchOpen: (open: boolean) => void;
+  setNowPlayingOpen: (open: boolean) => void;
+  toggleNowPlaying: () => void;
   closeAll: () => void;
 }
 
@@ -106,7 +118,11 @@ const initialTrack = initialWorld.tracks?.[0];
 export const usePlayerStore = create<PlayerState>((set, get) => ({
   viewMode: persistedState?.viewMode || getStoredViewMode(),
   activeTab: 'explore',
+  activeCategory: 'all',
   activeArtistId: null,
+
+  playbackQueue: persistedState?.queue ?? [],
+  playbackQueueIndex: persistedState?.queueIndex ?? 0,
 
   currentWorldId: initialWorld.id,
   currentWorld: initialWorld,
@@ -141,6 +157,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
   isTrackListOpen: false,
   isWorldSwitcherOpen: false,
   isSearchOpen: false,
+  isNowPlayingOpen: false,
 
   setViewMode: (mode) => {
     saveStoredViewMode(mode);
@@ -161,7 +178,13 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
   },
 
   setActiveTab: (tab) => set({ activeTab: tab, activeArtistId: null }),
+  setActiveCategory: (category) => set({ activeCategory: category }),
   setActiveArtistId: (artistId) => set({ activeArtistId: artistId }),
+  setPlaybackQueue: (queue, index) =>
+    set((s) => ({
+      playbackQueue: queue,
+      playbackQueueIndex: index !== undefined ? Math.max(0, index) : s.playbackQueueIndex,
+    })),
 
   setWorld: (worldId) =>
     set(() => {
@@ -325,10 +348,27 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
       isWorldSwitcherOpen: false,
     }),
 
+  setNowPlayingOpen: (open) =>
+    set({
+      isNowPlayingOpen: open,
+      isTrackListOpen: false,
+      isWorldSwitcherOpen: false,
+      isSearchOpen: false,
+    }),
+
+  toggleNowPlaying: () =>
+    set((s) => ({
+      isNowPlayingOpen: !s.isNowPlayingOpen,
+      isTrackListOpen: false,
+      isWorldSwitcherOpen: false,
+      isSearchOpen: false,
+    })),
+
   closeAll: () =>
     set({
       isTrackListOpen: false,
       isWorldSwitcherOpen: false,
       isSearchOpen: false,
+      isNowPlayingOpen: false,
     }),
 }));
