@@ -1,6 +1,6 @@
 {
-  "name": "vybz – Indian Music Player",
-  "short_name": "vybz",
+  "name": "VybZ – Indian Music Player",
+  "short_name": "VybZ",
   "description": "Indian Music Player with Top 25 Trending Indian songs, real-time lyrics search, popular artists, and ambient vibe mode.",
   "theme_color": "#070a10",
   "background_color": "#070a10",
@@ -10,15 +10,27 @@
   "scope": "/",
   "icons": [
     {
-      "src": "/favicon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/favicon.svg",
+      "src": "/icon-192.png",
       "sizes": "192x192",
-      "type": "image/svg+xml",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
       "purpose": "maskable"
     }
   ]
