@@ -54,7 +54,7 @@ function AppLayout() {
   return (
     <div
       data-world-id={currentWorld.id}
-      className="relative flex h-[100dvh] w-full flex-col overflow-hidden select-none bg-[#070a10] text-white"
+      className="relative flex h-[100dvh] w-full flex-col overflow-hidden bg-[#070a10] text-white"
       style={{
         '--world-primary': currentWorld.themeColor || '#f59e0b',
       } as React.CSSProperties}

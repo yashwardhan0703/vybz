@@ -23,7 +23,7 @@ export default function CenterHero() {
       {/* Big Bold Hindi Title */}
       <h1
         translate="no"
-        className="notranslate font-deva text-[clamp(2.6rem,11vw,4.6rem)] font-extrabold leading-none tracking-tight text-white drop-shadow-[0_6px_28px_rgba(0,0,0,0.92)] select-none"
+        className="notranslate font-deva text-[clamp(2.6rem,11vw,4.6rem)] font-extrabold leading-none tracking-tight text-white drop-shadow-[0_6px_28px_rgba(0,0,0,0.92)]"
         aria-label={currentWorld.nameHindi}
       >
         {currentWorld.nameHindi}

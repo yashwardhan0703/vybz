@@ -1466,7 +1466,7 @@ export default function UniqueIndianPlayer({
                                 handlePlayVibeStation(world);
                               }
                             }}
-                            className={`group relative overflow-hidden rounded-2xl border p-2.5 sm:p-3.5 flex flex-col justify-between transition-all select-none cursor-pointer hover:scale-[1.02] active:scale-[0.99] ${
+                            className={`group relative overflow-hidden rounded-2xl border p-2.5 sm:p-3.5 flex flex-col justify-between transition-all cursor-pointer hover:scale-[1.02] active:scale-[0.99] ${
                               isCurrentWorld
                                 ? 'border-amber-400/60 bg-[#141b2a] shadow-lg shadow-amber-500/15 ring-1 ring-amber-400/30'
                                 : 'border-white/10 bg-[#0d131f] hover:border-amber-400/40 hover:bg-[#121927]'
@@ -2022,7 +2022,7 @@ export default function UniqueIndianPlayer({
                 SLIM & STREAMLINED FOOTER (Home & Vibes Discovery)
                ======================================================== */}
             {(activeCategory === 'all' || activeCategory === 'vibes') && (
-              <footer className="mt-12 border-t border-white/5 pt-8 pb-6 text-white/50 space-y-6 select-none">
+              <footer className="mt-12 border-t border-white/5 pt-8 pb-6 text-white/50 space-y-6">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-xs">
                   {/* Column 1: Brand Info */}
                   <div className="space-y-2.5">
