@@ -173,9 +173,6 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
       if (!res.ok) {
         res = await fetch('https://vybzmusic.online/api/top25');
       }
-      if (!res.ok) {
-        res = await fetch('https://vybz.7yashshakya.workers.dev/api/top25');
-      }
       if (res.ok) {
         const data = await res.json();
         if (Array.isArray(data?.results) && data.results.length >= 10) {
