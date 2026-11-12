@@ -12,7 +12,22 @@ export interface LyricData {
 const lyricsCache = new Map<string, LyricData>();
 
 /**
- * Parses standard LRC text (e.g. "[01:23.45] Some lyric text") into LyricLine array
+ * Strips English translations or explanations in parentheses
+ * e.g. "Husn-e-janaan ki taareef mumkin nahin (The beauty of the beloved cannot be described)"
+ * -> "Husn-e-janaan ki taareef mumkin nahin"
+ * "Afreen afreen, afreen afreen (Wow, wow, wow, wow)"
+ * -> "Afreen afreen, afreen afreen"
+ */
+export function cleanLyricText(text: string): string {
+  if (!text) return '';
+  return text
+    .replace(/\s*\([A-Za-z0-9\s,.'’!?–-]{4,}\)\s*$/g, '')
+    .replace(/^\[(music|applause|instrumental)\]/gi, '')
+    .trim();
+}
+
+/**
+ * Parses standard LRC text into LyricLine array with clean, pure text
  */
 export function parseLrc(lrcText: string): LyricLine[] {
   if (!lrcText || typeof lrcText !== 'string') return [];
@@ -29,9 +44,9 @@ export function parseLrc(lrcText: string): LyricLine[] {
     const matches = Array.from(trimmed.matchAll(timeRegex));
     if (matches.length === 0) continue;
 
-    // Clean text by removing all timestamp tags
-    const text = trimmed.replace(timeRegex, '').trim();
-    // Don't include empty musical gaps if they have no text (or mark as instrumental break)
+    // Clean text by removing timestamp tags and trailing English translations
+    const rawText = trimmed.replace(timeRegex, '').trim();
+    const text = cleanLyricText(rawText);
     if (!text) continue;
 
     for (const match of matches) {
@@ -54,28 +69,37 @@ export function parseLrc(lrcText: string): LyricLine[] {
  */
 function cleanQueryString(str: string): string {
   return str
-    .replace(/[([][^\])]*?(official|video|audio|lyrics|lyrical|full song|teaser|trailer|4k|hd|remix|slowed|reverb)[^\])]*?[\])]/gi, '')
+    .replace(
+      /[([][^\])]*?(official|video|audio|lyrics|lyrical|full song|teaser|trailer|4k|hd|remix|slowed|reverb)[^\])]*?[\])]/gi,
+      ''
+    )
     .replace(/[-|].*$/, '')
     .trim();
 }
 
 /**
- * Fetches lyrics from our backend /api/lyrics endpoint with caching
+ * Fetches lyrics from our backend /api/lyrics endpoint with caching and duration matching
  */
-export async function getTrackLyrics(trackTitle: string, trackArtist?: string): Promise<LyricData | null> {
+export async function getTrackLyrics(
+  trackTitle: string,
+  trackArtist?: string,
+  duration?: number
+): Promise<LyricData | null> {
   if (!trackTitle || !trackTitle.trim()) return null;
   const cleanTrack = cleanQueryString(trackTitle);
   const cleanArtist = cleanQueryString(trackArtist || '');
-  const cacheKey = `${cleanTrack.toLowerCase()}___${cleanArtist.toLowerCase()}`;
+  const durRounded = duration && duration > 0 ? Math.round(duration) : 0;
+  const cacheKey = `${cleanTrack.toLowerCase()}___${cleanArtist.toLowerCase()}___${durRounded}`;
 
   if (lyricsCache.has(cacheKey)) {
     return lyricsCache.get(cacheKey)!;
   }
 
   try {
-    const res = await fetch(
-      `/api/lyrics?track=${encodeURIComponent(cleanTrack)}&artist=${encodeURIComponent(cleanArtist)}`
-    );
+    const url = `/api/lyrics?track=${encodeURIComponent(cleanTrack)}&artist=${encodeURIComponent(
+      cleanArtist
+    )}&duration=${durRounded}`;
+    const res = await fetch(url);
     if (!res.ok) return null;
     const data = await res.json();
     if (!data) return null;
@@ -97,4 +121,3 @@ export async function getTrackLyrics(trackTitle: string, trackArtist?: string): 
     return null;
   }
 }
-
