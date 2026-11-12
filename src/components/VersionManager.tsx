@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Sparkles, Radio, X } from 'lucide-react';
 import { usePlayerStore } from '../store/playerStore';
 
-export const CURRENT_CLIENT_VERSION = '2.6.5-clean-player-no-volume';
+export const CURRENT_CLIENT_VERSION = '2.6.6-clean-now-playing';
 
 export default function VersionManager() {
   const { setActiveCategory, setViewMode } = usePlayerStore();

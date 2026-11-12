@@ -459,31 +459,6 @@ export default function NowPlayingSheet({
                 {repeatMode === 'one' ? <Repeat1 size={20} /> : <Repeat size={20} />}
               </button>
             </div>
-
-            {/* Bottom Actions Row: Vibe Mode Switch & Queue */}
-            <div className="w-full flex items-center justify-between gap-3 pt-2.5 border-t border-white/5">
-              <button
-                type="button"
-                onClick={() => {
-                  handleClose();
-                  toggleViewMode();
-                }}
-                className="flex items-center gap-1.5 rounded-full border border-amber-400/35 bg-amber-400/15 px-3.5 py-1.5 text-xs font-semibold text-amber-300 hover:bg-amber-400/25 active:scale-95 transition-all shadow-sm"
-              >
-                <Sparkles size={13} />
-                <span>{viewMode === 'vibe' ? 'Discovery Studio' : '✨ Vibe Mode'}</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setMobilePanel('queue')}
-                aria-label="Open Queue"
-                className="flex items-center gap-1.5 rounded-full bg-white/5 px-3 py-1.5 text-xs font-medium text-white/70 hover:bg-white/10 hover:text-white active:scale-95 transition-all"
-              >
-                <ListMusic size={15} />
-                <span>Queue</span>
-              </button>
-            </div>
           </div>
         </div>
 
