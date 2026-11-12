@@ -6,7 +6,7 @@ export default {
 
     // -1. Live Version Endpoint for zero-lag iOS/Android/PWA cache busting
     if (url.pathname === '/api/version') {
-      return new Response(JSON.stringify({ version: '2.2.0-pure-native', timestamp: Date.now() }), {
+      return new Response(JSON.stringify({ version: '2.3.0-vybz-music', timestamp: Date.now() }), {
         headers: {
           'Content-Type': 'application/json',
           'Access-Control-Allow-Origin': '*',

@@ -562,8 +562,8 @@ export default function UniqueIndianPlayer({
             />
           </div>
           <div className="hidden lg:block min-w-0">
-            <h1 className="text-xl font-black tracking-tight text-white lowercase leading-none">
-              vybz<span className="text-amber-400">.</span>
+            <h1 className="text-xl font-black tracking-tight text-white leading-none">
+              vybz <span className="text-amber-400">music</span>
             </h1>
             <p className="mt-1 font-mono text-[0.6rem] uppercase tracking-widest text-white/45 truncate">
               Indian Audio Hub
@@ -666,8 +666,8 @@ export default function UniqueIndianPlayer({
                 className="size-full object-contain filter drop-shadow-[0_2px_6px_rgba(245,158,11,0.5)]"
               />
             </div>
-            <h1 className="text-lg font-black tracking-tight text-white lowercase truncate">
-              vybz<span className="text-amber-400">.</span>
+            <h1 className="text-lg font-black tracking-tight text-white truncate">
+              vybz <span className="text-amber-400">music</span>
             </h1>
           </div>
 
@@ -2032,7 +2032,7 @@ export default function UniqueIndianPlayer({
                       </div>
                       <div>
                         <span className="text-sm font-black text-white tracking-tight">
-                          vybz<span className="text-amber-400">.</span>
+                          vybz <span className="text-amber-400">music</span>
                         </span>
                         <p className="font-mono text-[0.55rem] uppercase tracking-widest text-amber-400/80">
                           Indian Audio Hub

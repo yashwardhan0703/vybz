@@ -103,7 +103,7 @@ export default function UpdateNotification() {
       </div>
 
       <div className="flex items-center gap-1.5 text-xs font-medium text-white/90">
-        <span className="hidden sm:inline">Naya VybZ update ready hai!</span>
+        <span className="hidden sm:inline">Naya VybZ Music update ready hai!</span>
         <span className="sm:hidden">Update ready!</span>
       </div>
 

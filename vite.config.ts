@@ -336,8 +336,8 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'apple-touch-icon.png'],
       manifest: {
-        name: 'VybZ – Indian Music Player',
-        short_name: 'VybZ',
+        name: 'VybZ Music – Indian Music Player',
+        short_name: 'VybZ Music',
         description:
           'Modern Indian music player with Top 25 Trending Indian songs, real-time lyrics search, popular artists, and ambient vibe mode.',
         theme_color: '#070a10',
