@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Sparkles, Radio, X } from 'lucide-react';
 import { usePlayerStore } from '../store/playerStore';
 
-export const CURRENT_CLIENT_VERSION = '2.3.0-vybz-music';
+export const CURRENT_CLIENT_VERSION = '2.5.0-clean-artists';
 
 export default function VersionManager() {
   const { setActiveCategory, setViewMode } = usePlayerStore();

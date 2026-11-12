@@ -1,12 +1,155 @@
 import { fetchLiveIndiaTop25 } from './src/utils/ytTop25Fetcher.js';
 
+function getRouteMetadata(pathname) {
+  const clean = pathname.replace(/\/+$/, '') || '/';
+
+  if (clean === '/top-25' || clean === '/top25') {
+    return {
+      title: 'Top 25 Trending Indian Songs Today | VybZ Music',
+      description: "Stream today's official Daily Top 25 Trending Indian songs across Bollywood, Punjabi, and Pop. 100% ad-free with zero buffer.",
+    };
+  }
+
+  if (clean === '/vibes' || clean === '/vibe') {
+    return {
+      title: '7 Curated Indian Mood & Vibe Radio Stations | VybZ Music',
+      description: 'Explore 7 nostalgic Indian ambient vibe radio stations: Chai Tapri, Deluxe Salon, Monsoon Baarish, Sufi Sukoon, and more on VybZ Music.',
+    };
+  }
+
+  const vibeMap = {
+    'chai-tapri': {
+      title: 'Chai Tapri Radio – Garam Chai & Purane Retro Gaane | VybZ Music',
+      desc: 'Listen to 25 nostalgic Chai Tapri retro songs on VybZ Music. Kishore Kumar, Rafi, and warm desi acoustic vibes.',
+    },
+    'chai_tapri': {
+      title: 'Chai Tapri Radio – Garam Chai & Purane Retro Gaane | VybZ Music',
+      desc: 'Listen to 25 nostalgic Chai Tapri retro songs on VybZ Music. Kishore Kumar, Rafi, and warm desi acoustic vibes.',
+    },
+    'sufi-sukoon': {
+      title: 'Sufi & Sukoon Radio – Roohani Ghazal & Qawwali Hits | VybZ Music',
+      desc: 'Stream 25 soul-soothing Sufi ghazals and qawwalis by Nusrat Fateh Ali Khan and Jagjit Singh on VybZ Music.',
+    },
+    'sufi_ghazal': {
+      title: 'Sufi & Sukoon Radio – Roohani Ghazal & Qawwali Hits | VybZ Music',
+      desc: 'Stream 25 soul-soothing Sufi ghazals and qawwalis by Nusrat Fateh Ali Khan and Jagjit Singh on VybZ Music.',
+    },
+    'deluxe-salon': {
+      title: 'Deluxe 90s Salon Radio – Haircut, Champi & Retro Bollywood | VybZ Music',
+      desc: '25 retro 90s Bollywood classics for cutting, shaving, and champi vibes on Deluxe Salon Radio by VybZ Music.',
+    },
+    'deluxe_salon': {
+      title: 'Deluxe 90s Salon Radio – Haircut, Champi & Retro Bollywood | VybZ Music',
+      desc: '25 retro 90s Bollywood classics for cutting, shaving, and champi vibes on Deluxe Salon Radio by VybZ Music.',
+    },
+    'monsoon-baarish': {
+      title: 'Monsoon Baarish Radio – Rain & Romantic Bollywood Hits | VybZ Music',
+      desc: 'Stream 25 romantic monsoon and rain Bollywood songs on VybZ Music. 100% ad-free with zero buffer.',
+    },
+    'monsoon-barish': {
+      title: 'Monsoon Baarish Radio – Rain & Romantic Bollywood Hits | VybZ Music',
+      desc: 'Stream 25 romantic monsoon and rain Bollywood songs on VybZ Music. 100% ad-free with zero buffer.',
+    },
+    'highway-dhaba': {
+      title: 'Late Night Highway Dhaba Radio – Punjabi & Retro Hits | VybZ Music',
+      desc: 'Daler Mehndi, high-energy Punjabi hits, and late-night highway truck radio on VybZ Music.',
+    },
+    'highway_dhaba': {
+      title: 'Late Night Highway Dhaba Radio – Punjabi & Retro Hits | VybZ Music',
+      desc: 'Daler Mehndi, high-energy Punjabi hits, and late-night highway truck radio on VybZ Music.',
+    },
+    'corporate-chill': {
+      title: 'Corporate Chill Radio – Lo-Fi Indian Beats for Work & Study | VybZ Music',
+      desc: 'Indian lo-fi chill beats and soothing instrumental melodies for coding, study, and focus on VybZ Music.',
+    },
+    'corporate_chill': {
+      title: 'Corporate Chill Radio – Lo-Fi Indian Beats for Work & Study | VybZ Music',
+      desc: 'Indian lo-fi chill beats and soothing instrumental melodies for coding, study, and focus on VybZ Music.',
+    },
+    'bartan-time': {
+      title: 'Bartan Time Radio – Jhaadu, Pocha & High Energy Dance Hits | VybZ Music',
+      desc: 'Zingaat, London Thumakda, and 25 energetic Bollywood dance hits for daily chores on VybZ Music.',
+    },
+    'bartan_time': {
+      title: 'Bartan Time Radio – Jhaadu, Pocha & High Energy Dance Hits | VybZ Music',
+      desc: 'Zingaat, London Thumakda, and 25 energetic Bollywood dance hits for daily chores on VybZ Music.',
+    },
+  };
+
+  if (clean.startsWith('/vibes/') || clean.startsWith('/vibe/')) {
+    const slug = clean.split('/')[2];
+    const v = vibeMap[slug];
+    if (v) return { title: v.title, description: v.desc };
+
+    const formatted = slug
+      .split(/[-_]+/)
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(' ');
+    return {
+      title: `${formatted} Radio – Indian Ambient Vibe Station | VybZ Music`,
+      description: `Stream ${formatted} ambient vibe music on VybZ Music. 100% ad-free with zero buffer.`,
+    };
+  }
+
+  if (clean === '/artists') {
+    return {
+      title: '50 Popular Bollywood & Punjabi Artists – Top 20 Hits Each | VybZ Music',
+      description: 'Discover 50 legendary Indian artists including Arijit Singh, Pritam, A.R. Rahman, Shreya Ghoshal, Diljit Dosanjh, and more on VybZ Music.',
+    };
+  }
+
+  if (clean.startsWith('/artist/')) {
+    const artId = clean.replace('/artist/', '').trim();
+    const artName = artId
+      .split(/[-_]+/)
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(' ');
+    return {
+      title: `${artName} – Top 20 Songs & Hits | VybZ Music`,
+      description: `Stream top 20 verified hit songs by ${artName} on VybZ Music. 100% ad-free with zero buffer.`,
+    };
+  }
+
+  if (clean === '/playlists') {
+    return {
+      title: 'My Playlists – Custom Indian Music Mixes | VybZ Music',
+      description: 'Create and organize your favorite Bollywood, Punjabi, and Retro playlists on VybZ Music.',
+    };
+  }
+
+  if (clean === '/liked') {
+    return {
+      title: 'Liked Songs – Favorite Indian Tracks | VybZ Music',
+      description: 'Your personal collection of liked songs and favorite tracks on VybZ Music.',
+    };
+  }
+
+  // Any custom or newly added route (e.g. /my-new-vibe, /retro, /example)
+  const customSlug = clean.replace(/^\//, '').trim();
+  if (customSlug) {
+    const v = vibeMap[customSlug];
+    if (v) return { title: v.title, description: v.desc };
+
+    const formatted = customSlug
+      .split(/[-_]+/)
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(' ');
+    return {
+      title: `${formatted} | VybZ Music`,
+      description: `Explore ${formatted} on VybZ Music – Indian Music Player & Ambient Vibe Hub.`,
+    };
+  }
+
+  return null;
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
 
     // -1. Live Version Endpoint for zero-lag iOS/Android/PWA cache busting
     if (url.pathname === '/api/version') {
-      return new Response(JSON.stringify({ version: '2.3.0-vybz-music', timestamp: Date.now() }), {
+      return new Response(JSON.stringify({ version: '2.5.0-clean-artists', timestamp: Date.now() }), {
         headers: {
           'Content-Type': 'application/json',
           'Access-Control-Allow-Origin': '*',
@@ -378,6 +521,62 @@ export default {
           status: response.status,
           statusText: response.statusText,
           headers,
+        });
+      }
+
+      // SPA Fallback & Dynamic Route SEO Metadata for clean routes
+      const isCleanRoute = !url.pathname.includes('.') && !url.pathname.startsWith('/api/');
+      if (
+        (response.status === 404 || url.pathname === '/') &&
+        isCleanRoute &&
+        (request.method === 'GET' || request.method === 'HEAD')
+      ) {
+        const indexReq = new Request(new URL('/', request.url), { method: 'GET' });
+        const indexRes = await env.ASSETS.fetch(indexReq);
+        let html = await indexRes.text();
+
+        const meta = getRouteMetadata(url.pathname);
+        if (meta) {
+          html = html
+            .replace(/<title>.*?<\/title>/, `<title>${meta.title}</title>`)
+            .replace(
+              /<meta name="description" content=".*?" \/>/,
+              `<meta name="description" content="${meta.description}" />`
+            )
+            .replace(
+              /<meta property="og:title" content=".*?" \/>/,
+              `<meta property="og:title" content="${meta.title}" />`
+            )
+            .replace(
+              /<meta property="og:description" content=".*?" \/>/,
+              `<meta property="og:description" content="${meta.description}" />`
+            )
+            .replace(
+              /<meta property="og:url" content=".*?" \/>/,
+              `<meta property="og:url" content="https://vybzmusic.online${url.pathname}" />`
+            )
+            .replace(
+              /<meta name="twitter:title" content=".*?" \/>/,
+              `<meta name="twitter:title" content="${meta.title}" />`
+            )
+            .replace(
+              /<meta name="twitter:description" content=".*?" \/>/,
+              `<meta name="twitter:description" content="${meta.description}" />`
+            )
+            .replace(
+              /<link rel="canonical" href=".*?" \/>/,
+              `<link rel="canonical" href="https://vybzmusic.online${url.pathname === '/' ? '/' : url.pathname}" />`
+            );
+        }
+
+        const h = new Headers(indexRes.headers);
+        h.set('Content-Type', 'text/html; charset=utf-8');
+        h.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+        h.set('Pragma', 'no-cache');
+        h.set('Expires', '0');
+        return new Response(request.method === 'HEAD' ? null : html, {
+          status: 200,
+          headers: h,
         });
       }
 

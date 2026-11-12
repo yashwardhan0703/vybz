@@ -1,9 +1,19 @@
 import { LayoutGrid, Flame, Radio, Mic2, FolderHeart, Heart } from 'lucide-react';
 import { usePlayerStore, type PlayerCategory } from '../store/playerStore';
+import { navigateTo } from '../utils/navigation';
 
 interface MobileBottomNavProps {
   onCategorySelect?: () => void;
 }
+
+const pathMap: Record<PlayerCategory, string> = {
+  all: '/',
+  trending: '/top-25',
+  vibes: '/vibes',
+  artists: '/artists',
+  playlists: '/playlists',
+  favorites: '/liked',
+};
 
 /**
  * Native-feeling thumb-zone bottom navigation bar for mobile viewports (< 768px).
@@ -60,10 +70,8 @@ export default function MobileBottomNav({ onCategorySelect }: MobileBottomNavPro
               key={item.id}
               type="button"
               onClick={() => {
+                navigateTo(pathMap[item.id] || '/');
                 setActiveCategory(item.id);
-                if (window.location.hash.startsWith('#artist/')) {
-                  window.history.back();
-                }
                 onCategorySelect?.();
               }}
               aria-current={isActive ? 'page' : undefined}

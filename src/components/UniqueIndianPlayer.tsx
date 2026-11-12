@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   Play,
   Pause,
@@ -35,6 +35,12 @@ import {
   cleanSongTitle,
   shareTrackOrApp,
 } from '../utils/mediaHelpers';
+import {
+  navigateTo,
+  parseRoute,
+  VIBE_SLUGS,
+  WORLD_ID_TO_SLUG,
+} from '../utils/navigation';
 
 interface UniqueIndianPlayerProps {
   onPlayCustomVideoId: (
@@ -64,8 +70,13 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
 }
 
-function getArtistFromHash(): Artist | null {
+function getInitialArtist(): Artist | null {
   if (typeof window === 'undefined') return null;
+  const path = window.location.pathname;
+  if (path.startsWith('/artist/')) {
+    const artId = path.replace('/artist/', '').replace(/\/+$/, '');
+    return ARTISTS_CATALOG.find((a) => a.id === artId) || null;
+  }
   const hash = window.location.hash;
   if (hash.startsWith('#artist/')) {
     const artId = hash.replace('#artist/', '');
@@ -74,13 +85,43 @@ function getArtistFromHash(): Artist | null {
   return null;
 }
 
-function getCachedArtistTracks(artistId: string): ArtistSong[] | null {
+function isGenuineTrack(song: ArtistSong, artistName?: string): boolean {
+  if (!song || !song.title || !song.id) return false;
+  const t = song.title.toLowerCase();
+  const a = (artistName || '').toLowerCase();
+  // Filter dummy titles
+  if (
+    /\bhit\s+\d+\b/i.test(t) ||
+    t.includes('essential hit') ||
+    (song.album && song.album.toLowerCase().includes('essential hits'))
+  ) {
+    return false;
+  }
+  // Check cross-artist copied songs
+  const crossArtistSongs: Record<string, string[]> = {
+    'kun faya kun': ['a.r. rahman', 'mohit chauhan'],
+    'chaiyya chaiyya': ['a.r. rahman', 'sukhwinder singh'],
+    'tum hi ho': ['arijit singh', 'mithoon'],
+  };
+  for (const [forbiddenTitle, allowedArtists] of Object.entries(crossArtistSongs)) {
+    if (t.includes(forbiddenTitle)) {
+      const allowed = allowedArtists.some((aa) => a.includes(aa));
+      if (!allowed) return false;
+    }
+  }
+  return true;
+}
+
+function getCachedArtistTracks(artistId: string, artistName?: string): ArtistSong[] | null {
   if (typeof window === 'undefined') return null;
   try {
-    const cached = localStorage.getItem(`vybz_art_v3_${artistId}`);
+    const cached = localStorage.getItem(`vybz_art_v5_${artistId}`);
     if (cached) {
       const parsed = JSON.parse(cached);
-      if (Array.isArray(parsed) && parsed.length >= 5) return parsed;
+      if (Array.isArray(parsed) && parsed.length >= 3) {
+        const genuine = parsed.filter((t) => isGenuineTrack(t, artistName));
+        if (genuine.length >= 3) return genuine;
+      }
     }
   } catch {}
   return null;
@@ -118,6 +159,8 @@ export default function UniqueIndianPlayer({
 
   // Handler for playing a Vibe Station directly and entering its ambient visual world
   const handlePlayVibeStation = (world: ThemeWorld) => {
+    const slug = WORLD_ID_TO_SLUG[world.id] || world.id;
+    navigateTo(`/vibes/${slug}`);
     setWorld(world.id);
     const first = world.tracks?.[0];
     if (first && (currentTrackId !== first.id || !isPlaying)) {
@@ -139,7 +182,6 @@ export default function UniqueIndianPlayer({
     }
     if (viewMode !== 'vibe') {
       setViewMode('vibe');
-      window.location.hash = 'vibe';
     }
   };
 
@@ -151,8 +193,8 @@ export default function UniqueIndianPlayer({
     }
   };
 
-  // Lazy-initialize artist from URL hash to avoid synchronous setState in useEffect
-  const [selectedArtist, setSelectedArtist] = useState<Artist | null>(getArtistFromHash);
+  // Lazy-initialize artist from URL pathname or hash to avoid synchronous setState in useEffect
+  const [selectedArtist, setSelectedArtist] = useState<Artist | null>(getInitialArtist);
   const [selectedPlaylistId, setSelectedPlaylistId] = useState<string | null>(null);
 
   // 5-by-5 Pagination State for Top 25
@@ -221,21 +263,54 @@ export default function UniqueIndianPlayer({
     refreshLiveTop25();
   }, [refreshLiveTop25]);
 
-  // Listen to browser Back / Forward events for #artist/...
+  // Synchronize initial route from URL (e.g. direct load on /top-25, /vibes/chai-tapri, /artists, etc.)
+  useEffect(() => {
+    const route = parseRoute();
+    if (route.category && route.category !== activeCategory) {
+      setActiveCategory(route.category);
+    }
+    if (route.vibeSlug) {
+      const worldId = VIBE_SLUGS[route.vibeSlug]?.worldId;
+      if (worldId && currentWorld.id !== worldId) {
+        setWorld(worldId);
+      }
+    }
+    // Ensure document.title & meta tags are synced
+    navigateTo(window.location.pathname, { replace: true });
+  }, []);
+
+  // Listen to browser Back / Forward events for all routes
   useEffect(() => {
     const handlePopState = () => {
-      const nextArtist = getArtistFromHash();
-      setSelectedArtist(nextArtist);
-      setArtistPage(1);
-      setIsArtistExpandAll(false);
+      const route = parseRoute();
+      if (route.artistId) {
+        const nextArtist = ARTISTS_CATALOG.find((a) => a.id === route.artistId) || null;
+        setSelectedArtist(nextArtist);
+        setArtistPage(1);
+        setIsArtistExpandAll(false);
+      } else {
+        setSelectedArtist(null);
+      }
+      if (route.category) {
+        setActiveCategory(route.category);
+      }
+      if (route.vibeSlug) {
+        const worldId = VIBE_SLUGS[route.vibeSlug]?.worldId;
+        if (worldId) setWorld(worldId);
+      }
+      setSelectedPlaylistId(null);
     };
 
     window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
-  }, []);
+    window.addEventListener('app-route-change', handlePopState);
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+      window.removeEventListener('app-route-change', handlePopState);
+    };
+  }, [setActiveCategory, setWorld]);
 
   const openArtist = (artist: Artist) => {
-    window.history.pushState({ type: 'artist', artistId: artist.id }, '', `#artist/${artist.id}`);
+    navigateTo(`/artist/${artist.id}`);
     setSelectedArtist(artist);
     setSelectedPlaylistId(null);
     setArtistPage(1);
@@ -243,9 +318,10 @@ export default function UniqueIndianPlayer({
   };
 
   const closeArtist = () => {
-    if (window.location.hash.startsWith('#artist/')) {
+    if (window.history.length > 1) {
       window.history.back();
     } else {
+      navigateTo('/artists');
       setSelectedArtist(null);
     }
   };
@@ -253,18 +329,26 @@ export default function UniqueIndianPlayer({
   const selectedArtistId = selectedArtist?.id;
   const selectedArtistName = selectedArtist?.name;
 
-  // Auto-search real YouTube songs when an artist is selected (if not already having 20 curated tracks)
+  // Auto-search real YouTube songs when an artist is selected (if fewer than 8 genuine curated tracks)
   useEffect(() => {
     if (!selectedArtistId || !selectedArtistName) return;
-    if (selectedArtist?.topTracks && selectedArtist.topTracks.length >= 20) return;
-    if (getCachedArtistTracks(selectedArtistId)) return;
+    const genuineCurated = (selectedArtist?.topTracks || []).filter((t) =>
+      isGenuineTrack(t, selectedArtistName)
+    );
+    if (genuineCurated.length >= 8) return;
+    if (artistTracksMap[selectedArtistId] && artistTracksMap[selectedArtistId].length >= 3) return;
+    const cached = getCachedArtistTracks(selectedArtistId, selectedArtistName);
+    if (cached && cached.length >= 3) {
+      setArtistTracksMap((prev) => ({ ...prev, [selectedArtistId]: cached }));
+      return;
+    }
 
     let isMounted = true;
     const fetchArtistSongs = async () => {
       setIsSearchingArtist(true);
       try {
         const res = await fetch(
-          `/api/search?q=${encodeURIComponent(selectedArtistName + ' songs hit')}`
+          `/api/search?q=${encodeURIComponent(selectedArtistName + ' songs audio')}`
         );
         if (!res.ok) throw new Error('Search failed');
         const data = await res.json();
@@ -275,30 +359,41 @@ export default function UniqueIndianPlayer({
             'jukebox',
             'all songs',
             'non stop',
+            'nonstop',
             'full album',
             'compilation',
             'podcast',
-            'mashup 1 hour',
             'interview',
+            'mashup 1 hour',
+            'top 50',
+            'top 20',
+            'top 30',
           ];
           const cleanResults: ArtistSong[] = data.results
-            .filter((item: { title?: string }) => {
+            .filter((item: { title?: string; duration?: string }) => {
               const titleLower = (item.title || '').toLowerCase();
-              return !stopWords.some((sw) => titleLower.includes(sw));
+              if (stopWords.some((sw) => titleLower.includes(sw))) return false;
+              if (item.duration) {
+                const parts = item.duration.split(':');
+                if (parts.length > 2) return false;
+                if (parts.length === 2 && parseInt(parts[0], 10) >= 10) return false;
+              }
+              return true;
             })
             .map((item: { id: string; title: string; artist?: string; duration?: string }) => ({
               id: item.id,
               title: cleanSongTitle(item.title),
-              album: item.artist || selectedArtistName,
+              album: selectedArtistName,
               duration: item.duration || '3:45',
             }))
+            .filter((t: ArtistSong) => isGenuineTrack(t, selectedArtistName))
             .slice(0, 20);
 
           if (cleanResults.length >= 3) {
             setArtistTracksMap((prev) => ({ ...prev, [selectedArtistId]: cleanResults }));
             try {
               localStorage.setItem(
-                `vybz_art_v3_${selectedArtistId}`,
+                `vybz_art_v5_${selectedArtistId}`,
                 JSON.stringify(cleanResults)
               );
             } catch {}
@@ -318,13 +413,22 @@ export default function UniqueIndianPlayer({
     return () => {
       isMounted = false;
     };
-  }, [selectedArtistId, selectedArtistName, selectedArtist?.topTracks]);
+  }, [selectedArtistId, selectedArtistName, selectedArtist?.topTracks, artistTracksMap]);
 
   const handleSelectCategory = (cat: PlayerCategory) => {
+    const pathMap: Record<PlayerCategory, string> = {
+      all: '/',
+      trending: '/top-25',
+      vibes: '/vibes',
+      artists: '/artists',
+      playlists: '/playlists',
+      favorites: '/liked',
+    };
+    navigateTo(pathMap[cat] || '/');
     setActiveCategory(cat);
     setSelectedPlaylistId(null);
     if (selectedArtist) {
-      closeArtist();
+      setSelectedArtist(null);
     }
   };
 
@@ -420,7 +524,11 @@ export default function UniqueIndianPlayer({
   // Toggle Play / Pause artist top track
   const handleTogglePlayArtist = (artist: Artist, e?: React.MouseEvent) => {
     e?.stopPropagation();
-    const tracksList = (artist ? artistTracksMap[artist.id] : null) || artist.topTracks || [];
+    const genuineCurated = (artist.topTracks || []).filter((t) => isGenuineTrack(t, artist.name));
+    const tracksList =
+      (selectedArtist?.id === artist.id ? currentArtistTracks : null) ||
+      (artist ? artistTracksMap[artist.id] || getCachedArtistTracks(artist.id, artist.name) : null) ||
+      genuineCurated;
     if (!tracksList || tracksList.length === 0) return;
     const first = tracksList[0];
     if (first) {
@@ -443,7 +551,7 @@ export default function UniqueIndianPlayer({
     }
     const tracksList =
       artistTracks ||
-      (selectedArtist ? artistTracksMap[selectedArtist.id] || selectedArtist.topTracks : []);
+      (selectedArtist ? currentArtistTracks : []);
     const artistQueue: QueueTrack[] = tracksList.map((t) => ({
       id: t.id,
       title: t.title,
@@ -479,13 +587,23 @@ export default function UniqueIndianPlayer({
     ? top25Tracks
     : top25Tracks.slice(startIdx, startIdx + 5);
 
-  const currentArtistTracks: ArtistSong[] =
-    (selectedArtist?.topTracks && selectedArtist.topTracks.length >= 20
-      ? selectedArtist.topTracks
-      : (selectedArtist ? artistTracksMap[selectedArtist.id] || getCachedArtistTracks(selectedArtist.id) : null) ||
-        (selectedArtist?.topTracks && selectedArtist.topTracks.length > 0
-          ? selectedArtist.topTracks
-          : []));
+  const currentArtistTracks: ArtistSong[] = useMemo(() => {
+    if (!selectedArtist) return [];
+    const genuineCurated = (selectedArtist.topTracks || []).filter((t) =>
+      isGenuineTrack(t, selectedArtist.name)
+    );
+    const dynamic =
+      artistTracksMap[selectedArtist.id] ||
+      getCachedArtistTracks(selectedArtist.id, selectedArtist.name);
+
+    if (genuineCurated.length >= 8) {
+      return genuineCurated;
+    }
+    if (dynamic && dynamic.length > 0) {
+      return dynamic;
+    }
+    return genuineCurated;
+  }, [selectedArtist, artistTracksMap]);
 
   const artistStartIdx = (artistPage - 1) * 5;
   const visibleArtistTracks = isArtistExpandAll
@@ -629,9 +747,10 @@ export default function UniqueIndianPlayer({
                     key={pl.id}
                     type="button"
                     onClick={() => {
+                      navigateTo('/playlists');
                       setActiveCategory('playlists');
                       setSelectedPlaylistId(pl.id);
-                      if (selectedArtist) closeArtist();
+                      if (selectedArtist) setSelectedArtist(null);
                     }}
                     className={`flex w-full items-center justify-between rounded-lg px-3 py-1.5 text-left text-xs transition-colors ${
                       selectedPlaylistId === pl.id
