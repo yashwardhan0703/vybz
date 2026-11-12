@@ -173,7 +173,7 @@ export default {
 
     // -1. Live Version Endpoint for zero-lag iOS/Android/PWA cache busting
     if (url.pathname === '/api/version') {
-      return new Response(JSON.stringify({ version: '2.6.6-clean-now-playing', timestamp: Date.now() }), {
+      return new Response(JSON.stringify({ version: '2.6.7-insta-synced-lyrics', timestamp: Date.now() }), {
         headers: {
           'Content-Type': 'application/json',
           'Access-Control-Allow-Origin': '*',
@@ -207,6 +207,99 @@ export default {
       } catch (err) {
         return new Response(JSON.stringify({ error: String(err) }), {
           status: 500,
+          headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*',
+          },
+        });
+      }
+    }
+
+    // 0.5 Synchronized & Plain Lyrics Endpoint (LRCLIB Integration with Caching)
+    if (url.pathname === '/api/lyrics') {
+      const rawTrack = url.searchParams.get('track') || '';
+      const rawArtist = url.searchParams.get('artist') || '';
+
+      if (!rawTrack.trim()) {
+        return new Response(JSON.stringify({ error: 'Missing track parameter' }), {
+          status: 400,
+          headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*',
+          },
+        });
+      }
+
+      // Clean track title (strip bracketed text like [Official Audio], (Lyrics), etc.)
+      const cleanTrack = rawTrack
+        .replace(/[([][^\])]*?(official|video|audio|lyrics|lyrical|full song|teaser|trailer|4k|hd|remix|slowed|reverb)[^\])]*?[\])]/gi, '')
+        .replace(/[-|].*$/, '')
+        .trim();
+      const cleanArtist = rawArtist
+        .replace(/[([][^\])]*?[\])]/g, '')
+        .split(/[,&]/)[0]
+        .trim();
+
+      try {
+        let result = null;
+
+        // Attempt 1: Exact get lookup
+        try {
+          const getUrl = `https://lrclib.net/api/get?track_name=${encodeURIComponent(cleanTrack)}&artist_name=${encodeURIComponent(cleanArtist)}`;
+          const getRes = await fetch(getUrl, {
+            headers: { 'User-Agent': 'VybZMusicApp/1.0 (https://vybzmusic.online)' },
+          });
+          if (getRes.ok) {
+            result = await getRes.json();
+          }
+        } catch {}
+
+        // Attempt 2: Search lookup if get didn't return synced lyrics
+        if (!result || !result.syncedLyrics) {
+          try {
+            const searchQuery = `${cleanTrack} ${cleanArtist}`.trim();
+            const searchUrl = `https://lrclib.net/api/search?q=${encodeURIComponent(searchQuery)}`;
+            const sRes = await fetch(searchUrl, {
+              headers: { 'User-Agent': 'VybZMusicApp/1.0 (https://vybzmusic.online)' },
+            });
+            if (sRes.ok) {
+              const list = await sRes.json();
+              if (Array.isArray(list) && list.length > 0) {
+                // Prioritize item with syncedLyrics
+                const withSynced = list.find((item) => item.syncedLyrics && item.syncedLyrics.trim().length > 0);
+                result = withSynced || list[0];
+              }
+            }
+          } catch {}
+        }
+
+        if (result && (result.syncedLyrics || result.plainLyrics)) {
+          return new Response(
+            JSON.stringify({
+              syncedLyrics: result.syncedLyrics || null,
+              plainLyrics: result.plainLyrics || null,
+              trackName: result.trackName || cleanTrack,
+              artistName: result.artistName || cleanArtist,
+            }),
+            {
+              headers: {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*',
+                'Cache-Control': 'public, max-age=86400',
+              },
+            }
+          );
+        }
+
+        return new Response(JSON.stringify({ syncedLyrics: null, plainLyrics: null }), {
+          headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*',
+            'Cache-Control': 'public, max-age=3600',
+          },
+        });
+      } catch (err) {
+        return new Response(JSON.stringify({ syncedLyrics: null, plainLyrics: null, error: String(err) }), {
           headers: {
             'Content-Type': 'application/json',
             'Access-Control-Allow-Origin': '*',
