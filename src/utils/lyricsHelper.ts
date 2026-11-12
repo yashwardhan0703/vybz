@@ -65,6 +65,29 @@ export function parseLrc(lrcText: string): LyricLine[] {
 }
 
 /**
+ * Converts plain text lyrics into smoothly paced timed lines across song duration
+ * Guarantees that songs with plain lyrics still scroll in sync with playback
+ */
+export function plainToTimedLines(plainText: string, duration = 240): LyricLine[] {
+  if (!plainText) return [];
+  const lines = plainText
+    .split('\n')
+    .map((l) => cleanLyricText(l))
+    .filter((l) => l.length > 0 && !/^\[.*\]$/.test(l));
+  if (lines.length === 0) return [];
+
+  const dur = duration > 0 ? duration : 240;
+  const startOffset = Math.min(10, dur * 0.05);
+  const endOffset = Math.max(startOffset + 10, dur * 0.94);
+  const timeStep = (endOffset - startOffset) / lines.length;
+
+  return lines.map((text, i) => ({
+    time: parseFloat((startOffset + i * timeStep).toFixed(2)),
+    text,
+  }));
+}
+
+/**
  * Clean artist and track title for higher match rate
  */
 function cleanQueryString(str: string): string {
@@ -78,7 +101,7 @@ function cleanQueryString(str: string): string {
 }
 
 /**
- * Fetches lyrics from our backend /api/lyrics endpoint with caching and duration matching
+ * Fetches lyrics from our backend /api/lyrics endpoint with caching, multi-stage fallback & duration matching
  */
 export async function getTrackLyrics(
   trackTitle: string,
@@ -105,8 +128,11 @@ export async function getTrackLyrics(
     if (!data) return null;
 
     let synced: LyricLine[] = [];
-    if (data.syncedLyrics) {
+    if (data.syncedLyrics && data.syncedLyrics.trim().length > 0) {
       synced = parseLrc(data.syncedLyrics);
+    } else if (data.plainLyrics && data.plainLyrics.trim().length > 0) {
+      // Auto-paced fallback from plain lyrics so every available song gets moving lyrics
+      synced = plainToTimedLines(data.plainLyrics, durRounded);
     }
 
     const lyricData: LyricData = {

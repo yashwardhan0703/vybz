@@ -173,7 +173,7 @@ export default {
 
     // -1. Live Version Endpoint for zero-lag iOS/Android/PWA cache busting
     if (url.pathname === '/api/version') {
-      return new Response(JSON.stringify({ version: '2.6.9-clean-exact-lyrics-sync', timestamp: Date.now() }), {
+      return new Response(JSON.stringify({ version: '2.7.0-universal-vibe-lyrics', timestamp: Date.now() }), {
         headers: {
           'Content-Type': 'application/json',
           'Access-Control-Allow-Origin': '*',
@@ -247,91 +247,90 @@ export default {
         .replace(/\b(feat|ft)\b.*$/i, '')
         .trim();
 
+      // Transliteration normalizer for Indian songs (handles aa/a, ee/i, oo/u, ein/en, etc.)
+      const normalizeText = (s) =>
+        (s || '')
+          .toLowerCase()
+          .replace(/ein\b/g, 'en')
+          .replace(/ee/g, 'i')
+          .replace(/oo/g, 'u')
+          .replace(/aa/g, 'a')
+          .replace(/suroor/g, 'saroor')
+          .replace(/saawan/g, 'sawan')
+          .replace(/[^a-z0-9]/g, ' ')
+          .replace(/\s+/g, ' ')
+          .trim();
+
       // Words matcher helper: ensures candidate actually contains core words of the track
       const isTrackMatch = (candidateTitle) => {
         if (!candidateTitle) return false;
-        const w1 = cleanTrack.toLowerCase().replace(/[^a-z0-9]/g, ' ').split(/\s+/).filter((w) => w.length > 2);
-        const w2 = candidateTitle.toLowerCase().replace(/[^a-z0-9]/g, ' ').split(/\s+/).filter((w) => w.length > 2);
-        if (!w1.length || !w2.length) {
-          return (
-            candidateTitle.toLowerCase().includes(cleanTrack.toLowerCase()) ||
-            cleanTrack.toLowerCase().includes(candidateTitle.toLowerCase())
-          );
-        }
+        const normTarget = normalizeText(cleanTrack);
+        const normCand = normalizeText(candidateTitle);
+        if (normCand.includes(normTarget) || normTarget.includes(normCand)) return true;
+
+        const w1 = normTarget.split(' ').filter((w) => w.length > 2);
+        const w2 = normCand.split(' ').filter((w) => w.length > 2);
+        if (!w1.length || !w2.length) return false;
         const common = w1.filter((w) => w2.includes(w));
         return common.length >= Math.ceil(Math.min(w1.length, w2.length) * 0.5);
       };
 
       try {
         let result = null;
+        let fallbackPlain = null;
 
-        // Attempt 1: Exact get lookup
-        try {
-          const getUrl = `https://lrclib.net/api/get?track_name=${encodeURIComponent(cleanTrack)}&artist_name=${encodeURIComponent(cleanArtist)}`;
-          const getRes = await fetch(getUrl, {
-            headers: { 'User-Agent': 'VybZMusicApp/1.0 (https://vybzmusic.online)' },
-          });
-          if (getRes.ok) {
-            const data = await getRes.json();
-            if (data && data.syncedLyrics && isTrackMatch(data.trackName)) {
-              if (!rawDuration || Math.abs(data.duration - rawDuration) <= 70) {
-                result = data;
-              }
-            }
-          }
-        } catch {}
+        // Multi-stage queries to maximize match coverage across spelling & tagging variations
+        const normTitle = normalizeText(cleanTrack);
+        const searchQueries = [
+          `${cleanTrack} ${cleanArtist}`.trim(),
+          cleanTrack,
+          `${cleanArtist} ${cleanTrack}`.trim(),
+          cleanTrack.split(/\s+/).slice(0, 3).join(' ') + (cleanArtist ? ` ${cleanArtist}` : ''),
+          cleanTrack.split(/\s+/).slice(0, 3).join(' '),
+          normTitle !== cleanTrack.toLowerCase() ? normTitle : '',
+        ].filter((q, idx, arr) => q && q.length >= 3 && arr.indexOf(q) === idx);
 
-        // Attempt 2: Search lookup with Duration & Title Filtering
-        if (!result || !result.syncedLyrics) {
+        for (const query of searchQueries) {
           try {
-            const searchQuery = `${cleanTrack} ${cleanArtist}`.trim();
-            const searchUrl = `https://lrclib.net/api/search?q=${encodeURIComponent(searchQuery)}`;
-            const sRes = await fetch(searchUrl, {
+            const sUrl = `https://lrclib.net/api/search?q=${encodeURIComponent(query)}`;
+            const sRes = await fetch(sUrl, {
               headers: { 'User-Agent': 'VybZMusicApp/1.0 (https://vybzmusic.online)' },
             });
-            if (sRes.ok) {
-              const list = await sRes.json();
-              if (Array.isArray(list) && list.length > 0) {
-                const validMatches = list.filter(
-                  (item) => item.syncedLyrics && item.syncedLyrics.trim().length > 0 && isTrackMatch(item.trackName)
-                );
+            if (!sRes.ok) continue;
+            const list = await sRes.json();
+            if (!Array.isArray(list) || list.length === 0) continue;
 
-                if (validMatches.length > 0) {
-                  if (rawDuration > 0) {
-                    validMatches.sort(
-                      (a, b) => Math.abs((a.duration || 0) - rawDuration) - Math.abs((b.duration || 0) - rawDuration)
-                    );
-                  }
-                  result = validMatches[0];
-                }
+            const validMatches = list.filter((item) => isTrackMatch(item.trackName));
+            if (!validMatches.length) continue;
+
+            // 1. Look for synced lyrics first
+            const withSynced = validMatches.filter(
+              (item) => item.syncedLyrics && item.syncedLyrics.trim().length > 0
+            );
+
+            if (withSynced.length > 0) {
+              if (rawDuration > 0) {
+                withSynced.sort(
+                  (a, b) => Math.abs((a.duration || 0) - rawDuration) - Math.abs((b.duration || 0) - rawDuration)
+                );
               }
+              result = withSynced[0];
+              break; // Found best synced lyrics, exit search
+            }
+
+            // 2. Keep best plain lyrics candidate as reliable fallback
+            if (!fallbackPlain) {
+              const withPlain = validMatches.find(
+                (item) => item.plainLyrics && item.plainLyrics.trim().length > 0
+              );
+              if (withPlain) fallbackPlain = withPlain;
             }
           } catch {}
         }
 
-        // Attempt 3: Track title only search if artist was compound
-        if (!result || !result.syncedLyrics) {
-          try {
-            const sRes = await fetch(`https://lrclib.net/api/search?q=${encodeURIComponent(cleanTrack)}`, {
-              headers: { 'User-Agent': 'VybZMusicApp/1.0 (https://vybzmusic.online)' },
-            });
-            if (sRes.ok) {
-              const list = await sRes.json();
-              if (Array.isArray(list) && list.length > 0) {
-                const validMatches = list.filter(
-                  (item) => item.syncedLyrics && item.syncedLyrics.trim().length > 0 && isTrackMatch(item.trackName)
-                );
-                if (validMatches.length > 0) {
-                  if (rawDuration > 0) {
-                    validMatches.sort(
-                      (a, b) => Math.abs((a.duration || 0) - rawDuration) - Math.abs((b.duration || 0) - rawDuration)
-                    );
-                  }
-                  result = validMatches[0];
-                }
-              }
-            }
-          } catch {}
+        // Use plain lyrics fallback if no synced lyrics were found
+        if (!result && fallbackPlain) {
+          result = fallbackPlain;
         }
 
         if (result && (result.syncedLyrics || result.plainLyrics)) {
