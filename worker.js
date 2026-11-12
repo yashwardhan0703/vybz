@@ -173,11 +173,13 @@ export default {
 
     // -1. Live Version Endpoint for zero-lag iOS/Android/PWA cache busting
     if (url.pathname === '/api/version') {
-      return new Response(JSON.stringify({ version: '2.6.7-insta-synced-lyrics', timestamp: Date.now() }), {
+      return new Response(JSON.stringify({ version: '2.6.8-pwa-silent-autoupdate', timestamp: Date.now() }), {
         headers: {
           'Content-Type': 'application/json',
           'Access-Control-Allow-Origin': '*',
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Cache-Control': 'private, no-cache, no-store, max-age=0, must-revalidate',
+          'CDN-Cache-Control': 'no-store, no-cache, max-age=0',
+          'Cloudflare-CDN-Cache-Control': 'no-store, no-cache, max-age=0',
           'Pragma': 'no-cache',
           'Expires': '0',
         },
@@ -688,7 +690,9 @@ export default {
 
         const h = new Headers(indexRes.headers);
         h.set('Content-Type', 'text/html; charset=utf-8');
-        h.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+        h.set('Cache-Control', 'private, no-cache, no-store, max-age=0, must-revalidate');
+        h.set('CDN-Cache-Control', 'no-store, no-cache, max-age=0');
+        h.set('Cloudflare-CDN-Cache-Control', 'no-store, no-cache, max-age=0');
         h.set('Pragma', 'no-cache');
         h.set('Expires', '0');
         return new Response(request.method === 'HEAD' ? null : html, {
@@ -697,15 +701,18 @@ export default {
         });
       }
 
-      // Root HTML, Service Worker & Manifest: NEVER stale cache (always check fresh live version)
+      // Root HTML, Service Worker, Workbox & Manifest: NEVER stale cache (always check fresh live version)
       if (
         url.pathname === '/' ||
         url.pathname.endsWith('.html') ||
         url.pathname.endsWith('sw.js') ||
         url.pathname.endsWith('registerSW.js') ||
-        url.pathname.endsWith('.webmanifest')
+        url.pathname.endsWith('.webmanifest') ||
+        url.pathname.includes('workbox')
       ) {
-        headers.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+        headers.set('Cache-Control', 'private, no-cache, no-store, max-age=0, must-revalidate');
+        headers.set('CDN-Cache-Control', 'no-store, no-cache, max-age=0');
+        headers.set('Cloudflare-CDN-Cache-Control', 'no-store, no-cache, max-age=0');
         headers.set('Pragma', 'no-cache');
         headers.set('Expires', '0');
         return new Response(response.body, {

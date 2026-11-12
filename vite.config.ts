@@ -352,6 +352,14 @@ export default defineConfig({
           { src: '/icon-maskable.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
         ],
       },
+      workbox: {
+        skipWaiting: true,
+        clientsClaim: true,
+        cleanupOutdatedCaches: true,
+        navigateFallback: '/index.html',
+        navigateFallbackDenylist: [/^\/api\//],
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,json,webmanifest}'],
+      },
     }),
   ],
   build: {
