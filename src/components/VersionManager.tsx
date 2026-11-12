@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Sparkles, Radio, X } from 'lucide-react';
 import { usePlayerStore } from '../store/playerStore';
 
-export const CURRENT_CLIENT_VERSION = '2.6.2-vibe-autoplay-scroll-fix';
+export const CURRENT_CLIENT_VERSION = '2.6.3-vibe-detail-cinematic';
 
 export default function VersionManager() {
   const { setActiveCategory, setViewMode } = usePlayerStore();

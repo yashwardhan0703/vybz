@@ -39,9 +39,10 @@ import {
 import {
   navigateTo,
   parseRoute,
-  VIBE_SLUGS,
   WORLD_ID_TO_SLUG,
+  findWorldBySlug,
 } from '../utils/navigation';
+import AmbientMixer from './AmbientMixer';
 
 interface UniqueIndianPlayerProps {
   onPlayCustomVideoId: (
@@ -82,6 +83,18 @@ function getInitialArtist(): Artist | null {
   if (hash.startsWith('#artist/')) {
     const artId = hash.replace('#artist/', '');
     return ARTISTS_CATALOG.find((a) => a.id === artId) || null;
+  }
+  return null;
+}
+
+function getInitialVibeWorld(): ThemeWorld | null {
+  if (typeof window === 'undefined') return null;
+  const path = window.location.pathname;
+  if (path.startsWith('/vibes/') || path.startsWith('/vibe/')) {
+    const slug = path.split('/')[2]?.replace(/\/+$/, '');
+    if (slug) {
+      return findWorldBySlug(slug) || null;
+    }
   }
   return null;
 }
@@ -145,6 +158,7 @@ export default function UniqueIndianPlayer({
     removeFromPlaylist,
     recentHistory,
     toggleSearch,
+    setViewMode,
     currentTrackId,
     isPlaying,
     currentWorld,
@@ -165,6 +179,7 @@ export default function UniqueIndianPlayer({
       removeFromPlaylist: s.removeFromPlaylist,
       recentHistory: s.recentHistory,
       toggleSearch: s.toggleSearch,
+      setViewMode: s.setViewMode,
       currentTrackId: s.currentTrackId,
       isPlaying: s.isPlaying,
       currentWorld: s.currentWorld,
@@ -178,10 +193,31 @@ export default function UniqueIndianPlayer({
   const [shareToast, setShareToast] = useState<string | null>(null);
   const mainScrollRef = useRef<HTMLElement | null>(null);
 
-  // Handler for playing a Vibe Station directly with automatic instant track 1 playback
+  // Lazy-initialize artist and vibe world from URL pathname to avoid synchronous setState in useEffect
+  const [selectedArtist, setSelectedArtist] = useState<Artist | null>(getInitialArtist);
+  const [selectedVibeWorld, setSelectedVibeWorld] = useState<ThemeWorld | null>(getInitialVibeWorld);
+  const [selectedPlaylistId, setSelectedPlaylistId] = useState<string | null>(null);
+
+  // 5-by-5 Pagination State for Selected Vibe Station
+  const [vibePage, setVibePage] = useState<number>(1);
+  const [isVibeExpandAll, setIsVibeExpandAll] = useState<boolean>(false);
+
+  // Automatically reset scroll position to top whenever changing tab, artist, vibe, or playlist
+  useEffect(() => {
+    if (mainScrollRef.current) {
+      mainScrollRef.current.scrollTo({ top: 0, behavior: 'instant' });
+    }
+  }, [activeCategory, selectedArtist?.id, selectedVibeWorld?.id, selectedPlaylistId]);
+
+  // Handler for opening a Vibe Station with dedicated hero UI & instant track 1 playback
   const handlePlayVibeStation = (world: ThemeWorld) => {
     const slug = WORLD_ID_TO_SLUG[world.id] || world.id;
     navigateTo(`/vibes/${slug}`);
+    setSelectedVibeWorld(world);
+    setSelectedArtist(null);
+    setSelectedPlaylistId(null);
+    setVibePage(1);
+    setIsVibeExpandAll(false);
     setWorld(world.id);
     const first = world.tracks?.[0];
     if (first) {
@@ -201,6 +237,12 @@ export default function UniqueIndianPlayer({
         false
       );
     }
+    mainScrollRef.current?.scrollTo({ top: 0, behavior: 'instant' });
+  };
+
+  const closeVibeWorld = () => {
+    setSelectedVibeWorld(null);
+    handleSelectCategory('vibes');
   };
 
   const handleShareTrack = async (title?: string, artist?: string) => {
@@ -210,17 +252,6 @@ export default function UniqueIndianPlayer({
       setTimeout(() => setShareToast(null), 3000);
     }
   };
-
-  // Lazy-initialize artist from URL pathname or hash to avoid synchronous setState in useEffect
-  const [selectedArtist, setSelectedArtist] = useState<Artist | null>(getInitialArtist);
-  const [selectedPlaylistId, setSelectedPlaylistId] = useState<string | null>(null);
-
-  // Automatically reset scroll position to top whenever changing tab, artist, or playlist
-  useEffect(() => {
-    if (mainScrollRef.current) {
-      mainScrollRef.current.scrollTo({ top: 0, behavior: 'instant' });
-    }
-  }, [activeCategory, selectedArtist?.id, selectedPlaylistId]);
 
   // 5-by-5 Pagination State for Top 25
   const [selectedPage, setSelectedPage] = useState<number>(1);
@@ -295,9 +326,12 @@ export default function UniqueIndianPlayer({
       setActiveCategory(route.category);
     }
     if (route.vibeSlug) {
-      const worldId = VIBE_SLUGS[route.vibeSlug]?.worldId;
-      if (worldId && currentWorld.id !== worldId) {
-        setWorld(worldId);
+      const targetWorld = findWorldBySlug(route.vibeSlug) || (route.worldId ? WORLDS.find((w) => w.id === route.worldId) : null) || null;
+      if (targetWorld) {
+        setSelectedVibeWorld(targetWorld);
+        if (currentWorld.id !== targetWorld.id) {
+          setWorld(targetWorld.id);
+        }
       }
     }
     // Ensure document.title & meta tags are synced
@@ -320,8 +354,11 @@ export default function UniqueIndianPlayer({
         setActiveCategory(route.category);
       }
       if (route.vibeSlug) {
-        const worldId = VIBE_SLUGS[route.vibeSlug]?.worldId;
-        if (worldId && currentWorld.id !== worldId) setWorld(worldId);
+        const targetWorld = findWorldBySlug(route.vibeSlug) || (route.worldId ? WORLDS.find((w) => w.id === route.worldId) : null) || null;
+        setSelectedVibeWorld(targetWorld);
+        if (targetWorld && currentWorld.id !== targetWorld.id) setWorld(targetWorld.id);
+      } else {
+        setSelectedVibeWorld(null);
       }
       setSelectedPlaylistId(null);
       mainScrollRef.current?.scrollTo({ top: 0, behavior: 'instant' });
@@ -336,6 +373,7 @@ export default function UniqueIndianPlayer({
   const openArtist = (artist: Artist) => {
     navigateTo(`/artist/${artist.id}`);
     setSelectedArtist(artist);
+    setSelectedVibeWorld(null);
     setSelectedPlaylistId(null);
     setArtistPage(1);
     setIsArtistExpandAll(false);
@@ -455,6 +493,9 @@ export default function UniqueIndianPlayer({
     setSelectedPlaylistId(null);
     if (selectedArtist) {
       setSelectedArtist(null);
+    }
+    if (selectedVibeWorld) {
+      setSelectedVibeWorld(null);
     }
     mainScrollRef.current?.scrollTo({ top: 0, behavior: 'instant' });
   };
@@ -600,6 +641,39 @@ export default function UniqueIndianPlayer({
     );
   };
 
+  // Toggle Play / Pause individual vibe station song
+  const handleTogglePlayVibeSong = (
+    songId: string,
+    songTitle: string,
+    artistName?: string,
+    songIndex?: number,
+    vibeTracksList?: { id: string; title: string; artist?: string }[]
+  ) => {
+    if (currentTrackId === songId) {
+      if (isPlaying) onPause();
+      else onPlay();
+      return;
+    }
+    const tracksList = vibeTracksList || (selectedVibeWorld?.tracks || []);
+    const vibeQueue: QueueTrack[] = tracksList.map((t) => ({
+      id: t.id,
+      title: t.title,
+      artist: t.artist || selectedVibeWorld?.name || 'VybZ Music',
+      thumbnail: `https://img.youtube.com/vi/${t.id}/mqdefault.jpg`,
+    }));
+    const sIdx = songIndex !== undefined ? songIndex : tracksList.findIndex((t) => t.id === songId);
+    const targetTrack = tracksList[sIdx];
+    onPlayCustomVideoId(
+      songId,
+      targetTrack?.title || songTitle,
+      targetTrack?.artist || artistName || selectedVibeWorld?.name,
+      `https://img.youtube.com/vi/${songId}/mqdefault.jpg`,
+      vibeQueue,
+      Math.max(0, sIdx),
+      false
+    );
+  };
+
   const handleSelectPage = (pageNum: number) => {
     setIsExpandAll(false);
     setSelectedPage(pageNum);
@@ -636,6 +710,15 @@ export default function UniqueIndianPlayer({
   const visibleArtistTracks = isArtistExpandAll
     ? currentArtistTracks
     : currentArtistTracks.slice(artistStartIdx, artistStartIdx + 5);
+
+  const currentVibeTracks = useMemo(() => {
+    return selectedVibeWorld?.tracks || [];
+  }, [selectedVibeWorld]);
+
+  const vibeStartIdx = (vibePage - 1) * 5;
+  const visibleVibeTracks = isVibeExpandAll
+    ? currentVibeTracks
+    : currentVibeTracks.slice(vibeStartIdx, vibeStartIdx + 5);
 
   const visibleArtists =
     activeCategory === 'artists'
@@ -1154,6 +1237,359 @@ export default function UniqueIndianPlayer({
                         className="rounded-full border border-amber-400/30 bg-amber-400/10 px-3 sm:px-4 py-1.5 text-[0.7rem] sm:text-xs font-semibold text-amber-300 hover:bg-amber-400/20 transition-colors"
                       >
                         {isArtistExpandAll ? 'Show 5' : 'All 20'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : selectedVibeWorld ? (
+              <div className="space-y-6 animate-fade-in">
+                {/* Back button & Share */}
+                <div className="flex items-center justify-between gap-3">
+                  <button
+                    type="button"
+                    onClick={closeVibeWorld}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3.5 py-1.5 text-xs font-medium text-amber-300 hover:bg-white/10 transition-colors"
+                  >
+                    ← Back to all vibes
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleShareTrack(selectedVibeWorld.nameHindi, selectedVibeWorld.name)}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3.5 py-1.5 text-xs font-medium text-white/70 hover:text-white hover:bg-white/10 transition-colors"
+                  >
+                    <Share2 size={13} className="text-amber-400" /> Share Vibe
+                  </button>
+                </div>
+
+                {/* HERO BANNER */}
+                <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-white/10 bg-[#0e141f] p-4 sm:p-7 shadow-2xl">
+                  {/* Atmospheric Background Art */}
+                  <div
+                    className="pointer-events-none absolute inset-0 bg-cover bg-center opacity-30 scale-105 filter blur-[1px] transition-all"
+                    style={{ backgroundImage: `url(${selectedVibeWorld.bg})` }}
+                  />
+                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#0e141f] via-[#0e141f]/85 to-transparent" />
+                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#0e141f] via-transparent to-[#0e141f]/80" />
+
+                  <div className="relative z-10 flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-4 sm:gap-6">
+                    {/* Visual Icon Badge */}
+                    <div
+                      className="size-24 sm:size-32 rounded-2xl sm:rounded-3xl overflow-hidden border-2 border-amber-400/50 shadow-2xl shrink-0 flex flex-col items-center justify-center p-3 text-center bg-black/60 backdrop-blur-md"
+                      style={{
+                        boxShadow: `0 8px 32px ${selectedVibeWorld.themeColor}30`,
+                      }}
+                    >
+                      <span className="text-4xl sm:text-5xl drop-shadow">
+                        {selectedVibeWorld.id === 'chai_tapri'
+                          ? '☕'
+                          : selectedVibeWorld.id === 'monsoon_barish'
+                            ? '🌧️'
+                            : selectedVibeWorld.id === 'highway_dhaba'
+                              ? '🌙'
+                              : selectedVibeWorld.id === 'deluxe_salon'
+                                ? '✂️'
+                                : selectedVibeWorld.id === 'sufi_ghazal'
+                                  ? '🕊️'
+                                  : selectedVibeWorld.id === 'corporate_majdoor' || selectedVibeWorld.id === 'corporate_chill'
+                                    ? '💻'
+                                    : selectedVibeWorld.id === 'bartan_time'
+                                      ? '🧹'
+                                      : selectedVibeWorld.id === 'alfaaz_ehsaas'
+                                        ? '✍️'
+                                        : selectedVibeWorld.id === 'hostel_ki_raat'
+                                          ? '🍜'
+                                          : '🚂'}
+                      </span>
+                      <span className="mt-1 font-mono text-[0.62rem] font-bold uppercase tracking-wider text-amber-300">
+                        {selectedVibeWorld.tracks?.length || 25} Songs
+                      </span>
+                    </div>
+
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center justify-center sm:justify-start gap-2 flex-wrap">
+                        <span className="inline-block rounded-full px-2.5 sm:px-3 py-0.5 sm:py-1 text-[0.68rem] sm:text-xs font-semibold border bg-amber-400/15 border-amber-400/30 text-amber-300">
+                          {selectedVibeWorld.pillTitle || 'Curated Mood Station'} • 25 Iconic Songs
+                        </span>
+                        <span className="rounded-full bg-white/5 border border-white/10 px-2.5 py-0.5 text-[0.62rem] font-mono text-white/60">
+                          100% Ad-Free
+                        </span>
+                      </div>
+
+                      <h2
+                        translate="no"
+                        className="notranslate mt-2 text-2xl sm:text-4xl font-black text-white leading-tight break-words"
+                      >
+                        {selectedVibeWorld.nameHindi}
+                        <span className="ml-2 text-lg sm:text-2xl text-amber-400 font-semibold">
+                          ({selectedVibeWorld.name})
+                        </span>
+                      </h2>
+
+                      <p className="mt-1 text-xs sm:text-sm text-amber-300/90 font-medium">
+                        {selectedVibeWorld.subtitle}
+                      </p>
+
+                      <p className="mt-2 text-xs sm:text-[0.82rem] text-white/70 max-w-2xl leading-relaxed italic">
+                        &ldquo;{selectedVibeWorld.subQuote}&rdquo;
+                      </p>
+
+                      {/* Action buttons */}
+                      <div className="mt-4 flex flex-col xs:flex-row items-stretch xs:items-center justify-center sm:justify-start gap-2.5">
+                        <button
+                          type="button"
+                          onClick={() => handlePlayVibeStation(selectedVibeWorld)}
+                          className="flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 px-5 sm:px-6 py-2.5 text-xs font-bold text-black shadow hover:scale-105 active:scale-95 transition-transform"
+                        >
+                          {currentWorld.id === selectedVibeWorld.id && isPlaying ? (
+                            <>
+                              <Pause size={14} fill="black" /> Playing Radio
+                            </>
+                          ) : (
+                            <>
+                              <Play size={14} fill="black" /> Play All 25 Songs
+                            </>
+                          )}
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const tracks = selectedVibeWorld.tracks || [];
+                            if (tracks.length === 0) return;
+                            const r = Math.floor(Math.random() * tracks.length);
+                            const t = tracks[r];
+                            const q: QueueTrack[] = tracks.map((x) => ({
+                              id: x.id,
+                              title: x.title,
+                              artist: x.artist || selectedVibeWorld.name,
+                              thumbnail: `https://img.youtube.com/vi/${x.id}/mqdefault.jpg`,
+                            }));
+                            onPlayCustomVideoId(
+                              t.id,
+                              t.title,
+                              t.artist || selectedVibeWorld.name,
+                              `https://img.youtube.com/vi/${t.id}/mqdefault.jpg`,
+                              q,
+                              r,
+                              false
+                            );
+                          }}
+                          className="flex items-center justify-center gap-1.5 rounded-full border border-white/15 bg-white/5 px-4 py-2.5 text-xs font-semibold text-white hover:bg-white/10 active:scale-95 transition-colors"
+                        >
+                          <Shuffle size={13} /> Shuffle Vibe
+                        </button>
+
+                        {/* ENTER FULLSCREEN VISUAL MODE */}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            window.location.hash = '#vibe';
+                            setViewMode('vibe');
+                          }}
+                          className="flex items-center justify-center gap-1.5 rounded-full border border-amber-400/40 bg-amber-400/10 px-4 py-2.5 text-xs font-bold text-amber-300 hover:bg-amber-400/20 active:scale-95 transition-all shadow-md shadow-amber-500/10"
+                        >
+                          <Sparkles size={13} className="text-amber-400 animate-spin" />
+                          <span>Fullscreen Cinematic Visual</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Optional Embedded Ambient Controls (e.g. Deluxe Salon Champi/Scissor/Trimmer) */}
+                  {selectedVibeWorld.id === 'deluxe_salon' && (
+                    <div className="relative z-10 mt-5 pt-4 border-t border-white/10">
+                      <div className="flex items-center gap-2 mb-2 text-xs font-bold uppercase tracking-wider text-amber-300">
+                        <Sparkles size={13} />
+                        <span>Interactive Ustaad Ji Salon Tools</span>
+                      </div>
+                      <AmbientMixer />
+                    </div>
+                  )}
+                </div>
+
+                {/* 25 TRACKS CONTAINER */}
+                <div className="rounded-2xl sm:rounded-3xl border border-white/10 bg-[#0c121b] p-3 sm:p-6 shadow-xl space-y-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-3 border-b border-white/5">
+                    <div>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h3 className="text-base sm:text-lg font-bold text-white">25 Curated Tracks</h3>
+                        <span className="rounded-full bg-amber-400/20 px-2 py-0.5 text-[0.62rem] sm:text-[0.65rem] font-bold text-amber-300">
+                          {isVibeExpandAll
+                            ? `All ${currentVibeTracks.length}`
+                            : `Page ${vibePage}/5 (${vibeStartIdx + 1}-${Math.min(vibeStartIdx + 5, currentVibeTracks.length)})`}
+                        </span>
+                      </div>
+                      <p className="text-[0.7rem] sm:text-xs text-white/45 mt-0.5">
+                        Selected timeless anthems & vibes for this mood
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-1 sm:gap-1.5 overflow-x-auto no-scrollbar py-0.5 touch-pan-x">
+                      {[
+                        { page: 1, label: '1-5' },
+                        { page: 2, label: '6-10' },
+                        { page: 3, label: '11-15' },
+                        { page: 4, label: '16-20' },
+                        { page: 5, label: '21-25' },
+                      ].map(({ page, label }) => {
+                        const isActive = !isVibeExpandAll && vibePage === page;
+                        return (
+                          <button
+                            key={`vibe-page-${page}`}
+                            type="button"
+                            onClick={() => {
+                              setIsVibeExpandAll(false);
+                              setVibePage(page);
+                            }}
+                            className={`rounded-lg sm:rounded-xl px-2 sm:px-2.5 py-1 text-[0.65rem] sm:text-xs font-mono font-bold transition-colors shrink-0 ${
+                              isActive
+                                ? 'bg-amber-400 text-black shadow'
+                                : 'border border-white/10 bg-white/5 text-white/60 hover:text-white hover:bg-white/10'
+                            }`}
+                          >
+                            {label}
+                          </button>
+                        );
+                      })}
+                      <button
+                        type="button"
+                        onClick={() => setIsVibeExpandAll((prev) => !prev)}
+                        className={`rounded-lg sm:rounded-xl px-2 sm:px-2.5 py-1 text-[0.65rem] sm:text-xs font-mono font-bold transition-colors shrink-0 ${
+                          isVibeExpandAll
+                            ? 'bg-amber-400 text-black shadow'
+                            : 'border border-white/10 bg-white/5 text-white/60 hover:text-white hover:bg-white/10'
+                        }`}
+                      >
+                        {isVibeExpandAll ? '5-by-5' : 'All 25'}
+                      </button>
+                    </div>
+                  </div>
+
+                  {visibleVibeTracks.length === 0 ? (
+                    <div className="py-10 text-center text-sm text-white/45">
+                      No tracks available in this station yet.
+                    </div>
+                  ) : (
+                    <div className="divide-y divide-white/5">
+                      {visibleVibeTracks.map((song, i) => {
+                        if (!song) return null;
+                        const overallIndex = isVibeExpandAll ? i : vibeStartIdx + i;
+                        const isSongCurrent = currentTrackId === song.id;
+                        return (
+                          <div
+                            key={`${song.id || 'vibe-song'}-${overallIndex}`}
+                            className={`group flex items-center justify-between p-2 sm:p-3 rounded-xl transition-colors gap-2 ${
+                              isSongCurrent ? 'bg-amber-500/10' : 'hover:bg-white/5'
+                            }`}
+                          >
+                            <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
+                              <span className="w-5 text-center font-mono text-xs text-white/40 shrink-0">
+                                {overallIndex + 1}
+                              </span>
+                              <div className="size-10 sm:size-11 rounded-lg overflow-hidden bg-black/40 shadow shrink-0 aspect-square">
+                                <img
+                                  src={`https://img.youtube.com/vi/${song.id}/mqdefault.jpg`}
+                                  alt=""
+                                  loading="lazy"
+                                  decoding="async"
+                                  onError={handleArtworkError}
+                                  className="size-full object-cover"
+                                />
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <p
+                                  translate="no"
+                                  onClick={() =>
+                                    handleTogglePlayVibeSong(
+                                      song.id,
+                                      song.title,
+                                      song.artist || selectedVibeWorld.name,
+                                      overallIndex,
+                                      currentVibeTracks
+                                    )
+                                  }
+                                  className={`notranslate truncate text-xs sm:text-sm font-semibold cursor-pointer transition-colors ${
+                                    isSongCurrent
+                                      ? 'text-amber-300'
+                                      : 'text-white group-hover:text-amber-300'
+                                  }`}
+                                >
+                                  {song.title}
+                                </p>
+                                <p
+                                  translate="no"
+                                  className="notranslate truncate text-[0.68rem] sm:text-xs text-white/50"
+                                >
+                                  {song.artist || selectedVibeWorld.name}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+                              <button
+                                type="button"
+                                aria-label={`Play ${song.title}`}
+                                onClick={() =>
+                                  handleTogglePlayVibeSong(
+                                    song.id,
+                                    song.title,
+                                    song.artist || selectedVibeWorld.name,
+                                    overallIndex,
+                                    currentVibeTracks
+                                  )
+                                }
+                                className="grid size-8 sm:size-9 place-items-center rounded-full bg-white/10 text-white group-hover:bg-amber-400 group-hover:text-black transition-colors"
+                              >
+                                {isSongCurrent && isPlaying ? (
+                                  <Pause size={13} fill="currentColor" />
+                                ) : (
+                                  <Play size={13} fill="currentColor" className="ml-0.5" />
+                                )}
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {/* Vibe Pagination Bar */}
+                  <div className="flex items-center justify-between gap-2 pt-2.5 border-t border-white/5">
+                    {!isVibeExpandAll && vibePage > 1 ? (
+                      <button
+                        type="button"
+                        onClick={() => setVibePage((p) => Math.max(1, p - 1))}
+                        className="flex items-center gap-1 rounded-full border border-white/10 bg-white/5 px-3 sm:px-4 py-1.5 text-[0.7rem] sm:text-xs font-semibold text-white/80 hover:bg-white/10 transition-colors"
+                      >
+                        ← Prev 5
+                      </button>
+                    ) : (
+                      <div />
+                    )}
+
+                    <div className="flex items-center gap-2">
+                      {!isVibeExpandAll &&
+                        vibePage < 5 &&
+                        currentVibeTracks.length > vibePage * 5 && (
+                          <button
+                            type="button"
+                            onClick={() => setVibePage((p) => Math.min(5, p + 1))}
+                            className="flex items-center gap-1 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 px-3.5 sm:px-5 py-1.5 text-[0.7rem] sm:text-xs font-bold text-black shadow hover:scale-102 active:scale-98 transition-transform"
+                          >
+                            <span>
+                              Next 5 ({vibePage * 5 + 1}-
+                              {Math.min((vibePage + 1) * 5, currentVibeTracks.length)})
+                            </span>
+                            <ChevronRight size={13} />
+                          </button>
+                        )}
+
+                      <button
+                        type="button"
+                        onClick={() => setIsVibeExpandAll((prev) => !prev)}
+                        className="rounded-full border border-amber-400/30 bg-amber-400/10 px-3 sm:px-4 py-1.5 text-[0.7rem] sm:text-xs font-semibold text-amber-300 hover:bg-amber-400/20 transition-colors"
+                      >
+                        {isVibeExpandAll ? 'Show 5' : 'All 25'}
                       </button>
                     </div>
                   </div>
