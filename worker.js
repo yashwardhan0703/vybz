@@ -12,8 +12,8 @@ function getRouteMetadata(pathname) {
 
   if (clean === '/vibes' || clean === '/vibe') {
     return {
-      title: '7 Curated Indian Mood & Vibe Radio Stations | VybZ Music',
-      description: 'Explore 7 nostalgic Indian ambient vibe radio stations: Chai Tapri, Deluxe Salon, Monsoon Baarish, Sufi Sukoon, and more on VybZ Music.',
+      title: '10 Curated Indian Mood & Vibe Radio Stations | VybZ Music',
+      description: 'Explore 10 nostalgic Indian ambient vibe radio stations: Chai Tapri, Alfaaz & Ehsaas, Hostel Ki Raat, Train Ki Khidki, Deluxe Salon, Monsoon Baarish, Sufi Sukoon, and more on VybZ Music.',
     };
   }
 
@@ -73,6 +73,30 @@ function getRouteMetadata(pathname) {
     'bartan_time': {
       title: 'Bartan Time Radio – Jhaadu, Pocha & High Energy Dance Hits | VybZ Music',
       desc: 'Zingaat, London Thumakda, and 25 energetic Bollywood dance hits for daily chores on VybZ Music.',
+    },
+    'alfaaz-ehsaas': {
+      title: 'Alfaaz & Ehsaas Radio – Poetic Urdu Indie & Acoustic Hits | VybZ Music',
+      desc: 'Stream 25 viral Urdu indie and acoustic songs like Jhol, Khasara, and Faasle on VybZ Music. 100% ad-free with zero buffer.',
+    },
+    'alfaaz_ehsaas': {
+      title: 'Alfaaz & Ehsaas Radio – Poetic Urdu Indie & Acoustic Hits | VybZ Music',
+      desc: 'Stream 25 viral Urdu indie and acoustic songs like Jhol, Khasara, and Faasle on VybZ Music. 100% ad-free with zero buffer.',
+    },
+    'hostel-ki-raat': {
+      title: 'Hostel Ki Raat Radio – Maggi Jam & College Nostalgia Songs | VybZ Music',
+      desc: 'Stream 25 nostalgic college hostel songs, midnight guitar jams, and Lucky Ali classics on VybZ Music.',
+    },
+    'hostel_ki_raat': {
+      title: 'Hostel Ki Raat Radio – Maggi Jam & College Nostalgia Songs | VybZ Music',
+      desc: 'Stream 25 nostalgic college hostel songs, midnight guitar jams, and Lucky Ali classics on VybZ Music.',
+    },
+    'train-ki-khidki': {
+      title: 'Train Ki Khidki Radio – Window Seat Safar & Travel Classics | VybZ Music',
+      desc: 'Stream 25 nostalgic train journey classics like Chaiyya Chaiyya, Yun Hi Chala Chal, and Kishore Kumar travel hits on VybZ Music.',
+    },
+    'train_ki_khidki': {
+      title: 'Train Ki Khidki Radio – Window Seat Safar & Travel Classics | VybZ Music',
+      desc: 'Stream 25 nostalgic train journey classics like Chaiyya Chaiyya, Yun Hi Chala Chal, and Kishore Kumar travel hits on VybZ Music.',
     },
   };
 
@@ -149,7 +173,7 @@ export default {
 
     // -1. Live Version Endpoint for zero-lag iOS/Android/PWA cache busting
     if (url.pathname === '/api/version') {
-      return new Response(JSON.stringify({ version: '2.5.0-clean-artists', timestamp: Date.now() }), {
+      return new Response(JSON.stringify({ version: '2.6.0-ten-mood-stations', timestamp: Date.now() }), {
         headers: {
           'Content-Type': 'application/json',
           'Access-Control-Allow-Origin': '*',

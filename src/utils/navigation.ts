@@ -63,6 +63,24 @@ export const VIBE_SLUGS: Record<string, { worldId: string; name: string; title: 
     title: 'Bartan Time Radio – Jhaadu, Pocha & High Energy Dance Hits | VybZ Music',
     desc: 'Zingaat, London Thumakda, and 25 energetic Bollywood dance hits for daily chores on VybZ Music.',
   },
+  'alfaaz-ehsaas': {
+    worldId: 'alfaaz_ehsaas',
+    name: 'Alfaaz & Ehsaas Radio',
+    title: 'Alfaaz & Ehsaas Radio – Poetic Urdu Indie & Acoustic Hits | VybZ Music',
+    desc: 'Stream 25 viral Urdu indie and acoustic songs like Jhol, Khasara, and Faasle on VybZ Music. 100% ad-free with zero buffer.',
+  },
+  'hostel-ki-raat': {
+    worldId: 'hostel_ki_raat',
+    name: 'Hostel Ki Raat Radio',
+    title: 'Hostel Ki Raat Radio – Maggi Jam & College Nostalgia Songs | VybZ Music',
+    desc: 'Stream 25 nostalgic college hostel songs, midnight guitar jams, and Lucky Ali classics on VybZ Music.',
+  },
+  'train-ki-khidki': {
+    worldId: 'train_ki_khidki',
+    name: 'Train Ki Khidki Radio',
+    title: 'Train Ki Khidki Radio – Window Seat Safar & Travel Classics | VybZ Music',
+    desc: 'Stream 25 nostalgic train journey classics like Chaiyya Chaiyya, Yun Hi Chala Chal, and Kishore Kumar travel hits on VybZ Music.',
+  },
 };
 
 // Aliases for underscore IDs
@@ -74,6 +92,9 @@ VIBE_SLUGS['monsoon_barish'] = VIBE_SLUGS['monsoon-baarish'];
 VIBE_SLUGS['highway_dhaba'] = VIBE_SLUGS['highway-dhaba'];
 VIBE_SLUGS['corporate_chill'] = VIBE_SLUGS['corporate-chill'];
 VIBE_SLUGS['bartan_time'] = VIBE_SLUGS['bartan-time'];
+VIBE_SLUGS['alfaaz_ehsaas'] = VIBE_SLUGS['alfaaz-ehsaas'];
+VIBE_SLUGS['hostel_ki_raat'] = VIBE_SLUGS['hostel-ki-raat'];
+VIBE_SLUGS['train_ki_khidki'] = VIBE_SLUGS['train-ki-khidki'];
 
 export const WORLD_ID_TO_SLUG: Record<string, string> = {
   chai_tapri: 'chai-tapri',
@@ -84,6 +105,9 @@ export const WORLD_ID_TO_SLUG: Record<string, string> = {
   highway_dhaba: 'highway-dhaba',
   corporate_chill: 'corporate-chill',
   bartan_time: 'bartan-time',
+  alfaaz_ehsaas: 'alfaaz-ehsaas',
+  hostel_ki_raat: 'hostel-ki-raat',
+  train_ki_khidki: 'train-ki-khidki',
 };
 
 /**

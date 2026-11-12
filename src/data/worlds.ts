@@ -345,6 +345,468 @@ export const THEMES: ThemeWorld[] = [
       { title: 'काम खत्म, चाय शुरू!', sub: 'REWARD TIME' },
     ],
   },
+  {
+  "id": "alfaaz_ehsaas",
+  "name": "Alfaaz & Ehsaas",
+  "nameHindi": "अल्फ़ाज़ और अहसास",
+  "subtitle": "URDU INDIE, MELLOW ACOUSTIC & POETIC VIBES",
+  "tagline": "Deep Urdu poetry, viral indie melodies aur late night ehsaas",
+  "pillTitle": "अल्फ़ाज़ जो दिल छू लें!",
+  "pillSub": "URDU INDIE",
+  "subQuote": "Kuch baatein jo sirf shayari aur dhun me bayaan hoti hain.",
+  "themeColor": "#38bdf8",
+  "theme": "sky",
+  "bg": "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=1920&q=85",
+  "tracks": [
+    {
+      "id": "-2RAq5o5pwc",
+      "title": "Jhol",
+      "artist": "Maanu x Annural Khalid"
+    },
+    {
+      "id": "-EhOs3Ol-v4",
+      "title": "Khasara",
+      "artist": "Abdul Hannan & Samar Jafri"
+    },
+    {
+      "id": "EiiOYwqk3A0",
+      "title": "Faasle",
+      "artist": "Aditya Rikhari"
+    },
+    {
+      "id": "_XBVWlI8TsQ",
+      "title": "Kahani Suno 2.0",
+      "artist": "Kaifi Khalil"
+    },
+    {
+      "id": "Qwm6BSGrOq0",
+      "title": "Iraaday",
+      "artist": "Abdul Hannan x Rovalio"
+    },
+    {
+      "id": "aRzbHxJZSTo",
+      "title": "Bikhra",
+      "artist": "Abdul Hannan x Rovalio"
+    },
+    {
+      "id": "A7NDb0iDZd0",
+      "title": "Tu Hai Kahan",
+      "artist": "AUR"
+    },
+    {
+      "id": "SmaY7RfBgas",
+      "title": "Gul",
+      "artist": "Anuv Jain"
+    },
+    {
+      "id": "gJLVTKhTnog",
+      "title": "Husn",
+      "artist": "Anuv Jain"
+    },
+    {
+      "id": "5Eqb_-j3FDA",
+      "title": "Pasoori",
+      "artist": "Ali Sethi x Shae Gill"
+    },
+    {
+      "id": "jIQ0Dx-4peE",
+      "title": "Gumaan",
+      "artist": "Young Stunners"
+    },
+    {
+      "id": "ijE2MMtzkHg",
+      "title": "Afsanay",
+      "artist": "Young Stunners"
+    },
+    {
+      "id": "9-Vc4xmTZKk",
+      "title": "Downers At Dusk",
+      "artist": "Talha Anjum"
+    },
+    {
+      "id": "PJWemSzExXs",
+      "title": "Baarishein",
+      "artist": "Anuv Jain"
+    },
+    {
+      "id": "6DtPF9W3ejI",
+      "title": "Jo Tu Na Mila",
+      "artist": "Asim Azhar"
+    },
+    {
+      "id": "wS7wz14Q4Yg",
+      "title": "Aisy Kaisay",
+      "artist": "Hasan Raheem"
+    },
+    {
+      "id": "dB0AFSUl2Vk",
+      "title": "Peechay Hutt",
+      "artist": "Hasan Raheem x Justin Bibis"
+    },
+    {
+      "id": "zQDAi8tI-cU",
+      "title": "Kana Yaari",
+      "artist": "Kaifi Khalil x Eva B"
+    },
+    {
+      "id": "LZymeRtax3Q",
+      "title": "Gal Sun",
+      "artist": "Shamoon Ismail"
+    },
+    {
+      "id": "vA86QFrXoho",
+      "title": "Alag Aasmaan",
+      "artist": "Anuv Jain"
+    },
+    {
+      "id": "zx0YGEi32r0",
+      "title": "Mazaak",
+      "artist": "Anuv Jain"
+    },
+    {
+      "id": "b-K4oDRk04M",
+      "title": "Waqt Ki Baatein",
+      "artist": "Dream Note"
+    },
+    {
+      "id": "sFMRqxCexDk",
+      "title": "Choo Lo",
+      "artist": "The Local Train"
+    },
+    {
+      "id": "9sekgEXGm-E",
+      "title": "Faasle",
+      "artist": "Kaavish"
+    },
+    {
+      "id": "bu0ffB9uPuw",
+      "title": "Tajdar-e-Haram",
+      "artist": "Atif Aslam"
+    }
+  ],
+  "quotes": [
+    {
+      "title": "दिलों के अनकहे अल्फ़ाज़!",
+      "sub": "EHSAAS"
+    },
+    {
+      "title": "गहरी शायरी और मद्धम धुन!",
+      "sub": "SHAYARI"
+    },
+    {
+      "title": "रात का सन्नाटा और सुकून!",
+      "sub": "MIDNIGHT"
+    }
+  ]
+},
+  {
+  "id": "hostel_ki_raat",
+  "name": "Hostel Ki Raat",
+  "nameHindi": "होस्टल की रात",
+  "subtitle": "MAGGI, GUITAR JAMS & COLLEGE NOSTALGIA",
+  "tagline": "Late night assignments, 2 AM maggi aur hostel room guitar jamming",
+  "pillTitle": "होस्टल की यादें!",
+  "pillSub": "MAGGI JAM",
+  "subQuote": "Doston ki mehfil, ek cup chai aur yaadon ka silsila.",
+  "themeColor": "#f97316",
+  "theme": "orange",
+  "bg": "https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=1920&q=85",
+  "tracks": [
+    {
+      "id": "dWqb-WqbGh8",
+      "title": "O Sanam",
+      "artist": "Lucky Ali"
+    },
+    {
+      "id": "sOhESxhibAM",
+      "title": "Safarnama",
+      "artist": "Lucky Ali"
+    },
+    {
+      "id": "sFMRqxCexDk",
+      "title": "Choo Lo",
+      "artist": "The Local Train"
+    },
+    {
+      "id": "i96UO8-GFvw",
+      "title": "Aaoge Tum Kabhi",
+      "artist": "The Local Train"
+    },
+    {
+      "id": "U77d9912lrw",
+      "title": "Aaftaab",
+      "artist": "The Local Train"
+    },
+    {
+      "id": "Il7Nv270zNk",
+      "title": "Cold/Mess",
+      "artist": "Prateek Kuhad"
+    },
+    {
+      "id": "BmUe3-sfr7E",
+      "title": "Kasoor",
+      "artist": "Prateek Kuhad"
+    },
+    {
+      "id": "vt4jX0iRgCg",
+      "title": "Kho Gaye Hum Kahan",
+      "artist": "Jasleen Royal & Prateek Kuhad"
+    },
+    {
+      "id": "fdubeMFwuGs",
+      "title": "Ilahi",
+      "artist": "Arijit Singh"
+    },
+    {
+      "id": "6vKucgAeF_Q",
+      "title": "Matargashti",
+      "artist": "Mohit Chauhan"
+    },
+    {
+      "id": "SS3lIQdKP-A",
+      "title": "Masakali",
+      "artist": "Mohit Chauhan"
+    },
+    {
+      "id": "aHEbLVElUwY",
+      "title": "Hairat",
+      "artist": "Lucky Ali"
+    },
+    {
+      "id": "L3QrecTSn5A",
+      "title": "Na Tum Jano Na Hum",
+      "artist": "Lucky Ali"
+    },
+    {
+      "id": "e44meSqTkH0",
+      "title": "Ghar",
+      "artist": "Bharat Chauhan"
+    },
+    {
+      "id": "LCfvYo3ILG0",
+      "title": "Yaaron",
+      "artist": "KK"
+    },
+    {
+      "id": "NUqlCJTYu6I",
+      "title": "Pal",
+      "artist": "KK"
+    },
+    {
+      "id": "lbCRtrrMvSw",
+      "title": "Give Me Some Sunshine",
+      "artist": "Suraj Jagan & Sharman Joshi"
+    },
+    {
+      "id": "ewvddSUEONQ",
+      "title": "Behti Hawa Sa Tha Woh",
+      "artist": "Shaan"
+    },
+    {
+      "id": "mgF6SGtEr6g",
+      "title": "Dil Chahta Hai",
+      "artist": "Shankar Mahadevan"
+    },
+    {
+      "id": "50XjXNsK0Dc",
+      "title": "Jaane Kyun",
+      "artist": "Vishal Dadlani"
+    },
+    {
+      "id": "poYtscS7bto",
+      "title": "Tum Ho Toh",
+      "artist": "Farhan Akhtar"
+    },
+    {
+      "id": "dnXGxMlV-rU",
+      "title": "Socha Hai",
+      "artist": "Farhan Akhtar"
+    },
+    {
+      "id": "vNSwdLu_ieI",
+      "title": "Sham",
+      "artist": "Amit Trivedi"
+    },
+    {
+      "id": "ZlOZktsODpA",
+      "title": "Iktara",
+      "artist": "Kavita Seth"
+    },
+    {
+      "id": "R0XjwtP_iTY",
+      "title": "Khaabon Ke Parindey",
+      "artist": "Mohit Chauhan"
+    }
+  ],
+  "quotes": [
+    {
+      "title": "2 AM मैगी और गिटार!",
+      "sub": "MAGGI JAM"
+    },
+    {
+      "title": "दोस्ती और पुराने अफ़साने!",
+      "sub": "YAARI"
+    },
+    {
+      "title": "होस्टल का वो पुराना कमरा!",
+      "sub": "NOSTALGIA"
+    }
+  ]
+},
+  {
+  "id": "train_ki_khidki",
+  "name": "Train Ki Khidki",
+  "nameHindi": "ट्रेन की खिड़की",
+  "subtitle": "WINDOW SEAT, MOVING TREES & SAFAR NOSTALGIA",
+  "tagline": "Sleeper coach ki window seat, thandi hawa aur safar ke purane gaane",
+  "pillTitle": "खिड़की वाली सीट!",
+  "pillSub": "WINDOW SEAT",
+  "subQuote": "Manzil se zyada khoobsurat yeh safar hai.",
+  "themeColor": "#10b981",
+  "theme": "emerald",
+  "bg": "https://images.unsplash.com/photo-1474487548417-781cb71495f3?w=1920&q=85",
+  "tracks": [
+    {
+      "id": "9MX-QejdVaQ",
+      "title": "Chaiyya Chaiyya",
+      "artist": "Sukhwinder Singh"
+    },
+    {
+      "id": "deTVgOf2cWs",
+      "title": "Kasto Mazza",
+      "artist": "Sonu Nigam & Shreya Ghoshal"
+    },
+    {
+      "id": "eEeX2QMlSlo",
+      "title": "Yun Hi Chala Chal",
+      "artist": "Udit Narayan & Hariharan"
+    },
+    {
+      "id": "mZRJfQluJTM",
+      "title": "Phoolon Ke Rang Se",
+      "artist": "Kishore Kumar"
+    },
+    {
+      "id": "cHLgOcsngTI",
+      "title": "Musafir Hoon Yaaron",
+      "artist": "Kishore Kumar"
+    },
+    {
+      "id": "LlvoY4v5zm0",
+      "title": "Zindagi Ek Safar Hai Suhana",
+      "artist": "Kishore Kumar"
+    },
+    {
+      "id": "m4o0jUEVtoQ",
+      "title": "Gaadi Bula Rahi Hai",
+      "artist": "Kishore Kumar"
+    },
+    {
+      "id": "UlWAjd9bcKw",
+      "title": "Mere Sapnon Ki Rani",
+      "artist": "Kishore Kumar"
+    },
+    {
+      "id": "lbfWsIpXsCA",
+      "title": "Yeh Shaam Mastani",
+      "artist": "Kishore Kumar"
+    },
+    {
+      "id": "fdubeMFwuGs",
+      "title": "Ilahi",
+      "artist": "Arijit Singh"
+    },
+    {
+      "id": "y0O1Rt7AnPY",
+      "title": "Safarnama",
+      "artist": "Lucky Ali"
+    },
+    {
+      "id": "64KSVbMDr0c",
+      "title": "Tanha Dil",
+      "artist": "Shaan"
+    },
+    {
+      "id": "ZkwaiIGoyT4",
+      "title": "Tanhaayee",
+      "artist": "Sonu Nigam"
+    },
+    {
+      "id": "8HDTS80dlr4",
+      "title": "Patakha Guddi",
+      "artist": "Nooran Sisters"
+    },
+    {
+      "id": "xHLnZMjJ8bY",
+      "title": "Maahi Ve",
+      "artist": "A.R. Rahman"
+    },
+    {
+      "id": "Isb7WV4d17I",
+      "title": "Sooraj Ki Baahon Mein",
+      "artist": "Clinton Cerejo"
+    },
+    {
+      "id": "2apfulo5uqc",
+      "title": "Der Lagi Lekin",
+      "artist": "Shankar Mahadevan"
+    },
+    {
+      "id": "u7hfwX81bY4",
+      "title": "Aao Milo Chalo",
+      "artist": "Shaan & Ustad Sultan Khan"
+    },
+    {
+      "id": "dXpG0kavjUo",
+      "title": "Yeh Ishq Hai",
+      "artist": "Shreya Ghoshal"
+    },
+    {
+      "id": "Cb6wuzOurPc",
+      "title": "Tum Se Hi",
+      "artist": "Mohit Chauhan"
+    },
+    {
+      "id": "oZ7PnR_ZKRE",
+      "title": "Journey Song",
+      "artist": "Anupam Roy & Shreya Ghoshal"
+    },
+    {
+      "id": "QYO6AlxiRE4",
+      "title": "Subhanallah",
+      "artist": "Sreerama Chandra"
+    },
+    {
+      "id": "cYOB941gyXI",
+      "title": "Hawaayein",
+      "artist": "Arijit Singh"
+    },
+    {
+      "id": "UNjhqT_hlbg",
+      "title": "Chala Jata Hoon",
+      "artist": "Kishore Kumar"
+    },
+    {
+      "id": "uPR7qUMNV0k",
+      "title": "Rahi Manwa Dukh Ki Chinta",
+      "artist": "Mohammed Rafi"
+    }
+  ],
+  "quotes": [
+    {
+      "title": "खिड़की से दिखता हिंदुस्तान!",
+      "sub": "SAFAR"
+    },
+    {
+      "title": "छूटते स्टेशन और मीठी यादें!",
+      "sub": "WANDERLUST"
+    },
+    {
+      "title": "पटरी की आवाज़ और पुराने सुर!",
+      "sub": "JOURNEY"
+    }
+  ]
+}
 ];
 
 // Backwards compatibility aliases

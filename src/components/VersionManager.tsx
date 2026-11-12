@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Sparkles, Radio, X } from 'lucide-react';
 import { usePlayerStore } from '../store/playerStore';
 
-export const CURRENT_CLIENT_VERSION = '2.5.0-clean-artists';
+export const CURRENT_CLIENT_VERSION = '2.6.0-ten-mood-stations';
 
 export default function VersionManager() {
   const { setActiveCategory, setViewMode } = usePlayerStore();
@@ -11,8 +11,8 @@ export default function VersionManager() {
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    // 1. Check if user has already seen the "175 Songs" announcement
-    const hasSeen = localStorage.getItem('vybz_seen_v2_175');
+    // 1. Check if user has already seen the "250 Songs" announcement
+    const hasSeen = localStorage.getItem('vybz_seen_v3_250');
     if (!hasSeen) {
       // Small delay for smooth entry animation after app loads
       const timer = window.setTimeout(() => {
@@ -87,12 +87,12 @@ export default function VersionManager() {
   }, []);
 
   const handleDismiss = () => {
-    localStorage.setItem('vybz_seen_v2_175', 'true');
+    localStorage.setItem('vybz_seen_v3_250', 'true');
     setShowWhatsNew(false);
   };
 
   const handleExploreVibes = () => {
-    localStorage.setItem('vybz_seen_v2_175', 'true');
+    localStorage.setItem('vybz_seen_v3_250', 'true');
     setShowWhatsNew(false);
     setViewMode('studio');
     setActiveCategory('vibes');
@@ -123,55 +123,55 @@ export default function VersionManager() {
 
         {/* Badge & Title */}
         <div className="flex items-center gap-2">
-          <span className="inline-flex items-center gap-1 rounded-full border border-amber-400/40 bg-amber-500/10 px-3 py-1 text-[11px] font-bold tracking-wider text-amber-400 uppercase">
+          <span className="inline-flex items-center gap-1 rounded-full border border-sky-400/40 bg-sky-500/10 px-3 py-1 text-[11px] font-bold tracking-wider text-sky-400 uppercase">
             <Sparkles size={12} />
             Mega Update Live
           </span>
         </div>
 
         <h3 className="mt-3 text-xl font-extrabold tracking-tight text-white sm:text-2xl">
-          175 Songs Across 7 Mood Stations! 🎵
+          250 Songs Across 10 Mood Stations! 🎵
         </h3>
         <p className="mt-1.5 text-xs text-white/70 sm:text-sm">
-          Aapke har ek mood ke liye curated, high-quality audio experience ab live hai.
+          Alfaaz &amp; Ehsaas, Hostel Ki Raat, aur Train Ki Khidki samet 10 curated stations live hain.
         </p>
 
         {/* Feature Cards Grid */}
         <div className="mt-4 space-y-2 text-xs">
-          <div className="flex items-center gap-3 rounded-xl border border-white/5 bg-white/[0.03] p-2.5 transition hover:bg-white/[0.06]">
-            <span className="text-xl">📿</span>
+          <div className="flex items-center gap-3 rounded-xl border border-sky-500/20 bg-sky-500/5 p-2.5 transition hover:bg-sky-500/10">
+            <span className="text-xl">🌙</span>
             <div className="flex-1">
-              <span className="font-bold text-amber-400">सूफी और सुकून:</span>
-              <p className="text-[11px] text-white/60">Nusrat Fateh Ali Khan & Jagjit Singh Ghazals</p>
+              <span className="font-bold text-sky-400">अल्फ़ाज़ और अहसास:</span>
+              <p className="text-[11px] text-white/60">Jhol, Khasara, Faasle &amp; Viral Urdu Indie</p>
             </div>
-            <span className="rounded bg-amber-500/20 px-2 py-0.5 text-[10px] font-bold text-amber-300">25 Songs</span>
+            <span className="rounded bg-sky-500/20 px-2 py-0.5 text-[10px] font-bold text-sky-300">New • 25 Songs</span>
+          </div>
+
+          <div className="flex items-center gap-3 rounded-xl border border-orange-500/20 bg-orange-500/5 p-2.5 transition hover:bg-orange-500/10">
+            <span className="text-xl">🎸</span>
+            <div className="flex-1">
+              <span className="font-bold text-orange-400">होस्टल की रात:</span>
+              <p className="text-[11px] text-white/60">Lucky Ali, Maggi Jam &amp; 2 AM Nostalgia</p>
+            </div>
+            <span className="rounded bg-orange-500/20 px-2 py-0.5 text-[10px] font-bold text-orange-300">New • 25 Songs</span>
+          </div>
+
+          <div className="flex items-center gap-3 rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-2.5 transition hover:bg-emerald-500/10">
+            <span className="text-xl">🚂</span>
+            <div className="flex-1">
+              <span className="font-bold text-emerald-400">ट्रेन की खिड़की:</span>
+              <p className="text-[11px] text-white/60">Chaiyya Chaiyya, Window Seat &amp; Safar Hits</p>
+            </div>
+            <span className="rounded bg-emerald-500/20 px-2 py-0.5 text-[10px] font-bold text-emerald-300">New • 25 Songs</span>
           </div>
 
           <div className="flex items-center gap-3 rounded-xl border border-white/5 bg-white/[0.03] p-2.5 transition hover:bg-white/[0.06]">
             <span className="text-xl">☕</span>
             <div className="flex-1">
-              <span className="font-bold text-orange-400">चाय टपरी:</span>
-              <p className="text-[11px] text-white/60">Kishore Kumar, Rafi & Desi Acoustic Retro</p>
+              <span className="font-bold text-amber-400">चाय टपरी:</span>
+              <p className="text-[11px] text-white/60">Kishore Kumar, Rafi &amp; Desi Acoustic Retro</p>
             </div>
-            <span className="rounded bg-orange-500/20 px-2 py-0.5 text-[10px] font-bold text-orange-300">25 Songs</span>
-          </div>
-
-          <div className="flex items-center gap-3 rounded-xl border border-white/5 bg-white/[0.03] p-2.5 transition hover:bg-white/[0.06]">
-            <span className="text-xl">✂️</span>
-            <div className="flex-1">
-              <span className="font-bold text-yellow-400">डीलक्स सैलून:</span>
-              <p className="text-[11px] text-white/60">90s Haircut, Champi aur Romantic Bollywood</p>
-            </div>
-            <span className="rounded bg-yellow-500/20 px-2 py-0.5 text-[10px] font-bold text-yellow-300">25 Songs</span>
-          </div>
-
-          <div className="flex items-center gap-3 rounded-xl border border-white/5 bg-white/[0.03] p-2.5 transition hover:bg-white/[0.06]">
-            <span className="text-xl">🚚</span>
-            <div className="flex-1">
-              <span className="font-bold text-pink-400">हाईवे ढाबा:</span>
-              <p className="text-[11px] text-white/60">Daler Mehndi & High Energy Punjabi Hits</p>
-            </div>
-            <span className="rounded bg-pink-500/20 px-2 py-0.5 text-[10px] font-bold text-pink-300">25 Songs</span>
+            <span className="rounded bg-amber-500/20 px-2 py-0.5 text-[10px] font-bold text-amber-300">25 Songs</span>
           </div>
         </div>
 
@@ -180,10 +180,10 @@ export default function VersionManager() {
           <button
             type="button"
             onClick={handleExploreVibes}
-            className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 py-3 text-xs font-bold text-black shadow-lg shadow-amber-500/20 transition hover:brightness-110 active:scale-98"
+            className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-sky-400 via-amber-400 to-orange-500 py-3 text-xs font-bold text-black shadow-lg shadow-sky-500/20 transition hover:brightness-110 active:scale-98"
           >
             <Radio size={15} />
-            <span>Vibe Stations Suno 🎧</span>
+            <span>10 Vibe Stations Suno 🎧</span>
           </button>
           <button
             type="button"

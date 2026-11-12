@@ -81,6 +81,24 @@
     <changefreq>daily</changefreq>
     <priority>0.85</priority>
   </url>
+  <url>
+    <loc>https://vybzmusic.online/vibes/alfaaz-ehsaas</loc>
+    <lastmod>2026-11-12</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://vybzmusic.online/vibes/hostel-ki-raat</loc>
+    <lastmod>2026-11-12</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://vybzmusic.online/vibes/train-ki-khidki</loc>
+    <lastmod>2026-11-12</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.85</priority>
+  </url>
 
   <!-- Popular Artists (Auto-synced from artistsData.ts) -->
   <url>

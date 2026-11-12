@@ -8,7 +8,7 @@ const rootDir = path.resolve(__dirname, '..');
 
 // 1. Read worlds.ts dynamically
 const worldsContent = fs.readFileSync(path.join(rootDir, 'src/data/worlds.ts'), 'utf8');
-const worldMatches = [...worldsContent.matchAll(/id:\s*['"]([a-zA-Z0-9_-]+)['"],\s*name:\s*['"]([^'"]+)['"]/g)];
+const worldMatches = [...worldsContent.matchAll(/["']?id["']?:\s*['"]([a-zA-Z0-9_-]+)['"],\s*["']?name["']?:\s*['"]([^'"]+)['"]/g)];
 const worlds = worldMatches.map((m) => ({
   id: m[1],
   slug: m[1].replace(/_/g, '-'),
