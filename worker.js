@@ -173,7 +173,7 @@ export default {
 
     // -1. Live Version Endpoint for zero-lag iOS/Android/PWA cache busting
     if (url.pathname === '/api/version') {
-      return new Response(JSON.stringify({ version: '2.6.4-share-deep-links', timestamp: Date.now() }), {
+      return new Response(JSON.stringify({ version: '2.6.5-clean-player-no-volume', timestamp: Date.now() }), {
         headers: {
           'Content-Type': 'application/json',
           'Access-Control-Allow-Origin': '*',

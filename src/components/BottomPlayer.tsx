@@ -7,8 +7,6 @@ import {
   Shuffle,
   Repeat,
   Repeat1,
-  Volume2,
-  VolumeX,
   ListMusic,
   Loader2,
   Heart,
@@ -41,7 +39,6 @@ export default function BottomPlayer({
     isShuffle,
     repeatMode,
     volume,
-    isMuted,
     currentTime,
     duration,
     trackIndex,
@@ -391,30 +388,6 @@ export default function BottomPlayer({
           >
             <ListMusic size={17} />
           </button>
-
-          <div className="flex items-center gap-1.5">
-            <button
-              type="button"
-              onClick={toggleMute}
-              aria-label={isMuted ? 'Unmute' : 'Mute'}
-              className="grid size-8 place-items-center rounded-lg text-white/65 hover:bg-white/10 hover:text-white transition-colors"
-            >
-              {isMuted || volume === 0 ? <VolumeX size={16} /> : <Volume2 size={16} />}
-            </button>
-            <input
-              type="range"
-              min={0}
-              max={100}
-              value={isMuted ? 0 : volume}
-              aria-label="Volume"
-              onChange={(e) => setVolume(Number(e.target.value))}
-              className="world-range h-3 w-16 lg:w-24 cursor-pointer"
-              style={{
-                '--world-primary': themeColor,
-                '--range-progress': `${isMuted ? 0 : volume}%`,
-              } as React.CSSProperties}
-            />
-          </div>
 
           <button
             type="button"

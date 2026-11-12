@@ -13,8 +13,6 @@ import {
   SkipBack,
   SkipForward,
   Sparkles,
-  Volume2,
-  VolumeX,
   Check,
   Share2,
 } from 'lucide-react';
@@ -50,8 +48,6 @@ export default function NowPlayingSheet({
     isTuning,
     isShuffle,
     repeatMode,
-    volume,
-    isMuted,
     currentTime,
     duration,
     currentTrackId,
@@ -70,8 +66,6 @@ export default function NowPlayingSheet({
     playbackQueueIndex,
     toggleShuffle,
     cycleRepeat,
-    setVolume,
-    toggleMute,
   } = usePlayerStore();
 
   const [mobilePanel, setMobilePanel] = useState<'player' | 'queue'>('player');
@@ -466,54 +460,29 @@ export default function NowPlayingSheet({
               </button>
             </div>
 
-            {/* Bottom Actions Row: Volume Slider + Vibe Mode Switch */}
+            {/* Bottom Actions Row: Vibe Mode Switch & Queue */}
             <div className="w-full flex items-center justify-between gap-3 pt-2.5 border-t border-white/5">
-              <div className="flex flex-1 items-center gap-2 max-w-[200px]">
-                <button
-                  type="button"
-                  onClick={toggleMute}
-                  aria-label={isMuted ? 'Unmute' : 'Mute'}
-                  className="text-white/60 hover:text-white transition-colors"
-                >
-                  {isMuted || volume === 0 ? <VolumeX size={16} /> : <Volume2 size={16} />}
-                </button>
-                <input
-                  type="range"
-                  min={0}
-                  max={100}
-                  value={isMuted ? 0 : volume}
-                  aria-label="Volume"
-                  onChange={(e) => setVolume(Number(e.target.value))}
-                  className="world-range h-2 flex-1 cursor-pointer"
-                  style={{
-                    '--world-primary': themeColor,
-                    '--range-progress': `${isMuted ? 0 : volume}%`,
-                  } as React.CSSProperties}
-                />
-              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  handleClose();
+                  toggleViewMode();
+                }}
+                className="flex items-center gap-1.5 rounded-full border border-amber-400/35 bg-amber-400/15 px-3.5 py-1.5 text-xs font-semibold text-amber-300 hover:bg-amber-400/25 active:scale-95 transition-all shadow-sm"
+              >
+                <Sparkles size={13} />
+                <span>{viewMode === 'vibe' ? 'Discovery Studio' : '✨ Vibe Mode'}</span>
+              </button>
 
-              <div className="flex items-center gap-1.5 shrink-0">
-                <button
-                  type="button"
-                  onClick={() => {
-                    handleClose();
-                    toggleViewMode();
-                  }}
-                  className="flex items-center gap-1.5 rounded-full border border-amber-400/35 bg-amber-400/15 px-3 py-1.5 text-xs font-semibold text-amber-300 hover:bg-amber-400/25 active:scale-95 transition-all"
-                >
-                  <Sparkles size={13} />
-                  <span>{viewMode === 'vibe' ? 'Discovery' : 'Vibe'}</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setMobilePanel('queue')}
-                  aria-label="Open Queue"
-                  className="md:hidden grid size-8 place-items-center rounded-full bg-white/5 text-white/70 hover:bg-white/10 hover:text-white active:scale-95 transition-all"
-                >
-                  <ListMusic size={16} />
-                </button>
-              </div>
+              <button
+                type="button"
+                onClick={() => setMobilePanel('queue')}
+                aria-label="Open Queue"
+                className="flex items-center gap-1.5 rounded-full bg-white/5 px-3 py-1.5 text-xs font-medium text-white/70 hover:bg-white/10 hover:text-white active:scale-95 transition-all"
+              >
+                <ListMusic size={15} />
+                <span>Queue</span>
+              </button>
             </div>
           </div>
         </div>
