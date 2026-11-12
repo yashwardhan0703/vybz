@@ -95,6 +95,16 @@ export function useYouTube(containerRef: React.RefObject<HTMLDivElement | null>)
   const isShuffleRef = useRef(usePlayerStore.getState().isShuffle);
   const volumeRef = useRef(usePlayerStore.getState().volume);
   const isMutedRef = useRef(usePlayerStore.getState().isMuted);
+  const pendingTrackRef = useRef<{
+    videoId: string;
+    title?: string;
+    artist?: string;
+    thumbnail?: string;
+    contextQueue?: QueueTrack[];
+    queueStartIndex?: number;
+    isVibeRadioMode?: boolean;
+    initialDuration?: string | number;
+  } | null>(null);
 
   const {
     currentWorld,
@@ -563,6 +573,21 @@ export function useYouTube(containerRef: React.RefObject<HTMLDivElement | null>)
                 }
                 setTimeout(updateTrackMeta, 400);
               }
+
+              if (pendingTrackRef.current) {
+                const pt = pendingTrackRef.current;
+                pendingTrackRef.current = null;
+                playCustomVideoId(
+                  pt.videoId,
+                  pt.title,
+                  pt.artist,
+                  pt.thumbnail,
+                  pt.contextQueue,
+                  pt.queueStartIndex,
+                  pt.isVibeRadioMode,
+                  pt.initialDuration
+                );
+              }
             } catch {}
           },
           onStateChange: (e: YT.OnStateChangeEvent) => {
@@ -604,6 +629,12 @@ export function useYouTube(containerRef: React.RefObject<HTMLDivElement | null>)
             } else if (state === window.YT.PlayerState.BUFFERING) {
               setIsLoading(true);
               syncPlayerTimes();
+            } else if (state === window.YT.PlayerState.CUED || state === -1) {
+              if (userIntentPlayingRef.current) {
+                try {
+                  e.target.playVideo();
+                } catch {}
+              }
             } else if (state === window.YT.PlayerState.ENDED) {
               syncPlayerTimes();
               persistState();
@@ -807,7 +838,19 @@ export function useYouTube(containerRef: React.RefObject<HTMLDivElement | null>)
       initialDuration?: string | number
     ) => {
       const p = playerRef.current;
-      if (!p) return;
+      if (!p) {
+        pendingTrackRef.current = {
+          videoId,
+          title,
+          artist,
+          thumbnail,
+          contextQueue,
+          queueStartIndex,
+          isVibeRadioMode,
+          initialDuration,
+        };
+        return;
+      }
       try {
         userIntentPlayingRef.current = true;
         wasPlayingBeforeHideRef.current = true;
@@ -899,6 +942,23 @@ export function useYouTube(containerRef: React.RefObject<HTMLDivElement | null>)
         try {
           p.playVideo();
         } catch {}
+
+        // Immediate micro-trigger and fallback trigger to ensure playback transitions out of CUED/UNSTARTED immediately
+        setTimeout(() => {
+          if (userIntentPlayingRef.current && playerRef.current) {
+            try {
+              playerRef.current.playVideo();
+            } catch {}
+          }
+        }, 120);
+
+        setTimeout(() => {
+          if (userIntentPlayingRef.current && playerRef.current) {
+            try {
+              playerRef.current.playVideo();
+            } catch {}
+          }
+        }, 350);
 
         setTrackInfo(
           queueIndexRef.current >= 0 ? queueIndexRef.current : 0,

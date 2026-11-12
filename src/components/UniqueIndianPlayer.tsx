@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import {
   Play,
@@ -145,8 +145,6 @@ export default function UniqueIndianPlayer({
     removeFromPlaylist,
     recentHistory,
     toggleSearch,
-    viewMode,
-    setViewMode,
     currentTrackId,
     isPlaying,
     currentWorld,
@@ -167,8 +165,6 @@ export default function UniqueIndianPlayer({
       removeFromPlaylist: s.removeFromPlaylist,
       recentHistory: s.recentHistory,
       toggleSearch: s.toggleSearch,
-      viewMode: s.viewMode,
-      setViewMode: s.setViewMode,
       currentTrackId: s.currentTrackId,
       isPlaying: s.isPlaying,
       currentWorld: s.currentWorld,
@@ -180,14 +176,15 @@ export default function UniqueIndianPlayer({
   );
 
   const [shareToast, setShareToast] = useState<string | null>(null);
+  const mainScrollRef = useRef<HTMLElement | null>(null);
 
-  // Handler for playing a Vibe Station directly and entering its ambient visual world
+  // Handler for playing a Vibe Station directly with automatic instant track 1 playback
   const handlePlayVibeStation = (world: ThemeWorld) => {
     const slug = WORLD_ID_TO_SLUG[world.id] || world.id;
     navigateTo(`/vibes/${slug}`);
     setWorld(world.id);
     const first = world.tracks?.[0];
-    if (first && (currentTrackId !== first.id || !isPlaying)) {
+    if (first) {
       const q: QueueTrack[] = (world.tracks || []).map((t) => ({
         id: t.id,
         title: t.title,
@@ -204,9 +201,6 @@ export default function UniqueIndianPlayer({
         false
       );
     }
-    if (viewMode !== 'vibe') {
-      setViewMode('vibe');
-    }
   };
 
   const handleShareTrack = async (title?: string, artist?: string) => {
@@ -220,6 +214,13 @@ export default function UniqueIndianPlayer({
   // Lazy-initialize artist from URL pathname or hash to avoid synchronous setState in useEffect
   const [selectedArtist, setSelectedArtist] = useState<Artist | null>(getInitialArtist);
   const [selectedPlaylistId, setSelectedPlaylistId] = useState<string | null>(null);
+
+  // Automatically reset scroll position to top whenever changing tab, artist, or playlist
+  useEffect(() => {
+    if (mainScrollRef.current) {
+      mainScrollRef.current.scrollTo({ top: 0, behavior: 'instant' });
+    }
+  }, [activeCategory, selectedArtist?.id, selectedPlaylistId]);
 
   // 5-by-5 Pagination State for Top 25
   const [selectedPage, setSelectedPage] = useState<number>(1);
@@ -323,6 +324,7 @@ export default function UniqueIndianPlayer({
         if (worldId && currentWorld.id !== worldId) setWorld(worldId);
       }
       setSelectedPlaylistId(null);
+      mainScrollRef.current?.scrollTo({ top: 0, behavior: 'instant' });
     };
 
     window.addEventListener('popstate', handlePopState);
@@ -337,6 +339,7 @@ export default function UniqueIndianPlayer({
     setSelectedPlaylistId(null);
     setArtistPage(1);
     setIsArtistExpandAll(false);
+    mainScrollRef.current?.scrollTo({ top: 0, behavior: 'instant' });
   };
 
   const closeArtist = () => {
@@ -346,6 +349,7 @@ export default function UniqueIndianPlayer({
       navigateTo('/artists');
       setSelectedArtist(null);
     }
+    mainScrollRef.current?.scrollTo({ top: 0, behavior: 'instant' });
   };
 
   const selectedArtistId = selectedArtist?.id;
@@ -452,6 +456,7 @@ export default function UniqueIndianPlayer({
     if (selectedArtist) {
       setSelectedArtist(null);
     }
+    mainScrollRef.current?.scrollTo({ top: 0, behavior: 'instant' });
   };
 
   // Toggle Play / Pause trending song (with continuous Top 25 queue)
@@ -854,7 +859,7 @@ export default function UniqueIndianPlayer({
         </header>
 
         {/* SCROLLABLE DISCOVERY MAIN CONTENT */}
-        <main className="relative z-10 flex-1 min-h-0 overflow-y-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6">
+        <main ref={mainScrollRef} className="relative z-10 flex-1 min-h-0 overflow-y-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6">
           <div className="mx-auto w-full max-w-[1440px] space-y-6 sm:space-y-8 pb-6">
             {/* ========================================================
                 ARTIST DETAIL VIEW
@@ -1561,7 +1566,7 @@ export default function UniqueIndianPlayer({
                         <div className="relative z-10 max-w-2xl">
                           <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-amber-300">
                             <Radio size={14} />
-                            <span>Desi Ambient Radios • 7 Iconic Indian Atmospheres</span>
+                            <span>Desi Ambient Radios • {WORLDS.length} Iconic Indian Atmospheres</span>
                           </div>
                           <h2 className="mt-1 sm:mt-2 text-xl sm:text-3xl font-black text-white leading-tight">
                             Mood & Vibe Stations
@@ -1587,7 +1592,7 @@ export default function UniqueIndianPlayer({
                           onClick={() => handleSelectCategory('vibes')}
                           className="text-xs font-semibold text-amber-400 hover:text-amber-300 transition-colors flex items-center gap-1 active:scale-95"
                         >
-                          See All (7) →
+                          See All ({WORLDS.length}) →
                         </button>
                       </div>
                     )}
