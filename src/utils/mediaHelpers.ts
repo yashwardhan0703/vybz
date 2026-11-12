@@ -44,15 +44,25 @@ export function cleanSongTitle(raw: string): string {
 /** Shares a track or app link with WhatsApp fallback and clipboard copy */
 export async function shareTrackOrApp(
   title?: string,
-  artist?: string
+  artist?: string,
+  customUrl?: string
 ): Promise<'shared' | 'copied'> {
   const songTitle = title ? cleanSongTitle(title) : 'Top Indian Hits';
   const songArtist = artist || 'VybZ';
   const shareTitle = `${songTitle} – ${songArtist} on VybZ`;
+
+  let shareUrl = 'https://vybzmusic.online';
+  if (customUrl) {
+    shareUrl = customUrl.startsWith('http')
+      ? customUrl
+      : `https://vybzmusic.online${customUrl.startsWith('/') ? '' : '/'}${customUrl}`;
+  } else if (typeof window !== 'undefined' && window.location.pathname && window.location.pathname !== '/') {
+    shareUrl = `https://vybzmusic.online${window.location.pathname}`;
+  }
+
   const shareText = title
     ? `Listen to "${songTitle}" by ${songArtist} ad-free on VybZ Music:`
     : 'Listen to India’s Top 25 hits and ambient nostalgic vibes ad-free on VybZ Music:';
-  const shareUrl = 'https://vybzmusic.online';
 
   if (typeof navigator !== 'undefined' && typeof navigator.share === 'function') {
     try {

@@ -245,8 +245,8 @@ export default function UniqueIndianPlayer({
     handleSelectCategory('vibes');
   };
 
-  const handleShareTrack = async (title?: string, artist?: string) => {
-    const res = await shareTrackOrApp(title, artist);
+  const handleShareTrack = async (title?: string, artist?: string, customUrl?: string) => {
+    const res = await shareTrackOrApp(title, artist, customUrl);
     if (res === 'copied') {
       setShareToast('Link copied! Ready to share with friends 🎉');
       setTimeout(() => setShareToast(null), 3000);
@@ -949,13 +949,28 @@ export default function UniqueIndianPlayer({
                ======================================================== */}
             {selectedArtist ? (
               <div className="space-y-6">
-                <button
-                  type="button"
-                  onClick={closeArtist}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3.5 py-1.5 text-xs font-medium text-amber-300 hover:bg-white/10 transition-colors"
-                >
-                  ← Back to artists
-                </button>
+                <div className="flex items-center justify-between gap-3">
+                  <button
+                    type="button"
+                    onClick={closeArtist}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3.5 py-1.5 text-xs font-medium text-amber-300 hover:bg-white/10 transition-colors"
+                  >
+                    ← Back to artists
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      handleShareTrack(
+                        `${selectedArtist.name} Top 20 Songs`,
+                        selectedArtist.name,
+                        `https://vybzmusic.online/artist/${selectedArtist.id}`
+                      )
+                    }
+                    className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3.5 py-1.5 text-xs font-medium text-white/70 hover:text-white hover:bg-white/10 transition-colors"
+                  >
+                    <Share2 size={13} className="text-amber-400" /> Share Artist
+                  </button>
+                </div>
 
                 <div className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-4 sm:gap-6 rounded-2xl sm:rounded-3xl border border-white/10 bg-[#0e141f] p-4 sm:p-7 shadow-xl">
                   <div className="size-24 sm:size-36 rounded-full overflow-hidden border-4 border-amber-400/40 shadow-xl shrink-0 aspect-square bg-black/40">
@@ -1255,7 +1270,14 @@ export default function UniqueIndianPlayer({
                   </button>
                   <button
                     type="button"
-                    onClick={() => handleShareTrack(selectedVibeWorld.nameHindi, selectedVibeWorld.name)}
+                    onClick={() => {
+                      const slug = WORLD_ID_TO_SLUG[selectedVibeWorld.id] || selectedVibeWorld.id;
+                      handleShareTrack(
+                        `${selectedVibeWorld.nameHindi} (${selectedVibeWorld.name}) Radio`,
+                        'VybZ Music',
+                        `https://vybzmusic.online/vibes/${slug}`
+                      );
+                    }}
                     className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3.5 py-1.5 text-xs font-medium text-white/70 hover:text-white hover:bg-white/10 transition-colors"
                   >
                     <Share2 size={13} className="text-amber-400" /> Share Vibe
