@@ -4,6 +4,19 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
 
+    // -1. Live Version Endpoint for zero-lag iOS/Android/PWA cache busting
+    if (url.pathname === '/api/version') {
+      return new Response(JSON.stringify({ version: '2.1.0-175songs', timestamp: Date.now() }), {
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0',
+        },
+      });
+    }
+
     // 0. Live YouTube Music India Top 25 Chart Endpoint
     if (url.pathname === '/api/top25') {
       try {

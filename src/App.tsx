@@ -14,6 +14,7 @@ import RadioTuningOverlay from './components/RadioTuningOverlay';
 import MobileBottomNav from './components/MobileBottomNav';
 import NowPlayingSheet from './components/NowPlayingSheet';
 import UpdateNotification from './components/UpdateNotification';
+import VersionManager from './components/VersionManager';
 
 function AppLayout() {
   const { currentWorld, isPlaying, viewMode, setViewMode } = usePlayerStore();
@@ -121,6 +122,7 @@ function AppLayout() {
       />
       <RadioTuningOverlay />
       <UpdateNotification />
+      <VersionManager />
 
       {/* Persistent YouTube mount with full opacity placed behind UI (-z-50) for Android MediaSession compatibility */}
       <div
