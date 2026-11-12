@@ -359,6 +359,11 @@ export const THEMES: ThemeWorld[] = [
   "bg": "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=1920&q=85",
   "tracks": [
     {
+      "id": "cQq6iLF66Gc",
+      "title": "Alfaaz",
+      "artist": "Hamza Malik x Zain Zohaib"
+    },
+    {
       "id": "-2RAq5o5pwc",
       "title": "Jhol",
       "artist": "Maanu x Annural Khalid"
@@ -472,11 +477,6 @@ export const THEMES: ThemeWorld[] = [
       "id": "sFMRqxCexDk",
       "title": "Choo Lo",
       "artist": "The Local Train"
-    },
-    {
-      "id": "9sekgEXGm-E",
-      "title": "Faasle",
-      "artist": "Kaavish"
     },
     {
       "id": "bu0ffB9uPuw",

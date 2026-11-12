@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Sparkles, Radio, X } from 'lucide-react';
 import { usePlayerStore } from '../store/playerStore';
 
-export const CURRENT_CLIENT_VERSION = '2.6.0-ten-mood-stations';
+export const CURRENT_CLIENT_VERSION = '2.6.1-alfaaz-perf-boost';
 
 export default function VersionManager() {
   const { setActiveCategory, setViewMode } = usePlayerStore();

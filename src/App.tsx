@@ -1,4 +1,5 @@
 import { Component, useEffect, useRef, type ReactNode } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 import { useYouTube } from './hooks/useYouTube';
 import { usePlayerStore } from './store/playerStore';
 import WorldBackground from './components/WorldBackground';
@@ -17,7 +18,14 @@ import UpdateNotification from './components/UpdateNotification';
 import VersionManager from './components/VersionManager';
 
 function AppLayout() {
-  const { currentWorld, isPlaying, viewMode, setViewMode } = usePlayerStore();
+  const { currentWorld, isPlaying, viewMode, setViewMode } = usePlayerStore(
+    useShallow((s) => ({
+      currentWorld: s.currentWorld,
+      isPlaying: s.isPlaying,
+      viewMode: s.viewMode,
+      setViewMode: s.setViewMode,
+    }))
+  );
   const playerContainerRef = useRef<HTMLDivElement | null>(null);
   const {
     play,

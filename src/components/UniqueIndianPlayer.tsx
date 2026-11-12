@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 import {
   Play,
   Pause,
@@ -153,7 +154,30 @@ export default function UniqueIndianPlayer({
     top25Tracks,
     isTop25Refreshing,
     refreshLiveTop25,
-  } = usePlayerStore();
+  } = usePlayerStore(
+    useShallow((s) => ({
+      activeCategory: s.activeCategory,
+      setActiveCategory: s.setActiveCategory,
+      likedSongs: s.likedSongs,
+      toggleLike: s.toggleLike,
+      userPlaylists: s.userPlaylists,
+      createPlaylist: s.createPlaylist,
+      deletePlaylist: s.deletePlaylist,
+      addToPlaylist: s.addToPlaylist,
+      removeFromPlaylist: s.removeFromPlaylist,
+      recentHistory: s.recentHistory,
+      toggleSearch: s.toggleSearch,
+      viewMode: s.viewMode,
+      setViewMode: s.setViewMode,
+      currentTrackId: s.currentTrackId,
+      isPlaying: s.isPlaying,
+      currentWorld: s.currentWorld,
+      setWorld: s.setWorld,
+      top25Tracks: s.top25Tracks,
+      isTop25Refreshing: s.isTop25Refreshing,
+      refreshLiveTop25: s.refreshLiveTop25,
+    }))
+  );
 
   const [shareToast, setShareToast] = useState<string | null>(null);
 
@@ -285,7 +309,7 @@ export default function UniqueIndianPlayer({
       const route = parseRoute();
       if (route.artistId) {
         const nextArtist = ARTISTS_CATALOG.find((a) => a.id === route.artistId) || null;
-        setSelectedArtist(nextArtist);
+        setSelectedArtist((prev) => (prev?.id === nextArtist?.id ? prev : nextArtist));
         setArtistPage(1);
         setIsArtistExpandAll(false);
       } else {
@@ -296,18 +320,16 @@ export default function UniqueIndianPlayer({
       }
       if (route.vibeSlug) {
         const worldId = VIBE_SLUGS[route.vibeSlug]?.worldId;
-        if (worldId) setWorld(worldId);
+        if (worldId && currentWorld.id !== worldId) setWorld(worldId);
       }
       setSelectedPlaylistId(null);
     };
 
     window.addEventListener('popstate', handlePopState);
-    window.addEventListener('app-route-change', handlePopState);
     return () => {
       window.removeEventListener('popstate', handlePopState);
-      window.removeEventListener('app-route-change', handlePopState);
     };
-  }, [setActiveCategory, setWorld]);
+  }, [setActiveCategory, setWorld, currentWorld.id]);
 
   const openArtist = (artist: Artist) => {
     navigateTo(`/artist/${artist.id}`);
@@ -413,7 +435,7 @@ export default function UniqueIndianPlayer({
     return () => {
       isMounted = false;
     };
-  }, [selectedArtistId, selectedArtistName, selectedArtist?.topTracks, artistTracksMap]);
+  }, [selectedArtistId, selectedArtistName, selectedArtist?.topTracks]);
 
   const handleSelectCategory = (cat: PlayerCategory) => {
     const pathMap: Record<PlayerCategory, string> = {

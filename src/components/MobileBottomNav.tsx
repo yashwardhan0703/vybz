@@ -1,4 +1,5 @@
 import { LayoutGrid, Flame, Radio, Mic2, FolderHeart, Heart } from 'lucide-react';
+import { useShallow } from 'zustand/react/shallow';
 import { usePlayerStore, type PlayerCategory } from '../store/playerStore';
 import { navigateTo } from '../utils/navigation';
 
@@ -20,7 +21,13 @@ const pathMap: Record<PlayerCategory, string> = {
  * Sits cleanly below the docked mini-player in flex flow so it never covers content.
  */
 export default function MobileBottomNav({ onCategorySelect }: MobileBottomNavProps) {
-  const { activeCategory, setActiveCategory, likedSongs } = usePlayerStore();
+  const { activeCategory, setActiveCategory, likedSongs } = usePlayerStore(
+    useShallow((s) => ({
+      activeCategory: s.activeCategory,
+      setActiveCategory: s.setActiveCategory,
+      likedSongs: s.likedSongs,
+    }))
+  );
 
   const items: Array<{
     id: PlayerCategory;
