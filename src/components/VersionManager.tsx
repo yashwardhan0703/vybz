@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { Sparkles, Radio, X } from 'lucide-react';
 import { usePlayerStore } from '../store/playerStore';
 
-export const CURRENT_CLIENT_VERSION = '2.7.6-vibe-icons-no-autoplay-fix';
+export const CURRENT_CLIENT_VERSION = '2.7.7-permanent-navigation-fix';
 
 export default function VersionManager() {
   const { setActiveCategory, setViewMode, isPlaying } = usePlayerStore();

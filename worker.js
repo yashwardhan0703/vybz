@@ -3,6 +3,13 @@ import { fetchLiveIndiaTop25 } from './src/utils/ytTop25Fetcher.js';
 function getRouteMetadata(pathname) {
   const clean = pathname.replace(/\/+$/, '') || '/';
 
+  if (clean === '/' || clean === '/index.html') {
+    return {
+      title: 'VybZ Music – Best Ad-Free Indian Music Player & 10 Curated Vibe Stations',
+      description: 'Stream Daily Top 25 Trending Indian songs, 50 popular artists, and 10 ambient vibe radio stations: Chai Tapri, Sufi Sukoon, Deluxe Salon, and more. 100% free with synced lyrics.',
+    };
+  }
+
   if (clean === '/top-25' || clean === '/top25') {
     return {
       title: 'Top 25 Trending Indian Songs Today | VybZ Music',
@@ -185,7 +192,7 @@ export default {
 
     // -1. Live Version Endpoint for zero-lag iOS/Android/PWA cache busting
     if (url.pathname === '/api/version') {
-      return new Response(JSON.stringify({ version: '2.7.6-vibe-icons-no-autoplay-fix', timestamp: Date.now() }), {
+      return new Response(JSON.stringify({ version: '2.7.7-permanent-navigation-fix', timestamp: Date.now() }), {
         headers: {
           'Content-Type': 'application/json',
           'Access-Control-Allow-Origin': '*',
@@ -702,7 +709,12 @@ export default {
     if (env && env.ASSETS && typeof env.ASSETS.fetch === 'function') {
       const pathname = url.pathname;
       const isApi = pathname.startsWith('/api/');
-      const isStaticAsset = pathname.startsWith('/assets/') || pathname.includes('.');
+      const isHtmlRoute =
+        pathname === '/' ||
+        pathname === '/index.html' ||
+        pathname.endsWith('.html');
+      const isStaticAsset =
+        (pathname.startsWith('/assets/') || pathname.includes('.')) && !isHtmlRoute;
 
       // A. Static Asset Files (/assets/..., /logo.png, /sw.js, /favicon.ico, etc.)
       if (isStaticAsset) {
@@ -724,8 +736,7 @@ export default {
           pathname.endsWith('sw.js') ||
           pathname.endsWith('registerSW.js') ||
           pathname.endsWith('.webmanifest') ||
-          pathname.includes('workbox') ||
-          pathname.endsWith('.html')
+          pathname.includes('workbox')
         ) {
           headers.set('Cache-Control', 'private, no-cache, no-store, max-age=0, must-revalidate');
           headers.set('CDN-Cache-Control', 'no-store, no-cache, max-age=0');
@@ -742,12 +753,14 @@ export default {
       }
 
       // B. Universal SPA Clean Routes (/, /vibes, /artists, /top-25, /vibes/chai-tapri, /artist/..., etc.)
-      // Always serve index.html directly with 200 OK without relying on 404 fallback!
+      // Always serve index.html directly with 200 OK without relying on 404 fallback or 307 redirect!
       if (!isApi && (request.method === 'GET' || request.method === 'HEAD')) {
         const indexReq = new Request(new URL('/', request.url), { method: 'GET' });
         const indexRes = await env.ASSETS.fetch(indexReq);
         let html = await indexRes.text();
 
+        const canonicalPath =
+          pathname === '/' || pathname === '/index.html' ? '/' : pathname;
         const meta = getRouteMetadata(pathname);
         if (meta) {
           html = html
@@ -766,7 +779,7 @@ export default {
             )
             .replace(
               /<meta property="og:url" content=".*?" \/>/,
-              `<meta property="og:url" content="https://vybzmusic.online${pathname}" />`
+              `<meta property="og:url" content="https://vybzmusic.online${canonicalPath}" />`
             )
             .replace(
               /<meta name="twitter:title" content=".*?" \/>/,
@@ -778,7 +791,7 @@ export default {
             )
             .replace(
               /<link rel="canonical" href=".*?" \/>/,
-              `<link rel="canonical" href="https://vybzmusic.online${pathname === '/' ? '/' : pathname}" />`
+              `<link rel="canonical" href="https://vybzmusic.online${canonicalPath}" />`
             );
         }
 
