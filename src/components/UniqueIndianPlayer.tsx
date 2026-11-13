@@ -209,8 +209,8 @@ export default function UniqueIndianPlayer({
     }
   }, [activeCategory, selectedArtist?.id, selectedVibeWorld?.id, selectedPlaylistId]);
 
-  // Handler for opening a Vibe Station with dedicated hero UI & instant track 1 playback
-  const handlePlayVibeStation = (world: ThemeWorld) => {
+  // Handler for opening a Vibe Station with dedicated hero UI & smart seamless playback
+  const handlePlayVibeStation = (world: ThemeWorld, userExplicitPlay: boolean = false) => {
     const slug = WORLD_ID_TO_SLUG[world.id] || world.id;
     navigateTo(`/vibes/${slug}`);
     setSelectedVibeWorld(world);
@@ -218,6 +218,24 @@ export default function UniqueIndianPlayer({
     setSelectedPlaylistId(null);
     setVibePage(1);
     setIsVibeExpandAll(false);
+
+    const isSameWorld = currentWorld.id === world.id;
+    const hasActiveAudio = Boolean(currentTrackId);
+
+    // If this vibe is already loaded and active, NEVER restart from 0:00!
+    if (isSameWorld && hasActiveAudio) {
+      if (userExplicitPlay) {
+        if (isPlaying) {
+          onPause();
+        } else {
+          onPlay();
+        }
+      }
+      mainScrollRef.current?.scrollTo({ top: 0, behavior: 'instant' });
+      return;
+    }
+
+    // New vibe station selected: switch world and start fresh from track 1 with full 25 queue
     setWorld(world.id);
     const first = world.tracks?.[0];
     if (first) {
@@ -1360,12 +1378,16 @@ export default function UniqueIndianPlayer({
                       <div className="mt-4 flex flex-col xs:flex-row items-stretch xs:items-center justify-center sm:justify-start gap-2.5">
                         <button
                           type="button"
-                          onClick={() => handlePlayVibeStation(selectedVibeWorld)}
+                          onClick={() => handlePlayVibeStation(selectedVibeWorld, true)}
                           className="flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 px-5 sm:px-6 py-2.5 text-xs font-bold text-black shadow hover:scale-105 active:scale-95 transition-transform"
                         >
                           {currentWorld.id === selectedVibeWorld.id && isPlaying ? (
                             <>
-                              <Pause size={14} fill="black" /> Playing Radio
+                              <Pause size={14} fill="black" /> Pause Radio
+                            </>
+                          ) : currentWorld.id === selectedVibeWorld.id && currentTrackId ? (
+                            <>
+                              <Play size={14} fill="black" /> Resume Radio
                             </>
                           ) : (
                             <>
@@ -2061,13 +2083,13 @@ export default function UniqueIndianPlayer({
                         return (
                           <div
                             key={`vibe-${world.id}`}
-                            onClick={() => handlePlayVibeStation(world)}
+                            onClick={() => handlePlayVibeStation(world, false)}
                             role="button"
                             tabIndex={0}
                             onKeyDown={(e) => {
                               if (e.key === 'Enter' || e.key === ' ') {
                                 e.preventDefault();
-                                handlePlayVibeStation(world);
+                                handlePlayVibeStation(world, false);
                               }
                             }}
                             className={`group relative overflow-hidden rounded-2xl border p-2.5 sm:p-3.5 flex flex-col justify-between transition-all cursor-pointer hover:scale-[1.02] active:scale-[0.99] ${
@@ -2127,18 +2149,25 @@ export default function UniqueIndianPlayer({
                                 type="button"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  handlePlayVibeStation(world);
+                                  handlePlayVibeStation(world, true);
                                 }}
                                 className={`w-full flex items-center justify-center gap-1.5 rounded-xl py-1.5 sm:py-2 px-2 sm:px-3 text-[0.68rem] sm:text-xs font-bold transition-all shadow-md ${
                                   isCurrentWorld && isPlaying
                                     ? 'bg-amber-400 text-black shadow-amber-400/30'
-                                    : 'bg-white/10 text-white group-hover:bg-amber-400 group-hover:text-black active:scale-95'
+                                    : isCurrentWorld && currentTrackId
+                                      ? 'bg-amber-400/20 text-amber-300 border border-amber-400/40'
+                                      : 'bg-white/10 text-white group-hover:bg-amber-400 group-hover:text-black active:scale-95'
                                 }`}
                               >
                                 {isCurrentWorld && isPlaying ? (
                                   <>
-                                    <Sparkles size={12} className="shrink-0" />
-                                    <span>Playing</span>
+                                    <Pause size={11} fill="currentColor" className="shrink-0" />
+                                    <span>Pause</span>
+                                  </>
+                                ) : isCurrentWorld && currentTrackId ? (
+                                  <>
+                                    <Play size={11} fill="currentColor" className="shrink-0" />
+                                    <span>Resume</span>
                                   </>
                                 ) : (
                                   <>

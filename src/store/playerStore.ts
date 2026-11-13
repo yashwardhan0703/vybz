@@ -259,7 +259,10 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
     })),
 
   setWorld: (worldId) =>
-    set(() => {
+    set((state) => {
+      if (state.currentWorldId === worldId) {
+        return {}; // Already in this world, do NOT reset playback state!
+      }
       const world = WORLDS.find((w) => w.id === worldId) ?? WORLDS[0];
       const track = world.tracks?.[0];
       return {

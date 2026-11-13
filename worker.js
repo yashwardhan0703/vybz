@@ -173,7 +173,7 @@ export default {
 
     // -1. Live Version Endpoint for zero-lag iOS/Android/PWA cache busting
     if (url.pathname === '/api/version') {
-      return new Response(JSON.stringify({ version: '2.7.2-earbud-bluetooth-controls-fix', timestamp: Date.now() }), {
+      return new Response(JSON.stringify({ version: '2.7.3-smart-vibe-nav-fix', timestamp: Date.now() }), {
         headers: {
           'Content-Type': 'application/json',
           'Access-Control-Allow-Origin': '*',
