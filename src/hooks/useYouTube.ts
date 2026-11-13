@@ -108,6 +108,26 @@ export function useYouTube(containerRef: React.RefObject<HTMLDivElement | null>)
     initialDuration?: string | number;
   } | null>(null);
 
+  // Silent audio anchor for continuous Web/PWA lock screen and background audio
+  const silentAudioRef = useRef<HTMLAudioElement | null>(null);
+  const ensureSilentAudio = useCallback(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      if (!silentAudioRef.current) {
+        const a = new Audio('data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA');
+        a.loop = true;
+        silentAudioRef.current = a;
+      }
+      silentAudioRef.current.play().catch(() => {});
+    } catch {}
+  }, []);
+
+  const pauseSilentAudio = useCallback(() => {
+    try {
+      silentAudioRef.current?.pause();
+    } catch {}
+  }, []);
+
   const {
     currentWorld,
     isShuffle,
@@ -377,15 +397,16 @@ export function useYouTube(containerRef: React.RefObject<HTMLDivElement | null>)
     // Visibility change handler for mobile browsers (switching to WhatsApp, pressing Home)
     const handleVisibilityChange = () => {
       const p = playerRef.current;
-      const isNativeApk = typeof window !== 'undefined' && Boolean((window as any).VybZNative);
       if (document.hidden) {
-        if (isNativeApk && userIntentPlayingRef.current) {
+        if (userIntentPlayingRef.current) {
+          // Both in APK and Web/PWA: Keep audio playing continuously in background!
+          ensureSilentAudio();
           try {
             p?.playVideo();
           } catch {}
           return;
         }
-        // App minimized or user pressed Home
+        // App minimized while paused
         if (p) {
           try {
             const cur = p.getCurrentTime?.() ?? 0;
@@ -394,7 +415,6 @@ export function useYouTube(containerRef: React.RefObject<HTMLDivElement | null>)
             }
           } catch {}
         }
-        wasPlayingBeforeHideRef.current = userIntentPlayingRef.current;
         persistState();
       } else {
         // User came back to Chrome!
@@ -438,6 +458,7 @@ export function useYouTube(containerRef: React.RefObject<HTMLDivElement | null>)
       safeSetHandler('play', () => {
         userIntentPlayingRef.current = true;
         wasPlayingBeforeHideRef.current = true;
+        ensureSilentAudio();
         try {
           playerRef.current?.playVideo();
         } catch {}
@@ -448,6 +469,7 @@ export function useYouTube(containerRef: React.RefObject<HTMLDivElement | null>)
       safeSetHandler('pause', () => {
         userIntentPlayingRef.current = false;
         wasPlayingBeforeHideRef.current = false;
+        pauseSilentAudio();
         try {
           playerRef.current?.pauseVideo();
         } catch {}
@@ -459,6 +481,7 @@ export function useYouTube(containerRef: React.RefObject<HTMLDivElement | null>)
       safeSetHandler('nexttrack', () => {
         userIntentPlayingRef.current = true;
         wasPlayingBeforeHideRef.current = true;
+        ensureSilentAudio();
         try {
           playNextTrackRef.current();
         } catch (e) {
@@ -469,6 +492,7 @@ export function useYouTube(containerRef: React.RefObject<HTMLDivElement | null>)
       safeSetHandler('previoustrack', () => {
         userIntentPlayingRef.current = true;
         wasPlayingBeforeHideRef.current = true;
+        ensureSilentAudio();
         try {
           playPrevTrackRef.current();
         } catch (e) {
@@ -780,10 +804,10 @@ export function useYouTube(containerRef: React.RefObject<HTMLDivElement | null>)
               syncPlayerTimes();
               persistState();
             } else if (state === window.YT.PlayerState.PAUSED) {
-              const isNativeApk = typeof window !== 'undefined' && Boolean((window as any).VybZNative);
-              if (isNativeApk && userIntentPlayingRef.current) {
-                // Inside Android APK: Keep playing in background when screen turns off or user switches apps!
+              if (userIntentPlayingRef.current) {
+                // Keep playing in background when screen turns off or user switches apps (Both APK and Web/PWA!)
                 try {
+                  ensureSilentAudio();
                   e.target.playVideo();
                   setIsPlaying(true);
                   if (typeof navigator !== 'undefined' && 'mediaSession' in navigator) {
@@ -793,6 +817,7 @@ export function useYouTube(containerRef: React.RefObject<HTMLDivElement | null>)
                 } catch {}
               }
 
+              pauseSilentAudio();
               if (typeof navigator !== 'undefined' && 'mediaSession' in navigator) {
                 navigator.mediaSession.playbackState = 'paused';
               }
@@ -966,6 +991,7 @@ export function useYouTube(containerRef: React.RefObject<HTMLDivElement | null>)
   const play = useCallback(() => {
     userIntentPlayingRef.current = true;
     wasPlayingBeforeHideRef.current = true;
+    ensureSilentAudio();
     const p = playerRef.current;
     if (!p) return;
 
@@ -993,6 +1019,7 @@ export function useYouTube(containerRef: React.RefObject<HTMLDivElement | null>)
   const pause = useCallback(() => {
     userIntentPlayingRef.current = false;
     wasPlayingBeforeHideRef.current = false;
+    pauseSilentAudio();
     const p = playerRef.current;
     if (!p) return;
     try {
@@ -1044,6 +1071,7 @@ export function useYouTube(containerRef: React.RefObject<HTMLDivElement | null>)
       try {
         userIntentPlayingRef.current = true;
         wasPlayingBeforeHideRef.current = true;
+        ensureSilentAudio();
         setIsLoading(true);
         setCurrentTime(0);
         lastPositionRef.current = 0;
@@ -1205,6 +1233,7 @@ export function useYouTube(containerRef: React.RefObject<HTMLDivElement | null>)
     (index: number) => {
       userIntentPlayingRef.current = true;
       wasPlayingBeforeHideRef.current = true;
+      ensureSilentAudio();
       const p = playerRef.current;
       if (!p) return;
       try {
