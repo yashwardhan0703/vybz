@@ -361,7 +361,14 @@ export function useYouTube(containerRef: React.RefObject<HTMLDivElement | null>)
     // Visibility change handler for mobile browsers (switching to WhatsApp, pressing Home)
     const handleVisibilityChange = () => {
       const p = playerRef.current;
+      const isNativeApk = typeof window !== 'undefined' && Boolean((window as any).VybZNative);
       if (document.hidden) {
+        if (isNativeApk && userIntentPlayingRef.current) {
+          try {
+            p?.playVideo();
+          } catch {}
+          return;
+        }
         // App minimized or user pressed Home
         if (p) {
           try {
@@ -675,6 +682,19 @@ export function useYouTube(containerRef: React.RefObject<HTMLDivElement | null>)
               syncPlayerTimes();
               persistState();
             } else if (state === window.YT.PlayerState.PAUSED) {
+              const isNativeApk = typeof window !== 'undefined' && Boolean((window as any).VybZNative);
+              if (isNativeApk && userIntentPlayingRef.current) {
+                // Inside Android APK: Keep playing in background when screen turns off or user switches apps!
+                try {
+                  e.target.playVideo();
+                  setIsPlaying(true);
+                  if (typeof navigator !== 'undefined' && 'mediaSession' in navigator) {
+                    navigator.mediaSession.playbackState = 'playing';
+                  }
+                  return;
+                } catch {}
+              }
+
               if (typeof navigator !== 'undefined' && 'mediaSession' in navigator) {
                 navigator.mediaSession.playbackState = 'paused';
               }
