@@ -6,12 +6,25 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const rootDir = path.resolve(__dirname, '..');
 
+const WORLD_SLUGS = {
+  sufi_ghazal: 'sufi-sukoon',
+  chai_tapri: 'chai-tapri',
+  deluxe_salon: 'deluxe-salon',
+  monsoon_barish: 'monsoon-baarish',
+  highway_dhaba: 'highway-dhaba',
+  corporate_majdoor: 'corporate-majdoor',
+  bartan_time: 'bartan-time',
+  alfaaz_ehsaas: 'alfaaz-ehsaas',
+  hostel_ki_raat: 'hostel-ki-raat',
+  train_ki_khidki: 'train-ki-khidki',
+};
+
 // 1. Read worlds.ts dynamically
 const worldsContent = fs.readFileSync(path.join(rootDir, 'src/data/worlds.ts'), 'utf8');
 const worldMatches = [...worldsContent.matchAll(/["']?id["']?:\s*['"]([a-zA-Z0-9_-]+)['"],\s*["']?name["']?:\s*['"]([^'"]+)['"]/g)];
 const worlds = worldMatches.map((m) => ({
   id: m[1],
-  slug: m[1].replace(/_/g, '-'),
+  slug: WORLD_SLUGS[m[1]] || m[1].replace(/_/g, '-'),
   name: m[2],
 }));
 

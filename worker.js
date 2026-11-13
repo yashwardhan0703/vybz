@@ -30,6 +30,10 @@ function getRouteMetadata(pathname) {
       title: 'Sufi & Sukoon Radio – Roohani Ghazal & Qawwali Hits | VybZ Music',
       desc: 'Stream 25 soul-soothing Sufi ghazals and qawwalis by Nusrat Fateh Ali Khan and Jagjit Singh on VybZ Music.',
     },
+    'sufi-ghazal': {
+      title: 'Sufi & Sukoon Radio – Roohani Ghazal & Qawwali Hits | VybZ Music',
+      desc: 'Stream 25 soul-soothing Sufi ghazals and qawwalis by Nusrat Fateh Ali Khan and Jagjit Singh on VybZ Music.',
+    },
     'sufi_ghazal': {
       title: 'Sufi & Sukoon Radio – Roohani Ghazal & Qawwali Hits | VybZ Music',
       desc: 'Stream 25 soul-soothing Sufi ghazals and qawwalis by Nusrat Fateh Ali Khan and Jagjit Singh on VybZ Music.',
@@ -58,12 +62,20 @@ function getRouteMetadata(pathname) {
       title: 'Late Night Highway Dhaba Radio – Punjabi & Retro Hits | VybZ Music',
       desc: 'Daler Mehndi, high-energy Punjabi hits, and late-night highway truck radio on VybZ Music.',
     },
+    'corporate-majdoor': {
+      title: 'Corporate Majdoor Radio – Lo-Fi Indian Beats for Work & Study | VybZ Music',
+      desc: 'Indian lo-fi chill beats and soothing instrumental melodies for coding, study, and focus on VybZ Music.',
+    },
+    'corporate_majdoor': {
+      title: 'Corporate Majdoor Radio – Lo-Fi Indian Beats for Work & Study | VybZ Music',
+      desc: 'Indian lo-fi chill beats and soothing instrumental melodies for coding, study, and focus on VybZ Music.',
+    },
     'corporate-chill': {
-      title: 'Corporate Chill Radio – Lo-Fi Indian Beats for Work & Study | VybZ Music',
+      title: 'Corporate Majdoor Radio – Lo-Fi Indian Beats for Work & Study | VybZ Music',
       desc: 'Indian lo-fi chill beats and soothing instrumental melodies for coding, study, and focus on VybZ Music.',
     },
     'corporate_chill': {
-      title: 'Corporate Chill Radio – Lo-Fi Indian Beats for Work & Study | VybZ Music',
+      title: 'Corporate Majdoor Radio – Lo-Fi Indian Beats for Work & Study | VybZ Music',
       desc: 'Indian lo-fi chill beats and soothing instrumental melodies for coding, study, and focus on VybZ Music.',
     },
     'bartan-time': {
@@ -173,7 +185,7 @@ export default {
 
     // -1. Live Version Endpoint for zero-lag iOS/Android/PWA cache busting
     if (url.pathname === '/api/version') {
-      return new Response(JSON.stringify({ version: '2.7.4-direct-url-spa-routing-fix', timestamp: Date.now() }), {
+      return new Response(JSON.stringify({ version: '2.7.6-vibe-icons-no-autoplay-fix', timestamp: Date.now() }), {
         headers: {
           'Content-Type': 'application/json',
           'Access-Control-Allow-Origin': '*',

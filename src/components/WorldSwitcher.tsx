@@ -69,7 +69,7 @@ export default function WorldSwitcher() {
                   style={{ background: w.themeColor }}
                   aria-hidden="true"
                 >
-                  ✂️
+                  {w.icon || '🎵'}
                 </div>
 
                 <div className="min-w-0 flex-1">

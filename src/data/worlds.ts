@@ -18,6 +18,7 @@ export interface ThemeWorld {
   quotes: { title: string; sub: string }[];
   tagline?: string;
   theme?: string;
+  icon?: string;
 }
 
 export const SALON_SERVICES = [
@@ -35,6 +36,7 @@ export const THEMES: ThemeWorld[] = [
     nameHindi: 'सूफी और सुकून',
     subtitle: 'ROOHANI SUKOON AUR DIL SE GHAZAL',
     tagline: 'Roohani sukoon aur dil se ghazal',
+    icon: '🕊️',
     pillTitle: 'रूह को छू ले!',
     pillSub: 'SUFI NIGHT',
     subQuote: 'Shor se door, bas ek khamosh sukoon.',
@@ -80,6 +82,7 @@ export const THEMES: ThemeWorld[] = [
     nameHindi: 'चाय टपरी',
     subtitle: 'GARAM CHAI AUR PURANE GAANE',
     tagline: 'Garam chai aur purane gaane',
+    icon: '☕',
     pillTitle: 'एक कड़क चाय हो जाए!',
     pillSub: 'TAPRI SPECIAL',
     subQuote: 'Chai ke bina baat aage nahi badhti.',
@@ -125,6 +128,7 @@ export const THEMES: ThemeWorld[] = [
     nameHindi: 'डीलक्स सैलून',
     subtitle: 'CUTTING, SHAVING AUR 90S GAANE',
     tagline: 'Cutting, shaving aur 90s gaane',
+    icon: '✂️',
     pillTitle: 'उस्ताद जी, कटिंग कर दो!',
     pillSub: 'DELUXE SPECIAL',
     subQuote: 'Purani yaadein, naya haircut.',
@@ -170,6 +174,7 @@ export const THEMES: ThemeWorld[] = [
     nameHindi: 'रिमझिम बारिश',
     subtitle: 'BARKHA, CHAI AUR ROMANTIC GEET',
     tagline: 'Barkha, chai aur romantic geet',
+    icon: '🌧️',
     pillTitle: 'रिमझिम फुहारें!',
     pillSub: 'RAINY VIBES',
     subQuote: 'Khidki par barish ki boondein aur purane gaane.',
@@ -215,6 +220,7 @@ export const THEMES: ThemeWorld[] = [
     nameHindi: 'हाईवे ढाबा',
     subtitle: 'LATE NIGHT HIGHWAY TRUCK RADIO',
     tagline: 'Late night highway truck radio',
+    icon: '🌙',
     pillTitle: 'हॉर्न बजाओ, साइड लो!',
     pillSub: 'TRUCK RADIO',
     subQuote: 'Raat ka safar aur desi Punjabi energy.',
@@ -260,6 +266,7 @@ export const THEMES: ThemeWorld[] = [
     nameHindi: 'कॉर्पोरेट मज़दूर',
     subtitle: 'EXCEL, EMAIL AUR GAANE',
     tagline: 'Excel, email aur gaane',
+    icon: '💻',
     pillTitle: 'लॉगिन हो गया भाई!',
     pillSub: '9 TO 5 SHIFT',
     subQuote: 'Deadline aati jaati rahegi, gaane chalte rahenge.',
@@ -305,6 +312,7 @@ export const THEMES: ThemeWorld[] = [
     nameHindi: 'बर्तन टाइम',
     subtitle: 'JHAADU, POCHA AUR GAANE',
     tagline: 'Jhaadu, pocha aur gaane',
+    icon: '🍽️',
     pillTitle: 'बर्तन धो लो!',
     pillSub: 'GHAR ITNE',
     subQuote: 'Kaam ke saath thoda beat bhi.',
@@ -351,6 +359,7 @@ export const THEMES: ThemeWorld[] = [
   "nameHindi": "अल्फ़ाज़ और अहसास",
   "subtitle": "URDU INDIE, MELLOW ACOUSTIC & POETIC VIBES",
   "tagline": "Deep Urdu poetry, viral indie melodies aur late night ehsaas",
+  "icon": "✍️",
   "pillTitle": "अल्फ़ाज़ जो दिल छू लें!",
   "pillSub": "URDU INDIE",
   "subQuote": "Kuch baatein jo sirf shayari aur dhun me bayaan hoti hain.",
@@ -505,6 +514,7 @@ export const THEMES: ThemeWorld[] = [
   "nameHindi": "होस्टल की रात",
   "subtitle": "MAGGI, GUITAR JAMS & COLLEGE NOSTALGIA",
   "tagline": "Late night assignments, 2 AM maggi aur hostel room guitar jamming",
+  "icon": "🎸",
   "pillTitle": "होस्टल की यादें!",
   "pillSub": "MAGGI JAM",
   "subQuote": "Doston ki mehfil, ek cup chai aur yaadon ka silsila.",
@@ -659,6 +669,7 @@ export const THEMES: ThemeWorld[] = [
   "nameHindi": "ट्रेन की खिड़की",
   "subtitle": "WINDOW SEAT, MOVING TREES & SAFAR NOSTALGIA",
   "tagline": "Sleeper coach ki window seat, thandi hawa aur safar ke purane gaane",
+  "icon": "🚂",
   "pillTitle": "खिड़की वाली सीट!",
   "pillSub": "WINDOW SEAT",
   "subQuote": "Manzil se zyada khoobsurat yeh safar hai.",

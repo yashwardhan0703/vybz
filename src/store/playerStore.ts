@@ -143,10 +143,21 @@ const initialWorld =
   WORLDS[0];
 const initialTrack = initialWorld.tracks?.[0];
 
+const getInitialCategory = (): PlayerCategory => {
+  if (typeof window === 'undefined') return 'all';
+  const path = window.location.pathname.replace(/\/+$/, '') || '/';
+  if (path === '/top-25' || path === '/top25') return 'trending';
+  if (path === '/vibes' || path === '/vibe' || path.startsWith('/vibes/') || path.startsWith('/vibe/')) return 'vibes';
+  if (path === '/artists' || path.startsWith('/artist/')) return 'artists';
+  if (path === '/playlists') return 'playlists';
+  if (path === '/liked') return 'favorites';
+  return 'all';
+};
+
 export const usePlayerStore = create<PlayerState>((set, get) => ({
   viewMode: persistedState?.viewMode || getStoredViewMode(),
   activeTab: 'explore',
-  activeCategory: 'all',
+  activeCategory: getInitialCategory(),
   activeArtistId: null,
 
   playbackQueue: persistedState?.queue ?? [],

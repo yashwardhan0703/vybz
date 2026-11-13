@@ -51,10 +51,16 @@ export const VIBE_SLUGS: Record<string, { worldId: string; name: string; title: 
     title: 'Late Night Highway Dhaba Radio – Punjabi & Retro Hits | VybZ Music',
     desc: 'Daler Mehndi, high-energy Punjabi hits, and late-night highway truck radio on VybZ Music.',
   },
+  'corporate-majdoor': {
+    worldId: 'corporate_majdoor',
+    name: 'Corporate Majdoor Radio',
+    title: 'Corporate Majdoor Radio – Lo-Fi Indian Beats for Work & Study | VybZ Music',
+    desc: 'Indian lo-fi chill beats and soothing instrumental melodies for coding, study, and focus on VybZ Music.',
+  },
   'corporate-chill': {
-    worldId: 'corporate_chill',
-    name: 'Corporate Chill Radio',
-    title: 'Corporate Chill Radio – Lo-Fi Indian Beats for Work & Study | VybZ Music',
+    worldId: 'corporate_majdoor',
+    name: 'Corporate Majdoor Radio',
+    title: 'Corporate Majdoor Radio – Lo-Fi Indian Beats for Work & Study | VybZ Music',
     desc: 'Indian lo-fi chill beats and soothing instrumental melodies for coding, study, and focus on VybZ Music.',
   },
   'bartan-time': {
@@ -83,14 +89,16 @@ export const VIBE_SLUGS: Record<string, { worldId: string; name: string; title: 
   },
 };
 
-// Aliases for underscore IDs
+// Aliases for underscore IDs and variations
 VIBE_SLUGS['chai_tapri'] = VIBE_SLUGS['chai-tapri'];
+VIBE_SLUGS['sufi-ghazal'] = VIBE_SLUGS['sufi-sukoon'];
 VIBE_SLUGS['sufi_ghazal'] = VIBE_SLUGS['sufi-sukoon'];
 VIBE_SLUGS['deluxe_salon'] = VIBE_SLUGS['deluxe-salon'];
 VIBE_SLUGS['monsoon_baarish'] = VIBE_SLUGS['monsoon-baarish'];
 VIBE_SLUGS['monsoon_barish'] = VIBE_SLUGS['monsoon-baarish'];
 VIBE_SLUGS['highway_dhaba'] = VIBE_SLUGS['highway-dhaba'];
-VIBE_SLUGS['corporate_chill'] = VIBE_SLUGS['corporate-chill'];
+VIBE_SLUGS['corporate_majdoor'] = VIBE_SLUGS['corporate-majdoor'];
+VIBE_SLUGS['corporate_chill'] = VIBE_SLUGS['corporate-majdoor'];
 VIBE_SLUGS['bartan_time'] = VIBE_SLUGS['bartan-time'];
 VIBE_SLUGS['alfaaz_ehsaas'] = VIBE_SLUGS['alfaaz-ehsaas'];
 VIBE_SLUGS['hostel_ki_raat'] = VIBE_SLUGS['hostel-ki-raat'];
@@ -103,7 +111,8 @@ export const WORLD_ID_TO_SLUG: Record<string, string> = {
   monsoon_baarish: 'monsoon-baarish',
   monsoon_barish: 'monsoon-baarish',
   highway_dhaba: 'highway-dhaba',
-  corporate_chill: 'corporate-chill',
+  corporate_majdoor: 'corporate-majdoor',
+  corporate_chill: 'corporate-majdoor',
   bartan_time: 'bartan-time',
   alfaaz_ehsaas: 'alfaaz-ehsaas',
   hostel_ki_raat: 'hostel-ki-raat',

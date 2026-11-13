@@ -99,6 +99,37 @@ function getInitialVibeWorld(): ThemeWorld | null {
   return null;
 }
 
+export function getVibeIcon(world: ThemeWorld | { id: string; icon?: string } | null | undefined): string {
+  if (!world) return '🎵';
+  if ('icon' in world && world.icon) return world.icon;
+  switch (world.id) {
+    case 'chai_tapri':
+      return '☕';
+    case 'sufi_ghazal':
+      return '🕊️';
+    case 'deluxe_salon':
+      return '✂️';
+    case 'monsoon_barish':
+    case 'monsoon_baarish':
+      return '🌧️';
+    case 'highway_dhaba':
+      return '🌙';
+    case 'corporate_majdoor':
+    case 'corporate_chill':
+      return '💻';
+    case 'bartan_time':
+      return '🍽️';
+    case 'alfaaz_ehsaas':
+      return '✍️';
+    case 'hostel_ki_raat':
+      return '🎸';
+    case 'train_ki_khidki':
+      return '🚂';
+    default:
+      return '🎵';
+  }
+}
+
 function isGenuineTrack(song: ArtistSong, artistName?: string): boolean {
   if (!song || !song.title || !song.id) return false;
   const t = song.title.toLowerCase();
@@ -219,23 +250,28 @@ export default function UniqueIndianPlayer({
     setVibePage(1);
     setIsVibeExpandAll(false);
 
+    // If user clicked just to view/select the vibe (userExplicitPlay is false),
+    // NEVER auto-play! Simply navigate to the vibe page.
+    if (!userExplicitPlay) {
+      mainScrollRef.current?.scrollTo({ top: 0, behavior: 'instant' });
+      return;
+    }
+
     const isSameWorld = currentWorld.id === world.id;
     const hasActiveAudio = Boolean(currentTrackId);
 
     // If this vibe is already loaded and active, NEVER restart from 0:00!
     if (isSameWorld && hasActiveAudio) {
-      if (userExplicitPlay) {
-        if (isPlaying) {
-          onPause();
-        } else {
-          onPlay();
-        }
+      if (isPlaying) {
+        onPause();
+      } else {
+        onPlay();
       }
       mainScrollRef.current?.scrollTo({ top: 0, behavior: 'instant' });
       return;
     }
 
-    // New vibe station selected: switch world and start fresh from track 1 with full 25 queue
+    // User explicitly pressed Play: switch world and start fresh from track 1 with full 25 queue
     setWorld(world.id);
     const first = world.tracks?.[0];
     if (first) {
@@ -347,9 +383,14 @@ export default function UniqueIndianPlayer({
       const targetWorld = findWorldBySlug(route.vibeSlug) || (route.worldId ? WORLDS.find((w) => w.id === route.worldId) : null) || null;
       if (targetWorld) {
         setSelectedVibeWorld(targetWorld);
-        if (currentWorld.id !== targetWorld.id) {
-          setWorld(targetWorld.id);
-        }
+      }
+    }
+    if (route.artistId) {
+      const targetArtist = ARTISTS_CATALOG.find((a) => a.id === route.artistId) || null;
+      if (targetArtist) {
+        setSelectedArtist(targetArtist);
+        setArtistPage(1);
+        setIsArtistExpandAll(false);
       }
     }
     // Ensure document.title & meta tags are synced
@@ -374,7 +415,6 @@ export default function UniqueIndianPlayer({
       if (route.vibeSlug) {
         const targetWorld = findWorldBySlug(route.vibeSlug) || (route.worldId ? WORLDS.find((w) => w.id === route.worldId) : null) || null;
         setSelectedVibeWorld(targetWorld);
-        if (targetWorld && currentWorld.id !== targetWorld.id) setWorld(targetWorld.id);
       } else {
         setSelectedVibeWorld(null);
       }
@@ -1321,25 +1361,7 @@ export default function UniqueIndianPlayer({
                       }}
                     >
                       <span className="text-4xl sm:text-5xl drop-shadow">
-                        {selectedVibeWorld.id === 'chai_tapri'
-                          ? '☕'
-                          : selectedVibeWorld.id === 'monsoon_barish'
-                            ? '🌧️'
-                            : selectedVibeWorld.id === 'highway_dhaba'
-                              ? '🌙'
-                              : selectedVibeWorld.id === 'deluxe_salon'
-                                ? '✂️'
-                                : selectedVibeWorld.id === 'sufi_ghazal'
-                                  ? '🕊️'
-                                  : selectedVibeWorld.id === 'corporate_majdoor' || selectedVibeWorld.id === 'corporate_chill'
-                                    ? '💻'
-                                    : selectedVibeWorld.id === 'bartan_time'
-                                      ? '🧹'
-                                      : selectedVibeWorld.id === 'alfaaz_ehsaas'
-                                        ? '✍️'
-                                        : selectedVibeWorld.id === 'hostel_ki_raat'
-                                          ? '🍜'
-                                          : '🚂'}
+                        {getVibeIcon(selectedVibeWorld)}
                       </span>
                       <span className="mt-1 font-mono text-[0.62rem] font-bold uppercase tracking-wider text-amber-300">
                         {selectedVibeWorld.tracks?.length || 25} Songs
@@ -2114,19 +2136,7 @@ export default function UniqueIndianPlayer({
                                     border: `1px solid ${world.themeColor}50`,
                                   }}
                                 >
-                                  {world.id === 'chai_tapri'
-                                    ? '☕'
-                                    : world.id === 'monsoon_barish'
-                                      ? '🌧️'
-                                      : world.id === 'highway_dhaba'
-                                        ? '🌙'
-                                        : world.id === 'deluxe_salon'
-                                          ? '✂️'
-                                          : world.id === 'sufi_ghazal'
-                                            ? '🕊️'
-                                            : world.id === 'corporate_majdoor'
-                                              ? '💻'
-                                              : '🧹'}
+                                  {getVibeIcon(world)}
                                 </span>
                                 <span className="font-mono text-[0.58rem] sm:text-[0.6rem] uppercase tracking-wider text-white/40">
                                   {world.tracks.length} Songs
@@ -2687,93 +2697,21 @@ export default function UniqueIndianPlayer({
                   {/* Column 2: Exact Live Ambient Vibe Stations */}
                   <div className="space-y-2">
                     <h3 className="font-mono text-[0.68rem] uppercase tracking-wider text-white/90 font-bold">
-                      Mood & Vibe Stations (7)
+                      Mood & Vibe Stations ({WORLDS.length})
                     </h3>
                     <ul className="space-y-1 text-[0.72rem] text-white/50">
-                      <li>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const w = WORLDS.find((x) => x.id === 'chai_tapri');
-                            if (w) handlePlayVibeStation(w);
-                          }}
-                          className="hover:text-amber-300 transition-colors text-left"
-                        >
-                          ☕ Chai Tapri Radio (Garam Chai & Purane Gaane)
-                        </button>
-                      </li>
-                      <li>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const w = WORLDS.find((x) => x.id === 'deluxe_salon');
-                            if (w) handlePlayVibeStation(w);
-                          }}
-                          className="hover:text-amber-300 transition-colors text-left"
-                        >
-                          ✂️ Deluxe 90s Salon (Ustaad Ji Specials)
-                        </button>
-                      </li>
-                      <li>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const w = WORLDS.find((x) => x.id === 'monsoon_barish');
-                            if (w) handlePlayVibeStation(w);
-                          }}
-                          className="hover:text-amber-300 transition-colors text-left"
-                        >
-                          🌧️ Monsoon Baarish (Rain & Romantic Geeta)
-                        </button>
-                      </li>
-                      <li>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const w = WORLDS.find((x) => x.id === 'highway_dhaba');
-                            if (w) handlePlayVibeStation(w);
-                          }}
-                          className="hover:text-amber-300 transition-colors text-left"
-                        >
-                          🌙 Late Night Highway Dhaba (Truck Radio)
-                        </button>
-                      </li>
-                      <li>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const w = WORLDS.find((x) => x.id === 'sufi_ghazal');
-                            if (w) handlePlayVibeStation(w);
-                          }}
-                          className="hover:text-amber-300 transition-colors text-left"
-                        >
-                          🕊️ Sufi & Sukoon (Qawwali & Roohani Ghazal)
-                        </button>
-                      </li>
-                      <li>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const w = WORLDS.find((x) => x.id === 'corporate_majdoor');
-                            if (w) handlePlayVibeStation(w);
-                          }}
-                          className="hover:text-amber-300 transition-colors text-left"
-                        >
-                          💻 Corporate Chill (Lo-Fi Study & Focus)
-                        </button>
-                      </li>
-                      <li>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const w = WORLDS.find((x) => x.id === 'bartan_time');
-                            if (w) handlePlayVibeStation(w);
-                          }}
-                          className="hover:text-amber-300 transition-colors text-left"
-                        >
-                          🧹 Bartan Time (Jhaadu, Pocha & Gaane)
-                        </button>
-                      </li>
+                      {WORLDS.map((w) => (
+                        <li key={`footer-vibe-${w.id}`}>
+                          <button
+                            type="button"
+                            onClick={() => handlePlayVibeStation(w, false)}
+                            className="hover:text-amber-300 transition-colors text-left flex items-center gap-1.5"
+                          >
+                            <span>{getVibeIcon(w)}</span>
+                            <span>{w.nameHindi} ({w.name})</span>
+                          </button>
+                        </li>
+                      ))}
                     </ul>
                   </div>
 
