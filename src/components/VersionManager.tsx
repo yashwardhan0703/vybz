@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { Sparkles, Radio, X } from 'lucide-react';
 import { usePlayerStore } from '../store/playerStore';
 
-export const CURRENT_CLIENT_VERSION = '2.7.0-universal-vibe-lyrics';
+export const CURRENT_CLIENT_VERSION = '2.7.1-mobile-ux-back-nav-fix';
 
 export default function VersionManager() {
   const { setActiveCategory, setViewMode, isPlaying } = usePlayerStore();

@@ -217,9 +217,10 @@ export default function NowPlayingSheet({
           type="button"
           onClick={handleClose}
           aria-label="Minimize Now Playing"
-          className="grid size-10 place-items-center rounded-full bg-white/5 text-white/80 hover:bg-white/10 hover:text-white active:scale-95 transition-all"
+          className="flex items-center gap-1 rounded-full bg-white/10 px-3 py-1.5 text-xs font-semibold text-white/90 hover:bg-white/20 active:scale-95 transition-all"
         >
-          <ChevronDown size={22} />
+          <ChevronDown size={18} />
+          <span>Back</span>
         </button>
 
         <div className="min-w-0 px-3 text-center">

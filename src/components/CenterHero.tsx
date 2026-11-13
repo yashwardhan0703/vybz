@@ -1,6 +1,5 @@
 import { useState, useCallback } from 'react';
 import { usePlayerStore } from '../store/playerStore';
-import KineticLyrics from './KineticLyrics';
 
 export default function CenterHero() {
   const { currentWorld } = usePlayerStore();
@@ -67,14 +66,11 @@ export default function CenterHero() {
 
         <p
           translate="no"
-          className="notranslate mt-3 font-serif text-xs sm:text-sm italic tracking-wide text-white/85 drop-shadow-[0_2px_12px_rgba(0,0,0,0.95)] max-w-md px-4 leading-relaxed"
+          className="notranslate mt-3.5 font-serif text-xs sm:text-sm italic tracking-wide text-white/85 drop-shadow-[0_2px_12px_rgba(0,0,0,0.95)] max-w-md px-4 leading-relaxed"
         >
           &ldquo;{currentWorld.subQuote}&rdquo;
         </p>
       </div>
-
-      {/* 4. Automatic Synced Lyrics (Directly Underneath, Pure White Minimalist, No Yellow Glow) */}
-      <KineticLyrics />
     </div>
   );
 }

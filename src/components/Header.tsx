@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ListMusic, LayoutGrid, Share2, Search, Home } from 'lucide-react';
+import { ListMusic, LayoutGrid, Share2, Search, Home, ArrowLeft } from 'lucide-react';
 import { useOnlineCount } from '../hooks/useOnlineCount';
 import { usePlayerStore } from '../store/playerStore';
 
@@ -50,9 +50,26 @@ export default function Header() {
 
   return (
     <header className="relative z-30 flex items-center justify-between gap-2 px-3 sm:px-8 pt-[max(0.75rem,env(safe-area-inset-top))] sm:pt-4">
-      {/* Top Left: Live Digital Clock */}
-      <div className="font-mono text-[0.65rem] sm:text-sm font-semibold tracking-wider text-white/85 drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)] shrink-0">
-        {time || '7:28:13 pm'}
+      {/* Top Left: Back / Exit Visual button + Digital Clock */}
+      <div className="flex items-center gap-2 shrink-0">
+        <button
+          type="button"
+          onClick={() => {
+            if (window.location.hash.includes('vibe')) {
+              window.history.back();
+            }
+            toggleViewMode();
+          }}
+          aria-label="Exit Fullscreen Visual"
+          className="flex items-center gap-1.5 rounded-full border border-white/20 bg-black/60 px-2.5 py-1 text-[0.7rem] sm:text-xs font-semibold text-white/95 backdrop-blur-md transition-all active:scale-95 hover:bg-white/15 hover:text-white shadow-md"
+        >
+          <ArrowLeft size={13} className="text-amber-400" />
+          <span>Back</span>
+        </button>
+
+        <div className="hidden xs:block font-mono text-[0.65rem] sm:text-sm font-semibold tracking-wider text-white/85 drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)] shrink-0">
+          {time || '7:28:13 pm'}
+        </div>
       </div>
 
       {/* Top Center: Online Counter */}

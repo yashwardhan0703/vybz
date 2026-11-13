@@ -144,7 +144,7 @@ export default function BottomPlayer({
           MOBILE COMPACT MINI-PLAYER (< 768px) — Tap or swipe up to expand
          ======================================================== */}
       <div
-        className="md:hidden relative"
+        className={`md:hidden relative ${viewMode === 'vibe' ? 'pb-[max(0.75rem,env(safe-area-inset-bottom))]' : ''}`}
         onTouchStart={(e) => {
           touchStartYRef.current = e.touches[0].clientY;
         }}
@@ -192,7 +192,7 @@ export default function BottomPlayer({
             </div>
           </button>
 
-          {/* Right: Touch-friendly controls */}
+          {/* Right: Touch-friendly controls (Like, Prev, Play/Pause, Next, Expand) */}
           <div className="flex items-center gap-0.5 shrink-0">
             <button
               type="button"
@@ -203,6 +203,18 @@ export default function BottomPlayer({
               <Heart size={16} className={isLiked ? 'fill-rose-500 text-rose-500' : ''} />
             </button>
 
+            {/* Back / Previous Song */}
+            <button
+              type="button"
+              onClick={onPrev}
+              aria-label="Previous track"
+              className="grid size-9 place-items-center rounded-full text-white/80 hover:text-white active:scale-95 transition-all"
+              title="Previous Song"
+            >
+              <SkipBack size={16} fill="currentColor" />
+            </button>
+
+            {/* Play / Pause */}
             <button
               type="button"
               onClick={isPlaying ? onPause : onPlay}
@@ -219,20 +231,24 @@ export default function BottomPlayer({
               )}
             </button>
 
+            {/* Next Song */}
             <button
               type="button"
               onClick={onNext}
               aria-label="Next track"
-              className="grid size-9 place-items-center rounded-full text-white/75 hover:text-white active:scale-95 transition-all"
+              className="grid size-9 place-items-center rounded-full text-white/80 hover:text-white active:scale-95 transition-all"
+              title="Next Song"
             >
               <SkipForward size={16} fill="currentColor" />
             </button>
 
+            {/* Open Full Player Sheet */}
             <button
               type="button"
               onClick={() => setNowPlayingOpen(true)}
               aria-label="Open Full Player"
               className="grid size-8 place-items-center rounded-full text-white/45 hover:text-white active:scale-95"
+              title="Expand Player"
             >
               <ChevronUp size={16} />
             </button>

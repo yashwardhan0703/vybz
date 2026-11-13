@@ -87,6 +87,7 @@ export function useYouTube(containerRef: React.RefObject<HTMLDivElement | null>)
   const isVibeRadioModeRef = useRef<boolean>(false);
   const playNextTrackRef = useRef<() => void>(() => {});
   const playPrevTrackRef = useRef<() => void>(() => {});
+  const lastPrevTapTimeRef = useRef<number>(0);
   const userIntentPlayingRef = useRef<boolean>(false);
   const lastPositionRef = useRef<number>(0);
   const wasPlayingBeforeHideRef = useRef<boolean>(false);
@@ -1142,13 +1143,23 @@ export function useYouTube(containerRef: React.RefObject<HTMLDivElement | null>)
     const p = playerRef.current;
     if (!p) return;
 
+    const now = Date.now();
+    const timeSinceLastPrev = now - lastPrevTapTimeRef.current;
+    lastPrevTapTimeRef.current = now;
+
+    // If user clicked Prev within 2.5s, force skip to previous track even if curTime > 2s
+    let shouldSeekOnly = false;
     try {
       const curTime = p.getCurrentTime?.() ?? 0;
-      if (curTime > 3) {
-        p.seekTo(0, true);
-        return;
+      if (curTime > 2 && timeSinceLastPrev > 2500) {
+        shouldSeekOnly = true;
       }
     } catch {}
+
+    if (shouldSeekOnly) {
+      p.seekTo(0, true);
+      return;
+    }
 
     if (!activeCustomTrackRef.current) {
       p.previousVideo();
@@ -1157,8 +1168,13 @@ export function useYouTube(containerRef: React.RefObject<HTMLDivElement | null>)
     }
 
     const queue = queueRef.current;
-    const prevIdx = queueIndexRef.current - 1;
-    if (queue.length > 0 && prevIdx >= 0) {
+    let prevIdx = queueIndexRef.current - 1;
+    // Loop to end of queue if at beginning
+    if (prevIdx < 0 && queue.length > 1) {
+      prevIdx = queue.length - 1;
+    }
+
+    if (queue.length > 0 && prevIdx >= 0 && prevIdx < queue.length) {
       const prevTrack = queue[prevIdx];
       queueIndexRef.current = prevIdx;
       playCustomVideoId(
