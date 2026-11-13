@@ -87,6 +87,7 @@ export function useYouTube(containerRef: React.RefObject<HTMLDivElement | null>)
   const isVibeRadioModeRef = useRef<boolean>(false);
   const playNextTrackRef = useRef<() => void>(() => {});
   const playPrevTrackRef = useRef<() => void>(() => {});
+  const setupMediaSessionHandlersRef = useRef<() => void>(() => {});
   const lastPrevTapTimeRef = useRef<number>(0);
   const userIntentPlayingRef = useRef<boolean>(false);
   const lastPositionRef = useRef<number>(0);
@@ -216,6 +217,9 @@ export function useYouTube(containerRef: React.RefObject<HTMLDivElement | null>)
             });
           } catch {}
         }
+
+        // Re-assert action handlers on every track update so Bluetooth AVRCP and Lockscreen controls stay active
+        setupMediaSessionHandlersRef.current?.();
       } catch {}
     },
     []
@@ -305,7 +309,9 @@ export function useYouTube(containerRef: React.RefObject<HTMLDivElement | null>)
         } catch {}
 
         const thumbnail = custom.thumbnail || (videoId ? `https://img.youtube.com/vi/${videoId}/mqdefault.jpg` : '');
-        setTrackInfo(0, 1, title, artist, thumbnail, videoId);
+        const curIdx = Math.max(0, queueIndexRef.current);
+        const totalTracks = Math.max(1, queueRef.current.length || 1);
+        setTrackInfo(curIdx, totalTracks, title, artist, thumbnail, videoId);
         syncMediaSession(title, artist, thumbnail);
         return;
       }
@@ -332,6 +338,16 @@ export function useYouTube(containerRef: React.RefObject<HTMLDivElement | null>)
       const title = rawTitle && rawTitle !== '' ? rawTitle : fallbackTrack?.title || world.nameHindi;
       const artist = rawArtist && rawArtist !== '' ? `${rawArtist} • ${safeIndex + 1}/${totalTracks}` : fallbackTrack?.artist || world.name;
       const thumbnail = videoId ? `https://img.youtube.com/vi/${videoId}/mqdefault.jpg` : world.bg;
+
+      if (fallbackTrack) {
+        queueIndexRef.current = safeIndex;
+        activeCustomTrackRef.current = {
+          videoId,
+          title,
+          artist,
+          thumbnail,
+        };
+      }
 
       setTrackInfo(safeIndex, totalTracks, title, artist, thumbnail, videoId);
       syncMediaSession(title, artist, thumbnail);
@@ -386,8 +402,9 @@ export function useYouTube(containerRef: React.RefObject<HTMLDivElement | null>)
     window.addEventListener('pagehide', handlePageHide);
     window.addEventListener('beforeunload', handlePageHide);
 
-    // Setup MediaSession action handlers (Android/iOS lock screen & notification controls)
-    if ('mediaSession' in navigator) {
+    // Setup MediaSession action handlers (Android/iOS lock screen, Bluetooth earbuds & notification controls)
+    const setupMediaSessionHandlers = () => {
+      if (typeof window === 'undefined' || !('mediaSession' in navigator)) return;
       const ms = navigator.mediaSession;
       const safeSetHandler = (action: MediaSessionAction, handler: MediaSessionActionHandler | null) => {
         try {
@@ -417,11 +434,54 @@ export function useYouTube(containerRef: React.RefObject<HTMLDivElement | null>)
       });
 
       safeSetHandler('nexttrack', () => {
-        playNextTrackRef.current();
+        userIntentPlayingRef.current = true;
+        wasPlayingBeforeHideRef.current = true;
+        try {
+          playNextTrackRef.current();
+        } catch (e) {
+          console.error('Earbuds/MediaSession nexttrack error:', e);
+        }
       });
 
       safeSetHandler('previoustrack', () => {
-        playPrevTrackRef.current();
+        userIntentPlayingRef.current = true;
+        wasPlayingBeforeHideRef.current = true;
+        try {
+          playPrevTrackRef.current();
+        } catch (e) {
+          console.error('Earbuds/MediaSession previoustrack error:', e);
+        }
+      });
+
+      // Bluetooth Earphones / Headsets seekforward (fast-forward or 10s skip)
+      safeSetHandler('seekforward', (details) => {
+        const p = playerRef.current;
+        if (!p) return;
+        const skip = details?.seekOffset || 10;
+        try {
+          const cur = p.getCurrentTime?.() ?? 0;
+          const dur = p.getDuration?.() ?? 0;
+          const target = dur > 0 ? Math.min(dur, cur + skip) : cur + skip;
+          lastPositionRef.current = target;
+          setCurrentTime(target);
+          p.seekTo(target, true);
+          persistState();
+        } catch {}
+      });
+
+      // Bluetooth Earphones / Headsets seekbackward (rewind or 10s rewind)
+      safeSetHandler('seekbackward', (details) => {
+        const p = playerRef.current;
+        if (!p) return;
+        const skip = details?.seekOffset || 10;
+        try {
+          const cur = p.getCurrentTime?.() ?? 0;
+          const target = Math.max(0, cur - skip);
+          lastPositionRef.current = target;
+          setCurrentTime(target);
+          p.seekTo(target, true);
+          persistState();
+        } catch {}
       });
 
       safeSetHandler('seekto', (details) => {
@@ -449,27 +509,17 @@ export function useYouTube(containerRef: React.RefObject<HTMLDivElement | null>)
         ms.playbackState = 'none';
         persistState();
       });
-    }
+    };
+
+    setupMediaSessionHandlersRef.current = setupMediaSessionHandlers;
+    setupMediaSessionHandlers();
 
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('pagehide', handlePageHide);
       window.removeEventListener('beforeunload', handlePageHide);
-
-      if ('mediaSession' in navigator) {
-        const ms = navigator.mediaSession;
-        const safeClear = (action: MediaSessionAction) => {
-          try {
-            ms.setActionHandler(action, null);
-          } catch {}
-        };
-        safeClear('play');
-        safeClear('pause');
-        safeClear('nexttrack');
-        safeClear('previoustrack');
-        safeClear('seekto');
-        safeClear('stop');
-      }
+      // Note: We deliberately do NOT nullify MediaSession handlers here so that
+      // component re-renders do not detach Bluetooth AVRCP earbud controls!
     };
   }, [persistState, syncPlayerTimes, setIsPlaying, setCurrentTime]);
 
@@ -568,6 +618,25 @@ export function useYouTube(containerRef: React.RefObject<HTMLDivElement | null>)
                   persisted.currentTime
                 );
               } else {
+                const worldTracks = currentWorldRef.current?.tracks || [];
+                const worldQueue: QueueTrack[] = worldTracks.map((t) => ({
+                  id: t.id,
+                  title: t.title,
+                  artist: t.artist || currentWorldRef.current.name,
+                  thumbnail: `https://img.youtube.com/vi/${t.id}/mqdefault.jpg`,
+                }));
+                queueRef.current = worldQueue;
+                queueIndexRef.current = 0;
+                if (worldQueue.length > 0) {
+                  activeCustomTrackRef.current = {
+                    videoId: worldQueue[0].id,
+                    title: worldQueue[0].title,
+                    artist: worldQueue[0].artist,
+                    thumbnail: worldQueue[0].thumbnail,
+                  };
+                }
+                setPlaybackQueue(worldQueue, 0);
+
                 // Cue entire station's playlist
                 if (trackIds.length > 0) {
                   e.target.cuePlaylist(trackIds, 0, 0);
@@ -701,7 +770,24 @@ export function useYouTube(containerRef: React.RefObject<HTMLDivElement | null>)
   useEffect(() => {
     if (prevWorldIdRef.current !== currentWorld.id) {
       prevWorldIdRef.current = currentWorld.id;
-      activeCustomTrackRef.current = null;
+      const tracks = currentWorld.tracks ?? [];
+      const worldQueue: QueueTrack[] = tracks.map((t) => ({
+        id: t.id,
+        title: t.title,
+        artist: t.artist || currentWorld.name,
+        thumbnail: `https://img.youtube.com/vi/${t.id}/mqdefault.jpg`,
+      }));
+      queueRef.current = worldQueue;
+      queueIndexRef.current = 0;
+      if (worldQueue.length > 0) {
+        activeCustomTrackRef.current = {
+          videoId: worldQueue[0].id,
+          title: worldQueue[0].title,
+          artist: worldQueue[0].artist,
+          thumbnail: worldQueue[0].thumbnail,
+        };
+      }
+      setPlaybackQueue(worldQueue, 0);
       const p = playerRef.current;
       if (!p || !isReadyRef.current) return;
 
@@ -718,7 +804,7 @@ export function useYouTube(containerRef: React.RefObject<HTMLDivElement | null>)
         setTimeout(updateTrackMeta, 500);
       } catch {}
     }
-  }, [currentWorld, isPlaying, setIsLoading, updateTrackMeta]);
+  }, [currentWorld, isPlaying, setIsLoading, updateTrackMeta, setPlaybackQueue]);
 
   // Sync volume & mute
   useEffect(() => {
@@ -795,36 +881,6 @@ export function useYouTube(containerRef: React.RefObject<HTMLDivElement | null>)
       } catch {}
     },
     [setCurrentTime, persistState]
-  );
-
-  const playAt = useCallback(
-    (index: number) => {
-      userIntentPlayingRef.current = true;
-      wasPlayingBeforeHideRef.current = true;
-      const p = playerRef.current;
-      if (!p) return;
-      try {
-        setIsLoading(true);
-        setCurrentTime(0);
-        lastPositionRef.current = 0;
-        activeCustomTrackRef.current = null;
-        queueRef.current = [];
-        queueIndexRef.current = -1;
-        const trackIds = currentWorldRef.current.tracks?.map((t) => t.id) ?? [];
-        const worldQueue: QueueTrack[] =
-          currentWorldRef.current.tracks?.map((t) => ({
-            id: t.id,
-            title: t.title,
-            artist: t.artist || currentWorldRef.current.name,
-            thumbnail: `https://img.youtube.com/vi/${t.id}/mqdefault.jpg`,
-          })) ?? [];
-        setPlaybackQueue(worldQueue, index);
-        p.loadPlaylist(trackIds, index, 0);
-        setTimeout(updateTrackMeta, 600);
-        persistState();
-      } catch {}
-    },
-    [setIsLoading, setCurrentTime, setPlaybackQueue, updateTrackMeta, persistState]
   );
 
   const playCustomVideoId = useCallback(
@@ -1011,8 +1067,46 @@ export function useYouTube(containerRef: React.RefObject<HTMLDivElement | null>)
     [setCurrentTime, setDuration, setIsLoading, setTrackInfo, setPlaybackQueue, syncMediaSession, persistState]
   );
 
+  // Play track at specific index in current vibe world
+  const playAt = useCallback(
+    (index: number) => {
+      userIntentPlayingRef.current = true;
+      wasPlayingBeforeHideRef.current = true;
+      const p = playerRef.current;
+      if (!p) return;
+      try {
+        setIsLoading(true);
+        setCurrentTime(0);
+        lastPositionRef.current = 0;
+        const tracks = currentWorldRef.current.tracks ?? [];
+        const worldQueue: QueueTrack[] = tracks.map((t) => ({
+          id: t.id,
+          title: t.title,
+          artist: t.artist || currentWorldRef.current.name,
+          thumbnail: `https://img.youtube.com/vi/${t.id}/mqdefault.jpg`,
+        }));
+        const safeIdx = Math.max(0, Math.min(index, worldQueue.length - 1));
+        const targetTrack = worldQueue[safeIdx];
+        if (targetTrack) {
+          playCustomVideoId(
+            targetTrack.id,
+            targetTrack.title,
+            targetTrack.artist,
+            targetTrack.thumbnail,
+            worldQueue,
+            safeIdx,
+            false
+          );
+        }
+      } catch {}
+    },
+    [setIsLoading, setCurrentTime, playCustomVideoId]
+  );
+
   // Play next track (Automatic autoplay or Next button)
   const playNextTrack = useCallback(() => {
+    userIntentPlayingRef.current = true;
+    wasPlayingBeforeHideRef.current = true;
     const currentRepeat = repeatModeRef.current;
     const p = playerRef.current;
     if (!p) return;
@@ -1024,17 +1118,41 @@ export function useYouTube(containerRef: React.RefObject<HTMLDivElement | null>)
       return;
     }
 
-    // 2. Ambient Station Mode (if no custom track active)
-    if (!activeCustomTrackRef.current) {
-      p.nextVideo();
-      setTimeout(updateTrackMeta, 500);
-      return;
-    }
-
     const queue = queueRef.current;
     let nextIdx = queueIndexRef.current + 1;
 
-    // 3. Shuffle Mode
+    // If queue is empty or no custom track, populate queue from current vibe world
+    if (!activeCustomTrackRef.current || queue.length === 0) {
+      const worldTracks = currentWorldRef.current?.tracks || [];
+      if (worldTracks.length > 0) {
+        const worldQueue: QueueTrack[] = worldTracks.map((t) => ({
+          id: t.id,
+          title: t.title,
+          artist: t.artist || currentWorldRef.current.name,
+          thumbnail: `https://img.youtube.com/vi/${t.id}/mqdefault.jpg`,
+        }));
+        queueRef.current = worldQueue;
+        const curIdx = Math.max(0, usePlayerStore.getState().trackIndex);
+        const nextWorldIdx = (curIdx + 1) % worldQueue.length;
+        const nextTrack = worldQueue[nextWorldIdx];
+        queueIndexRef.current = nextWorldIdx;
+        playCustomVideoId(
+          nextTrack.id,
+          nextTrack.title,
+          nextTrack.artist,
+          nextTrack.thumbnail,
+          worldQueue,
+          nextWorldIdx,
+          false
+        );
+        return;
+      }
+      p.nextVideo();
+      updateTrackMeta();
+      return;
+    }
+
+    // 2. Shuffle Mode
     if (isShuffleRef.current && queue.length > 1) {
       let randIdx = Math.floor(Math.random() * queue.length);
       if (randIdx === queueIndexRef.current) {
@@ -1043,7 +1161,7 @@ export function useYouTube(containerRef: React.RefObject<HTMLDivElement | null>)
       nextIdx = randIdx;
     }
 
-    // 4. Next track available in queue
+    // 3. Next track available in queue
     if (queue.length > 0 && nextIdx < queue.length) {
       const nextTrack = queue[nextIdx];
       queueIndexRef.current = nextIdx;
@@ -1075,24 +1193,25 @@ export function useYouTube(containerRef: React.RefObject<HTMLDivElement | null>)
       return;
     }
 
-    // 5. Repeat All
-    if (currentRepeat === 'all' && queue.length > 0) {
-      const firstTrack = queue[0];
-      queueIndexRef.current = 0;
+    // 4. Wrap around queue (Continuous loop like Spotify / YouTube Music)
+    if (queue.length > 0) {
+      const wrappedIdx = nextIdx % queue.length;
+      const nextTrack = queue[wrappedIdx];
+      queueIndexRef.current = wrappedIdx;
       playCustomVideoId(
-        firstTrack.id,
-        firstTrack.title,
-        firstTrack.artist,
-        firstTrack.thumbnail,
+        nextTrack.id,
+        nextTrack.title,
+        nextTrack.artist,
+        nextTrack.thumbnail,
         queue,
-        0,
+        wrappedIdx,
         isVibeRadioModeRef.current,
-        firstTrack.duration
+        nextTrack.duration
       );
       return;
     }
 
-    // 6. Spotify/JioSaavn/YouTube Music Autoplay: Never pause! Smoothly transition to next related same-vibe track!
+    // 5. Autoplay recommendation fallback
     const curId = activeCustomTrackRef.current?.videoId;
     const curTitle = activeCustomTrackRef.current?.title || '';
     const curArtist = activeCustomTrackRef.current?.artist || '';
@@ -1140,6 +1259,8 @@ export function useYouTube(containerRef: React.RefObject<HTMLDivElement | null>)
 
   // Play previous track
   const playPrevTrack = useCallback(() => {
+    userIntentPlayingRef.current = true;
+    wasPlayingBeforeHideRef.current = true;
     const p = playerRef.current;
     if (!p) return;
 
@@ -1161,13 +1282,40 @@ export function useYouTube(containerRef: React.RefObject<HTMLDivElement | null>)
       return;
     }
 
-    if (!activeCustomTrackRef.current) {
+    const queue = queueRef.current;
+
+    // If queue is empty or no custom track, populate queue from current vibe world
+    if (!activeCustomTrackRef.current || queue.length === 0) {
+      const worldTracks = currentWorldRef.current?.tracks || [];
+      if (worldTracks.length > 0) {
+        const worldQueue: QueueTrack[] = worldTracks.map((t) => ({
+          id: t.id,
+          title: t.title,
+          artist: t.artist || currentWorldRef.current.name,
+          thumbnail: `https://img.youtube.com/vi/${t.id}/mqdefault.jpg`,
+        }));
+        queueRef.current = worldQueue;
+        const curIdx = Math.max(0, usePlayerStore.getState().trackIndex);
+        let prevWorldIdx = curIdx - 1;
+        if (prevWorldIdx < 0) prevWorldIdx = worldQueue.length - 1;
+        const prevTrack = worldQueue[prevWorldIdx];
+        queueIndexRef.current = prevWorldIdx;
+        playCustomVideoId(
+          prevTrack.id,
+          prevTrack.title,
+          prevTrack.artist,
+          prevTrack.thumbnail,
+          worldQueue,
+          prevWorldIdx,
+          false
+        );
+        return;
+      }
       p.previousVideo();
-      setTimeout(updateTrackMeta, 500);
+      updateTrackMeta();
       return;
     }
 
-    const queue = queueRef.current;
     let prevIdx = queueIndexRef.current - 1;
     // Loop to end of queue if at beginning
     if (prevIdx < 0 && queue.length > 1) {
