@@ -173,7 +173,7 @@ export default {
 
     // -1. Live Version Endpoint for zero-lag iOS/Android/PWA cache busting
     if (url.pathname === '/api/version') {
-      return new Response(JSON.stringify({ version: '2.7.3-smart-vibe-nav-fix', timestamp: Date.now() }), {
+      return new Response(JSON.stringify({ version: '2.7.4-direct-url-spa-routing-fix', timestamp: Date.now() }), {
         headers: {
           'Content-Type': 'application/json',
           'Access-Control-Allow-Origin': '*',
@@ -686,14 +686,42 @@ export default {
       }
     }
 
-    // 3. Static Assets serving via Cloudflare Assets
+    // 3. Static Assets & Direct Universal SPA Routing via Cloudflare Assets
     if (env && env.ASSETS && typeof env.ASSETS.fetch === 'function') {
-      const response = await env.ASSETS.fetch(request);
-      const headers = new Headers(response.headers);
+      const pathname = url.pathname;
+      const isApi = pathname.startsWith('/api/');
+      const isStaticAsset = pathname.startsWith('/assets/') || pathname.includes('.');
 
-      // Cache hashed static assets (JS chunks, CSS, fonts) for 1 year (instant 0ms repeat load)
-      if (url.pathname.startsWith('/assets/')) {
-        headers.set('Cache-Control', 'public, max-age=31536000, immutable');
+      // A. Static Asset Files (/assets/..., /logo.png, /sw.js, /favicon.ico, etc.)
+      if (isStaticAsset) {
+        const response = await env.ASSETS.fetch(request);
+        const headers = new Headers(response.headers);
+
+        // Cache immutable hashed static assets for 1 year
+        if (pathname.startsWith('/assets/')) {
+          headers.set('Cache-Control', 'public, max-age=31536000, immutable');
+          return new Response(response.body, {
+            status: response.status,
+            statusText: response.statusText,
+            headers,
+          });
+        }
+
+        // SW, Workbox, and manifest should never be stale
+        if (
+          pathname.endsWith('sw.js') ||
+          pathname.endsWith('registerSW.js') ||
+          pathname.endsWith('.webmanifest') ||
+          pathname.includes('workbox') ||
+          pathname.endsWith('.html')
+        ) {
+          headers.set('Cache-Control', 'private, no-cache, no-store, max-age=0, must-revalidate');
+          headers.set('CDN-Cache-Control', 'no-store, no-cache, max-age=0');
+          headers.set('Cloudflare-CDN-Cache-Control', 'no-store, no-cache, max-age=0');
+          headers.set('Pragma', 'no-cache');
+          headers.set('Expires', '0');
+        }
+
         return new Response(response.body, {
           status: response.status,
           statusText: response.statusText,
@@ -701,18 +729,14 @@ export default {
         });
       }
 
-      // SPA Fallback & Dynamic Route SEO Metadata for clean routes
-      const isCleanRoute = !url.pathname.includes('.') && !url.pathname.startsWith('/api/');
-      if (
-        (response.status === 404 || url.pathname === '/') &&
-        isCleanRoute &&
-        (request.method === 'GET' || request.method === 'HEAD')
-      ) {
+      // B. Universal SPA Clean Routes (/, /vibes, /artists, /top-25, /vibes/chai-tapri, /artist/..., etc.)
+      // Always serve index.html directly with 200 OK without relying on 404 fallback!
+      if (!isApi && (request.method === 'GET' || request.method === 'HEAD')) {
         const indexReq = new Request(new URL('/', request.url), { method: 'GET' });
         const indexRes = await env.ASSETS.fetch(indexReq);
         let html = await indexRes.text();
 
-        const meta = getRouteMetadata(url.pathname);
+        const meta = getRouteMetadata(pathname);
         if (meta) {
           html = html
             .replace(/<title>.*?<\/title>/, `<title>${meta.title}</title>`)
@@ -730,7 +754,7 @@ export default {
             )
             .replace(
               /<meta property="og:url" content=".*?" \/>/,
-              `<meta property="og:url" content="https://vybzmusic.online${url.pathname}" />`
+              `<meta property="og:url" content="https://vybzmusic.online${pathname}" />`
             )
             .replace(
               /<meta name="twitter:title" content=".*?" \/>/,
@@ -742,7 +766,7 @@ export default {
             )
             .replace(
               /<link rel="canonical" href=".*?" \/>/,
-              `<link rel="canonical" href="https://vybzmusic.online${url.pathname === '/' ? '/' : url.pathname}" />`
+              `<link rel="canonical" href="https://vybzmusic.online${pathname === '/' ? '/' : pathname}" />`
             );
         }
 
@@ -759,28 +783,7 @@ export default {
         });
       }
 
-      // Root HTML, Service Worker, Workbox & Manifest: NEVER stale cache (always check fresh live version)
-      if (
-        url.pathname === '/' ||
-        url.pathname.endsWith('.html') ||
-        url.pathname.endsWith('sw.js') ||
-        url.pathname.endsWith('registerSW.js') ||
-        url.pathname.endsWith('.webmanifest') ||
-        url.pathname.includes('workbox')
-      ) {
-        headers.set('Cache-Control', 'private, no-cache, no-store, max-age=0, must-revalidate');
-        headers.set('CDN-Cache-Control', 'no-store, no-cache, max-age=0');
-        headers.set('Cloudflare-CDN-Cache-Control', 'no-store, no-cache, max-age=0');
-        headers.set('Pragma', 'no-cache');
-        headers.set('Expires', '0');
-        return new Response(response.body, {
-          status: response.status,
-          statusText: response.statusText,
-          headers,
-        });
-      }
-
-      return response;
+      return env.ASSETS.fetch(request);
     }
 
     return fetch(request);
