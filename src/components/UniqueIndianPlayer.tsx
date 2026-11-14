@@ -144,7 +144,7 @@ function isGenuineTrack(song: ArtistSong, artistName?: string): boolean {
   }
   // Check cross-artist copied songs
   const crossArtistSongs: Record<string, string[]> = {
-    'kun faya kun': ['a.r. rahman', 'mohit chauhan'],
+    'kun faya kun': ['a.r. rahman', 'mohit chauhan', 'javed ali'],
     'chaiyya chaiyya': ['a.r. rahman', 'sukhwinder singh'],
     'tum hi ho': ['arijit singh', 'mithoon'],
   };
@@ -311,9 +311,9 @@ export default function UniqueIndianPlayer({
   const [selectedPage, setSelectedPage] = useState<number>(1);
   const [isExpandAll, setIsExpandAll] = useState<boolean>(false);
 
-  // 5-by-5 Pagination State & Dynamic Search for Selected Artist
+  // 5-by-5 Pagination State & Dynamic Search for Selected Artist (Defaults to true so user sees all 20 songs instantly)
   const [artistPage, setArtistPage] = useState<number>(1);
-  const [isArtistExpandAll, setIsArtistExpandAll] = useState<boolean>(false);
+  const [isArtistExpandAll, setIsArtistExpandAll] = useState<boolean>(true);
   const [artistTracksMap, setArtistTracksMap] = useState<Record<string, ArtistSong[]>>({});
   const [isSearchingArtist, setIsSearchingArtist] = useState<boolean>(false);
 
@@ -390,7 +390,7 @@ export default function UniqueIndianPlayer({
       if (targetArtist) {
         setSelectedArtist(targetArtist);
         setArtistPage(1);
-        setIsArtistExpandAll(false);
+        setIsArtistExpandAll(true);
       }
     }
     // Ensure document.title & meta tags are synced
@@ -405,7 +405,7 @@ export default function UniqueIndianPlayer({
         const nextArtist = ARTISTS_CATALOG.find((a) => a.id === route.artistId) || null;
         setSelectedArtist((prev) => (prev?.id === nextArtist?.id ? prev : nextArtist));
         setArtistPage(1);
-        setIsArtistExpandAll(false);
+        setIsArtistExpandAll(true);
       } else {
         setSelectedArtist(null);
       }
@@ -434,7 +434,7 @@ export default function UniqueIndianPlayer({
     setSelectedVibeWorld(null);
     setSelectedPlaylistId(null);
     setArtistPage(1);
-    setIsArtistExpandAll(false);
+    setIsArtistExpandAll(true);
     mainScrollRef.current?.scrollTo({ top: 0, behavior: 'instant' });
   };
 

@@ -61,6 +61,14 @@ function getRouteMetadata(pathname) {
       title: 'Monsoon Baarish Radio – Rain & Romantic Bollywood Hits | VybZ Music',
       desc: 'Stream 25 romantic monsoon and rain Bollywood songs on VybZ Music. 100% ad-free with zero buffer.',
     },
+    'monsoon_barish': {
+      title: 'Monsoon Baarish Radio – Rain & Romantic Bollywood Hits | VybZ Music',
+      desc: 'Stream 25 romantic monsoon and rain Bollywood songs on VybZ Music. 100% ad-free with zero buffer.',
+    },
+    'monsoon_baarish': {
+      title: 'Monsoon Baarish Radio – Rain & Romantic Bollywood Hits | VybZ Music',
+      desc: 'Stream 25 romantic monsoon and rain Bollywood songs on VybZ Music. 100% ad-free with zero buffer.',
+    },
     'highway-dhaba': {
       title: 'Late Night Highway Dhaba Radio – Punjabi & Retro Hits | VybZ Music',
       desc: 'Daler Mehndi, high-energy Punjabi hits, and late-night highway truck radio on VybZ Music.',

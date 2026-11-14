@@ -232,7 +232,7 @@ export const THEMES: ThemeWorld[] = [
       { id: 'lhVceZE1lf4', title: 'Bolo Ta Ra Ra', artist: 'Daler Mehndi' },
       { id: 'vDolreuYdhA', title: 'Na Na Na Re', artist: 'Daler Mehndi' },
       { id: '-99Z8E1pOrs', title: 'Ishq Tera Tadpave', artist: 'Sukhbir' },
-      { id: '-99Z8E1pOrs', title: 'Oh Ho Ho Ho', artist: 'Sukhbir' },
+      { id: 'lYtqFkYIom8', title: 'Kudiyan Shehar Diyan', artist: 'Daler Mehndi' },
       { id: 'x9WO2ieJMYk', title: 'Mundian To Bach Ke', artist: 'Panjabi MC' },
       { id: 'CtJNQFKyZJ0', title: 'Khao Piyo Aish Karo', artist: 'Mika Singh' },
       { id: 'OPLHEkHXRwg', title: 'Dum Mast Kalandar', artist: 'Runa Laila' },
@@ -823,4 +823,4 @@ export const THEMES: ThemeWorld[] = [
 // Backwards compatibility aliases
 export type World = ThemeWorld;
 export const WORLDS = THEMES;
-export const DEFAULT_WORLD_ID = 'bartan_time';
+export const DEFAULT_WORLD_ID = 'chai_tapri';
