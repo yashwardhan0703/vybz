@@ -14,7 +14,6 @@ import {
   ChevronRight,
   TrendingUp,
   LayoutGrid,
-  ChevronDown,
   Volume2,
   Loader2,
   Trash2,
@@ -312,9 +311,6 @@ export default function UniqueIndianPlayer({
   const [isArtistExpandAll, setIsArtistExpandAll] = useState<boolean>(true);
   const [artistTracksMap, setArtistTracksMap] = useState<Record<string, ArtistSong[]>>({});
   const [isSearchingArtist, setIsSearchingArtist] = useState<boolean>(false);
-
-  // Progressive Display for Popular Artists
-  const [displayedArtistsCount, setDisplayedArtistsCount] = useState<number>(12);
 
   // Playlist creation & modal state
   const [playlistModalSong, setPlaylistModalSong] = useState<StoredTrack | null>(null);
@@ -728,10 +724,6 @@ export default function UniqueIndianPlayer({
     );
   };
 
-  const handleLoadMoreArtists = () => {
-    setDisplayedArtistsCount((prev) => Math.min(prev + 12, ARTISTS_CATALOG.length));
-  };
-
   // Top 25: Home page shows Top 5 preview; dedicated /top-25 shows all 25 hits continuously
   const visibleTrendingSongs =
     activeCategory === 'all'
@@ -770,10 +762,11 @@ export default function UniqueIndianPlayer({
     ? currentVibeTracks
     : currentVibeTracks.slice(vibeStartIdx, vibeStartIdx + 5);
 
+  // Popular Artists: Home page shows Top 6 preview; dedicated /artists shows all 50 artists
   const visibleArtists =
     activeCategory === 'artists'
       ? ARTISTS_CATALOG
-      : ARTISTS_CATALOG.slice(0, displayedArtistsCount);
+      : ARTISTS_CATALOG.slice(0, 6);
 
   const inspectedPlaylist = selectedPlaylistId
     ? userPlaylists.find((p) => p.id === selectedPlaylistId) || null
@@ -2042,22 +2035,31 @@ export default function UniqueIndianPlayer({
                         </div>
                       </div>
                     ) : (
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <Sparkles size={16} className="text-amber-400" />
-                          <h2 className="text-sm sm:text-base font-bold text-white">
-                            Curated Mood & Vibe Stations
-                          </h2>
-                          <span className="rounded-full bg-amber-400/15 border border-amber-400/30 px-2 py-0.5 text-[0.62rem] font-bold text-amber-300">
-                            Ambient Radios
-                          </span>
+                      <div className="flex items-center justify-between gap-2.5 pb-1">
+                        <div>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <div className="flex items-center gap-1.5">
+                              <Sparkles size={16} className="text-amber-400" />
+                              <h2 className="text-base sm:text-lg font-bold text-white">
+                                Curated Mood & Vibe Stations
+                              </h2>
+                            </div>
+                            <span className="rounded-full bg-amber-400/20 px-2 py-0.5 text-[0.6rem] sm:text-[0.65rem] font-bold text-amber-300">
+                              Top 4 Preview
+                            </span>
+                          </div>
+                          <p className="text-[0.68rem] sm:text-xs text-white/45 mt-0.5">
+                            Handcrafted Indian soundscapes & nostalgic ambient radios
+                          </p>
                         </div>
+
                         <button
                           type="button"
                           onClick={() => handleSelectCategory('vibes')}
-                          className="text-xs font-semibold text-amber-400 hover:text-amber-300 transition-colors flex items-center gap-1 active:scale-95"
+                          className="flex items-center gap-1 rounded-full border border-amber-400/30 bg-amber-400/10 hover:bg-amber-400/20 px-3 sm:px-3.5 py-1.5 text-xs font-bold text-amber-300 transition-colors shrink-0"
                         >
-                          See All ({WORLDS.length}) →
+                          <span>See All 10 Vibes</span>
+                          <ChevronRight size={14} />
                         </button>
                       </div>
                     )}
@@ -2154,6 +2156,31 @@ export default function UniqueIndianPlayer({
                         );
                       })}
                     </div>
+
+                    {activeCategory === 'all' ? (
+                      <button
+                        type="button"
+                        onClick={() => handleSelectCategory('vibes')}
+                        className="w-full flex items-center justify-center gap-2 rounded-xl sm:rounded-2xl bg-gradient-to-r from-amber-500/20 via-orange-500/15 to-amber-500/20 hover:from-amber-500/30 hover:to-orange-500/25 border border-amber-400/30 p-3 sm:p-3.5 text-xs sm:text-sm font-bold text-amber-300 transition-all hover:scale-[1.01] active:scale-[0.99] shadow"
+                      >
+                        <span>✨ Explore All 10 Mood & Vibe Stations</span>
+                        <ChevronRight size={16} />
+                      </button>
+                    ) : (
+                      <div className="mt-3 sm:mt-5 pt-3 border-t border-white/5 flex items-center justify-between text-xs text-white/45 px-1 py-1">
+                        <span className="flex items-center gap-1.5">
+                          <span className="inline-block size-2 rounded-full bg-emerald-400" />
+                          Desi Ambient Radios • 10 Unique Stations
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                          className="text-amber-400/80 hover:text-amber-300 transition-colors font-medium"
+                        >
+                          Back to top ↑
+                        </button>
+                      </div>
+                    )}
                   </section>
                 )}
 
@@ -2162,19 +2189,50 @@ export default function UniqueIndianPlayer({
                    ======================================================== */}
                 {(activeCategory === 'all' || activeCategory === 'artists') && (
                   <section className="space-y-4">
-                    <div className="flex items-end justify-between gap-2">
-                      <div>
-                        <h2 className="text-xl sm:text-2xl font-bold text-white">
-                          Popular Artists
-                        </h2>
-                        <p className="text-xs text-white/50 mt-0.5">
-                          The voices and composers defining Indian sound
-                        </p>
+                    {activeCategory === 'artists' ? (
+                      <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-amber-400/30 bg-gradient-to-r from-amber-500/15 via-[#0d131f] to-orange-500/10 p-4 sm:p-7 shadow-xl">
+                        <div className="relative z-10 max-w-2xl">
+                          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-amber-300">
+                            <Mic2 size={14} />
+                            <span>Indian Music Legends • {ARTISTS_CATALOG.length} Curated Artists</span>
+                          </div>
+                          <h2 className="mt-1 sm:mt-2 text-xl sm:text-3xl font-black text-white leading-tight">
+                            Popular Indian Artists
+                          </h2>
+                          <p className="mt-1 text-xs sm:text-sm text-white/75 leading-relaxed">
+                            From Bollywood playback legends and classical masters to modern Punjabi icons and Indie sensations. Tap any artist to explore their 20 top curated hits.
+                          </p>
+                        </div>
                       </div>
-                      <span className="text-xs font-semibold text-amber-400 shrink-0">
-                        {visibleArtists.length} / {ARTISTS_CATALOG.length}
-                      </span>
-                    </div>
+                    ) : (
+                      <div className="flex items-center justify-between gap-2.5 pb-1">
+                        <div>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <div className="flex items-center gap-1.5">
+                              <Mic2 size={16} className="text-amber-400" />
+                              <h2 className="text-base sm:text-lg font-bold text-white">
+                                Popular Artists
+                              </h2>
+                            </div>
+                            <span className="rounded-full bg-amber-400/20 px-2 py-0.5 text-[0.6rem] sm:text-[0.65rem] font-bold text-amber-300">
+                              Top 6 Preview
+                            </span>
+                          </div>
+                          <p className="text-[0.68rem] sm:text-xs text-white/45 mt-0.5">
+                            The iconic voices and composers defining Indian sound • Tap to stream hits
+                          </p>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => handleSelectCategory('artists')}
+                          className="flex items-center gap-1 rounded-full border border-amber-400/30 bg-amber-400/10 hover:bg-amber-400/20 px-3 sm:px-3.5 py-1.5 text-xs font-bold text-amber-300 transition-colors shrink-0"
+                        >
+                          <span>See All 50 Artists</span>
+                          <ChevronRight size={14} />
+                        </button>
+                      </div>
+                    )}
 
                     <div className="grid grid-cols-2 xs:grid-cols-3 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-2.5 sm:gap-4">
                       {visibleArtists.map((artist, aIdx) => {
@@ -2236,22 +2294,30 @@ export default function UniqueIndianPlayer({
                       })}
                     </div>
 
-                    {activeCategory !== 'artists' &&
-                      displayedArtistsCount < ARTISTS_CATALOG.length && (
-                        <div className="flex justify-center pt-1">
-                          <button
-                            type="button"
-                            onClick={handleLoadMoreArtists}
-                            className="flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-5 py-2 text-xs font-semibold text-white/80 hover:bg-white/10 hover:text-white transition-colors"
-                          >
-                            <ChevronDown size={14} className="text-amber-400" />
-                            <span>Show More Artists (+12)</span>
-                            <span className="text-[0.62rem] text-white/40">
-                              {displayedArtistsCount}/{ARTISTS_CATALOG.length}
-                            </span>
-                          </button>
-                        </div>
-                      )}
+                    {activeCategory === 'all' ? (
+                      <button
+                        type="button"
+                        onClick={() => handleSelectCategory('artists')}
+                        className="w-full flex items-center justify-center gap-2 rounded-xl sm:rounded-2xl bg-gradient-to-r from-amber-500/20 via-orange-500/15 to-amber-500/20 hover:from-amber-500/30 hover:to-orange-500/25 border border-amber-400/30 p-3 sm:p-3.5 text-xs sm:text-sm font-bold text-amber-300 transition-all hover:scale-[1.01] active:scale-[0.99] shadow"
+                      >
+                        <span>🎤 Explore All 50 Popular Artists</span>
+                        <ChevronRight size={16} />
+                      </button>
+                    ) : (
+                      <div className="mt-3 sm:mt-5 pt-3 border-t border-white/5 flex items-center justify-between text-xs text-white/45 px-1 py-1">
+                        <span className="flex items-center gap-1.5">
+                          <span className="inline-block size-2 rounded-full bg-emerald-400" />
+                          Complete Indian Artists Catalog • {ARTISTS_CATALOG.length} Curated Artists
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                          className="text-amber-400/80 hover:text-amber-300 transition-colors font-medium"
+                        >
+                          Back to top ↑
+                        </button>
+                      </div>
+                    )}
                   </section>
                 )}
 
