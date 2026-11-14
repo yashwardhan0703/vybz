@@ -229,9 +229,9 @@ export default function UniqueIndianPlayer({
   const [selectedVibeWorld, setSelectedVibeWorld] = useState<ThemeWorld | null>(getInitialVibeWorld);
   const [selectedPlaylistId, setSelectedPlaylistId] = useState<string | null>(null);
 
-  // 5-by-5 Pagination State for Selected Vibe Station
+  // Pagination & Display State for Selected Vibe Station (Defaults to true for full 25 continuous scroll)
   const [vibePage, setVibePage] = useState<number>(1);
-  const [isVibeExpandAll, setIsVibeExpandAll] = useState<boolean>(false);
+  const [isVibeExpandAll, setIsVibeExpandAll] = useState<boolean>(true);
 
   // Automatically reset scroll position to top whenever changing tab, artist, vibe, or playlist
   useEffect(() => {
@@ -248,7 +248,7 @@ export default function UniqueIndianPlayer({
     setSelectedArtist(null);
     setSelectedPlaylistId(null);
     setVibePage(1);
-    setIsVibeExpandAll(false);
+    setIsVibeExpandAll(true);
 
     // If user clicked just to view/select the vibe (userExplicitPlay is false),
     // NEVER auto-play! Simply navigate to the vibe page.
@@ -306,10 +306,6 @@ export default function UniqueIndianPlayer({
       setTimeout(() => setShareToast(null), 3000);
     }
   };
-
-  // 5-by-5 Pagination State for Top 25
-  const [selectedPage, setSelectedPage] = useState<number>(1);
-  const [isExpandAll, setIsExpandAll] = useState<boolean>(false);
 
   // 5-by-5 Pagination State & Dynamic Search for Selected Artist (Defaults to true so user sees all 20 songs instantly)
   const [artistPage, setArtistPage] = useState<number>(1);
@@ -732,19 +728,15 @@ export default function UniqueIndianPlayer({
     );
   };
 
-  const handleSelectPage = (pageNum: number) => {
-    setIsExpandAll(false);
-    setSelectedPage(pageNum);
-  };
-
   const handleLoadMoreArtists = () => {
     setDisplayedArtistsCount((prev) => Math.min(prev + 12, ARTISTS_CATALOG.length));
   };
 
-  const startIdx = (selectedPage - 1) * 5;
-  const visibleTrendingSongs = isExpandAll
-    ? top25Tracks
-    : top25Tracks.slice(startIdx, startIdx + 5);
+  // Top 25: Home page shows Top 5 preview; dedicated /top-25 shows all 25 hits continuously
+  const visibleTrendingSongs =
+    activeCategory === 'all'
+      ? top25Tracks.slice(0, 5)
+      : top25Tracks;
 
   const currentArtistTracks: ArtistSong[] = useMemo(() => {
     if (!selectedArtist) return [];
@@ -1814,59 +1806,40 @@ export default function UniqueIndianPlayer({
                       </div>
                     </div>
 
-                    {/* 5-BY-5 CHART CONTAINER */}
+                    {/* TOP 25 CHART CONTAINER */}
                     <div className="rounded-2xl sm:rounded-3xl border border-white/10 bg-[#0a0e17] p-3 sm:p-6 shadow-xl">
-                      <div className="flex flex-col md:flex-row md:items-center justify-between gap-2.5 pb-3 border-b border-white/5">
+                      <div className="flex items-center justify-between gap-2.5 pb-3 border-b border-white/5">
                         <div>
                           <div className="flex items-center gap-2 flex-wrap">
-                            <h3 className="text-base sm:text-lg font-bold text-white">Top 25 Hits</h3>
+                            <h3 className="text-base sm:text-lg font-bold text-white">
+                              {activeCategory === 'all' ? 'Top 25 Trending Hits' : 'Top 25 India Chart'}
+                            </h3>
                             <span className="rounded-full bg-amber-400/20 px-2 py-0.5 text-[0.6rem] sm:text-[0.65rem] font-bold text-amber-300">
-                              {isExpandAll
-                                ? 'All 25'
-                                : `Page ${selectedPage}/5 (${startIdx + 1}-${startIdx + visibleTrendingSongs.length})`}
+                              {activeCategory === 'all' ? 'Top 5 Preview' : 'All 25 Hits'}
                             </span>
                           </div>
                           <p className="text-[0.68rem] sm:text-xs text-white/45 mt-0.5">
-                            Tap any track to stream continuously
+                            {activeCategory === 'all'
+                              ? "India's #1 to #5 trending daily hits • Tap to stream"
+                              : 'Rank 1 to 25 • Continuous Official India Daily Streaming'}
                           </p>
                         </div>
 
-                        <div className="flex items-center gap-1 sm:gap-1.5 overflow-x-auto no-scrollbar py-0.5 touch-pan-x">
-                          {[
-                            { page: 1, label: '1-5' },
-                            { page: 2, label: '6-10' },
-                            { page: 3, label: '11-15' },
-                            { page: 4, label: '16-20' },
-                            { page: 5, label: '21-25' },
-                          ].map(({ page, label }) => {
-                            const isActive = !isExpandAll && selectedPage === page;
-                            return (
-                              <button
-                                key={`batch-${page}`}
-                                type="button"
-                                onClick={() => handleSelectPage(page)}
-                                className={`rounded-lg sm:rounded-xl px-2 sm:px-2.5 py-1 text-[0.65rem] sm:text-xs font-mono font-bold transition-colors shrink-0 ${
-                                  isActive
-                                    ? 'bg-amber-400 text-black shadow'
-                                    : 'border border-white/10 bg-white/5 text-white/60 hover:text-white hover:bg-white/10'
-                                }`}
-                              >
-                                {label}
-                              </button>
-                            );
-                          })}
+                        {activeCategory === 'all' ? (
                           <button
                             type="button"
-                            onClick={() => setIsExpandAll((prev) => !prev)}
-                            className={`rounded-lg sm:rounded-xl px-2 sm:px-2.5 py-1 text-[0.65rem] sm:text-xs font-mono font-bold transition-colors shrink-0 ${
-                              isExpandAll
-                                ? 'bg-amber-400 text-black shadow'
-                                : 'border border-white/10 bg-white/5 text-white/60 hover:text-white hover:bg-white/10'
-                            }`}
+                            onClick={() => handleSelectCategory('trending')}
+                            className="flex items-center gap-1 rounded-full border border-amber-400/30 bg-amber-400/10 hover:bg-amber-400/20 px-3 sm:px-3.5 py-1.5 text-xs font-bold text-amber-300 transition-colors shrink-0"
                           >
-                            {isExpandAll ? '5-by-5' : 'All 25'}
+                            <span>See All 25 Hits</span>
+                            <ChevronRight size={14} />
                           </button>
-                        </div>
+                        ) : (
+                          <span className="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-white/5 border border-white/10 px-3 py-1 text-xs font-medium text-white/70">
+                            <span className="size-1.5 rounded-full bg-emerald-400" />
+                            Live Daily Hits
+                          </span>
+                        )}
                       </div>
 
                       {/* 5-SONG LIST */}
@@ -2017,42 +1990,32 @@ export default function UniqueIndianPlayer({
                         })}
                       </div>
 
-                      {/* 5-BY-5 PAGINATION */}
-                      <div className="mt-3 sm:mt-5 flex items-center justify-between gap-2 pt-3 border-t border-white/5">
-                        {!isExpandAll && selectedPage > 1 ? (
+                      {/* BOTTOM ACTION */}
+                      <div className="mt-3 sm:mt-5 pt-3 border-t border-white/5">
+                        {activeCategory === 'all' ? (
                           <button
                             type="button"
-                            onClick={() => setSelectedPage((p) => Math.max(1, p - 1))}
-                            className="flex items-center gap-1 rounded-full border border-white/10 bg-white/5 px-3.5 sm:px-4 py-1.5 text-[0.7rem] sm:text-xs font-semibold text-white/80 hover:bg-white/10 transition-colors"
+                            onClick={() => handleSelectCategory('trending')}
+                            className="w-full flex items-center justify-center gap-2 rounded-xl sm:rounded-2xl bg-gradient-to-r from-amber-500/20 via-orange-500/15 to-amber-500/20 hover:from-amber-500/30 hover:to-orange-500/25 border border-amber-400/30 p-3 sm:p-3.5 text-xs sm:text-sm font-bold text-amber-300 transition-all hover:scale-[1.01] active:scale-[0.99] shadow"
                           >
-                            ← Prev 5
+                            <span>🔥 Explore Full Top 25 Trending Chart (Rank 1–25)</span>
+                            <ChevronRight size={16} />
                           </button>
                         ) : (
-                          <div />
-                        )}
-
-                        <div className="flex items-center gap-1.5 sm:gap-2">
-                          {!isExpandAll && selectedPage < 5 && (
+                          <div className="flex items-center justify-between text-xs text-white/45 px-1 py-1">
+                            <span className="flex items-center gap-1.5">
+                              <span className="inline-block size-2 rounded-full bg-emerald-400" />
+                              Official India Daily Chart • 25 Tracks
+                            </span>
                             <button
                               type="button"
-                              onClick={() => setSelectedPage((p) => Math.min(5, p + 1))}
-                              className="flex items-center gap-1 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 px-3.5 sm:px-5 py-1.5 text-[0.7rem] sm:text-xs font-bold text-black shadow hover:scale-102 active:scale-98 transition-transform"
+                              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                              className="text-amber-400/80 hover:text-amber-300 transition-colors font-medium"
                             >
-                              <span>
-                                Next 5 ({selectedPage * 5 + 1}-{(selectedPage + 1) * 5})
-                              </span>
-                              <ChevronRight size={13} />
+                              Back to top ↑
                             </button>
-                          )}
-
-                          <button
-                            type="button"
-                            onClick={() => setIsExpandAll((prev) => !prev)}
-                            className="rounded-full border border-amber-400/30 bg-amber-400/10 px-3 sm:px-4 py-1.5 text-[0.7rem] sm:text-xs font-semibold text-amber-300 hover:bg-amber-400/20 transition-colors"
-                          >
-                            {isExpandAll ? 'Show 5' : 'All 25'}
-                          </button>
-                        </div>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </section>
