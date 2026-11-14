@@ -1803,17 +1803,12 @@ export default function UniqueIndianPlayer({
                     <div className="rounded-2xl sm:rounded-3xl border border-white/10 bg-[#0a0e17] p-3 sm:p-6 shadow-xl">
                       <div className="flex items-center justify-between gap-2.5 pb-3 border-b border-white/5">
                         <div>
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <h3 className="text-base sm:text-lg font-bold text-white">
-                              {activeCategory === 'all' ? 'Top 25 Trending Hits' : 'Top 25 India Chart'}
-                            </h3>
-                            <span className="rounded-full bg-amber-400/20 px-2 py-0.5 text-[0.6rem] sm:text-[0.65rem] font-bold text-amber-300">
-                              {activeCategory === 'all' ? 'Top 5 Preview' : 'All 25 Hits'}
-                            </span>
-                          </div>
+                          <h3 className="text-base sm:text-lg font-bold text-white">
+                            {activeCategory === 'all' ? 'Top 25 Trending Hits' : 'Top 25 India Chart'}
+                          </h3>
                           <p className="text-[0.68rem] sm:text-xs text-white/45 mt-0.5">
                             {activeCategory === 'all'
-                              ? "India's #1 to #5 trending daily hits • Tap to stream"
+                              ? "India's daily trending chart • Tap to stream"
                               : 'Rank 1 to 25 • Continuous Official India Daily Streaming'}
                           </p>
                         </div>
@@ -1822,10 +1817,10 @@ export default function UniqueIndianPlayer({
                           <button
                             type="button"
                             onClick={() => handleSelectCategory('trending')}
-                            className="flex items-center gap-1 rounded-full border border-amber-400/30 bg-amber-400/10 hover:bg-amber-400/20 px-3 sm:px-3.5 py-1.5 text-xs font-bold text-amber-300 transition-colors shrink-0"
+                            className="text-xs sm:text-sm font-semibold text-white/60 hover:text-amber-300 transition-colors flex items-center gap-0.5 active:scale-95 py-1 px-1.5"
                           >
-                            <span>See All 25 Hits</span>
-                            <ChevronRight size={14} />
+                            <span>Show all</span>
+                            <ChevronRight size={15} />
                           </button>
                         ) : (
                           <span className="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-white/5 border border-white/10 px-3 py-1 text-xs font-medium text-white/70">
@@ -1983,33 +1978,22 @@ export default function UniqueIndianPlayer({
                         })}
                       </div>
 
-                      {/* BOTTOM ACTION */}
-                      <div className="mt-3 sm:mt-5 pt-3 border-t border-white/5">
-                        {activeCategory === 'all' ? (
+                      {/* BOTTOM ACTION (Only on dedicated chart page) */}
+                      {activeCategory === 'trending' && (
+                        <div className="mt-3 sm:mt-5 pt-3 border-t border-white/5 flex items-center justify-between text-xs text-white/45 px-1 py-1">
+                          <span className="flex items-center gap-1.5">
+                            <span className="inline-block size-2 rounded-full bg-emerald-400" />
+                            Official India Daily Chart • 25 Tracks
+                          </span>
                           <button
                             type="button"
-                            onClick={() => handleSelectCategory('trending')}
-                            className="w-full flex items-center justify-center gap-2 rounded-xl sm:rounded-2xl bg-gradient-to-r from-amber-500/20 via-orange-500/15 to-amber-500/20 hover:from-amber-500/30 hover:to-orange-500/25 border border-amber-400/30 p-3 sm:p-3.5 text-xs sm:text-sm font-bold text-amber-300 transition-all hover:scale-[1.01] active:scale-[0.99] shadow"
+                            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                            className="text-amber-400/80 hover:text-amber-300 transition-colors font-medium"
                           >
-                            <span>🔥 Explore Full Top 25 Trending Chart (Rank 1–25)</span>
-                            <ChevronRight size={16} />
+                            Back to top ↑
                           </button>
-                        ) : (
-                          <div className="flex items-center justify-between text-xs text-white/45 px-1 py-1">
-                            <span className="flex items-center gap-1.5">
-                              <span className="inline-block size-2 rounded-full bg-emerald-400" />
-                              Official India Daily Chart • 25 Tracks
-                            </span>
-                            <button
-                              type="button"
-                              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                              className="text-amber-400/80 hover:text-amber-300 transition-colors font-medium"
-                            >
-                              Back to top ↑
-                            </button>
-                          </div>
-                        )}
-                      </div>
+                        </div>
+                      )}
                     </div>
                   </section>
                 )}
@@ -2037,16 +2021,11 @@ export default function UniqueIndianPlayer({
                     ) : (
                       <div className="flex items-center justify-between gap-2.5 pb-1">
                         <div>
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <div className="flex items-center gap-1.5">
-                              <Sparkles size={16} className="text-amber-400" />
-                              <h2 className="text-base sm:text-lg font-bold text-white">
-                                Curated Mood & Vibe Stations
-                              </h2>
-                            </div>
-                            <span className="rounded-full bg-amber-400/20 px-2 py-0.5 text-[0.6rem] sm:text-[0.65rem] font-bold text-amber-300">
-                              Top 4 Preview
-                            </span>
+                          <div className="flex items-center gap-1.5">
+                            <Sparkles size={16} className="text-amber-400" />
+                            <h2 className="text-base sm:text-lg font-bold text-white">
+                              Curated Mood & Vibe Stations
+                            </h2>
                           </div>
                           <p className="text-[0.68rem] sm:text-xs text-white/45 mt-0.5">
                             Handcrafted Indian soundscapes & nostalgic ambient radios
@@ -2056,10 +2035,10 @@ export default function UniqueIndianPlayer({
                         <button
                           type="button"
                           onClick={() => handleSelectCategory('vibes')}
-                          className="flex items-center gap-1 rounded-full border border-amber-400/30 bg-amber-400/10 hover:bg-amber-400/20 px-3 sm:px-3.5 py-1.5 text-xs font-bold text-amber-300 transition-colors shrink-0"
+                          className="text-xs sm:text-sm font-semibold text-white/60 hover:text-amber-300 transition-colors flex items-center gap-0.5 active:scale-95 py-1 px-1.5"
                         >
-                          <span>See All 10 Vibes</span>
-                          <ChevronRight size={14} />
+                          <span>Show all</span>
+                          <ChevronRight size={15} />
                         </button>
                       </div>
                     )}
@@ -2157,16 +2136,7 @@ export default function UniqueIndianPlayer({
                       })}
                     </div>
 
-                    {activeCategory === 'all' ? (
-                      <button
-                        type="button"
-                        onClick={() => handleSelectCategory('vibes')}
-                        className="w-full flex items-center justify-center gap-2 rounded-xl sm:rounded-2xl bg-gradient-to-r from-amber-500/20 via-orange-500/15 to-amber-500/20 hover:from-amber-500/30 hover:to-orange-500/25 border border-amber-400/30 p-3 sm:p-3.5 text-xs sm:text-sm font-bold text-amber-300 transition-all hover:scale-[1.01] active:scale-[0.99] shadow"
-                      >
-                        <span>✨ Explore All 10 Mood & Vibe Stations</span>
-                        <ChevronRight size={16} />
-                      </button>
-                    ) : (
+                    {activeCategory === 'vibes' && (
                       <div className="mt-3 sm:mt-5 pt-3 border-t border-white/5 flex items-center justify-between text-xs text-white/45 px-1 py-1">
                         <span className="flex items-center gap-1.5">
                           <span className="inline-block size-2 rounded-full bg-emerald-400" />
@@ -2207,29 +2177,24 @@ export default function UniqueIndianPlayer({
                     ) : (
                       <div className="flex items-center justify-between gap-2.5 pb-1">
                         <div>
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <div className="flex items-center gap-1.5">
-                              <Mic2 size={16} className="text-amber-400" />
-                              <h2 className="text-base sm:text-lg font-bold text-white">
-                                Popular Artists
-                              </h2>
-                            </div>
-                            <span className="rounded-full bg-amber-400/20 px-2 py-0.5 text-[0.6rem] sm:text-[0.65rem] font-bold text-amber-300">
-                              Top 6 Preview
-                            </span>
+                          <div className="flex items-center gap-1.5">
+                            <Mic2 size={16} className="text-amber-400" />
+                            <h2 className="text-base sm:text-lg font-bold text-white">
+                              Popular Artists
+                            </h2>
                           </div>
                           <p className="text-[0.68rem] sm:text-xs text-white/45 mt-0.5">
-                            The iconic voices and composers defining Indian sound • Tap to stream hits
+                            The iconic voices and composers defining Indian sound
                           </p>
                         </div>
 
                         <button
                           type="button"
                           onClick={() => handleSelectCategory('artists')}
-                          className="flex items-center gap-1 rounded-full border border-amber-400/30 bg-amber-400/10 hover:bg-amber-400/20 px-3 sm:px-3.5 py-1.5 text-xs font-bold text-amber-300 transition-colors shrink-0"
+                          className="text-xs sm:text-sm font-semibold text-white/60 hover:text-amber-300 transition-colors flex items-center gap-0.5 active:scale-95 py-1 px-1.5"
                         >
-                          <span>See All 50 Artists</span>
-                          <ChevronRight size={14} />
+                          <span>Show all</span>
+                          <ChevronRight size={15} />
                         </button>
                       </div>
                     )}
@@ -2294,16 +2259,7 @@ export default function UniqueIndianPlayer({
                       })}
                     </div>
 
-                    {activeCategory === 'all' ? (
-                      <button
-                        type="button"
-                        onClick={() => handleSelectCategory('artists')}
-                        className="w-full flex items-center justify-center gap-2 rounded-xl sm:rounded-2xl bg-gradient-to-r from-amber-500/20 via-orange-500/15 to-amber-500/20 hover:from-amber-500/30 hover:to-orange-500/25 border border-amber-400/30 p-3 sm:p-3.5 text-xs sm:text-sm font-bold text-amber-300 transition-all hover:scale-[1.01] active:scale-[0.99] shadow"
-                      >
-                        <span>🎤 Explore All 50 Popular Artists</span>
-                        <ChevronRight size={16} />
-                      </button>
-                    ) : (
+                    {activeCategory === 'artists' && (
                       <div className="mt-3 sm:mt-5 pt-3 border-t border-white/5 flex items-center justify-between text-xs text-white/45 px-1 py-1">
                         <span className="flex items-center gap-1.5">
                           <span className="inline-block size-2 rounded-full bg-emerald-400" />
