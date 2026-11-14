@@ -41,6 +41,14 @@ function AppLayout() {
 
   // Sync Vibe / Studio mode with browser back/forward buttons without breaking modal hashes
   useEffect(() => {
+    // Initial mount check: unless URL hash explicitly requests #vibe, always default to Home (studio)
+    if (typeof window !== 'undefined') {
+      const initialHash = window.location.hash;
+      if (initialHash !== '#vibe' && usePlayerStore.getState().viewMode === 'vibe') {
+        setViewMode('studio');
+      }
+    }
+
     const handlePopState = () => {
       const hash = window.location.hash;
       const currentMode = usePlayerStore.getState().viewMode;

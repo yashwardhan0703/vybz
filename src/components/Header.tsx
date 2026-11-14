@@ -28,7 +28,7 @@ function useRealtimeClock() {
 export default function Header() {
   const time = useRealtimeClock();
   const count = useOnlineCount();
-  const { toggleWorldSwitcher, toggleTrackList, toggleSearch, toggleViewMode, currentWorld } = usePlayerStore();
+  const { toggleWorldSwitcher, toggleTrackList, toggleSearch, setViewMode, currentWorld } = usePlayerStore();
 
   // Keyboard shortcut Ctrl+K or / to open search
   useEffect(() => {
@@ -57,8 +57,10 @@ export default function Header() {
           onClick={() => {
             if (window.location.hash.includes('vibe')) {
               window.history.back();
+            } else if (window.location.hash === '#vibe') {
+              window.location.hash = '';
             }
-            toggleViewMode();
+            setViewMode('studio');
           }}
           aria-label="Exit Fullscreen Visual"
           className="flex items-center gap-1.5 rounded-full border border-white/20 bg-black/60 px-2.5 py-1 text-[0.7rem] sm:text-xs font-semibold text-white/95 backdrop-blur-md transition-all active:scale-95 hover:bg-white/15 hover:text-white shadow-md"
@@ -92,7 +94,14 @@ export default function Header() {
         {/* Return to Discover Home */}
         <button
           type="button"
-          onClick={toggleViewMode}
+          onClick={() => {
+            if (window.location.hash.includes('vibe')) {
+              window.history.back();
+            } else if (window.location.hash === '#vibe') {
+              window.location.hash = '';
+            }
+            setViewMode('studio');
+          }}
           aria-label="Return to Discover Home"
           className="group flex flex-col items-center gap-0.5 text-amber-300 transition-colors hover:text-amber-200 focus-visible:outline-none"
         >

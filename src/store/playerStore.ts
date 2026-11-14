@@ -9,7 +9,6 @@ import {
   saveStoredUserPlaylists,
   getStoredRecentHistory,
   saveStoredRecentHistory,
-  getStoredViewMode,
   saveStoredViewMode,
   getStoredPlaybackState,
   saveStoredPlaybackState,
@@ -143,6 +142,13 @@ const initialWorld =
   WORLDS[0];
 const initialTrack = initialWorld.tracks?.[0];
 
+const getInitialViewMode = (): ViewMode => {
+  if (typeof window !== 'undefined' && window.location.hash === '#vibe') {
+    return 'vibe';
+  }
+  return 'studio';
+};
+
 const getInitialCategory = (): PlayerCategory => {
   if (typeof window === 'undefined') return 'all';
   const path = window.location.pathname.replace(/\/+$/, '') || '/';
@@ -155,7 +161,7 @@ const getInitialCategory = (): PlayerCategory => {
 };
 
 export const usePlayerStore = create<PlayerState>((set, get) => ({
-  viewMode: persistedState?.viewMode || getStoredViewMode(),
+  viewMode: getInitialViewMode(),
   activeTab: 'explore',
   activeCategory: getInitialCategory(),
   activeArtistId: null,

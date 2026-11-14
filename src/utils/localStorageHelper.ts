@@ -23,7 +23,6 @@ const VIEW_MODE_KEY = 'vybz_music_view_mode';
 const LEGACY_LIKED_KEY = 'aura_music_liked_songs';
 const LEGACY_PLAYLISTS_KEY = 'aura_music_user_playlists';
 const LEGACY_HISTORY_KEY = 'aura_music_recent_history';
-const LEGACY_VIEW_MODE_KEY = 'aura_music_view_mode';
 
 export function getStoredLikedSongs(): StoredTrack[] {
   try {
@@ -103,12 +102,8 @@ export function saveStoredRecentHistory(history: StoredTrack[]): void {
 }
 
 export function getStoredViewMode(): 'studio' | 'vibe' {
-  try {
-    const raw = localStorage.getItem(VIEW_MODE_KEY) || localStorage.getItem(LEGACY_VIEW_MODE_KEY);
-    return raw === 'vibe' ? 'vibe' : 'studio';
-  } catch {
-    return 'studio';
-  }
+  // Always default to 'studio' (Home Screen) so app startup is clean and consistent
+  return 'studio';
 }
 
 export function saveStoredViewMode(mode: 'studio' | 'vibe'): void {
