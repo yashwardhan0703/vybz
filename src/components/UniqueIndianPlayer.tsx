@@ -2765,7 +2765,7 @@ export default function UniqueIndianPlayer({
                 </div>
 
                 <div className="border-t border-white/5 pt-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-[0.68rem] text-white/35">
-                  <p>© 2026 VybZ Music • Official India Audio Hub • https://www.vybzmusic.online</p>
+                  <p>© 2026 VybZ Music • Official India Audio Hub • https://vybzmusic.online</p>
                   <div className="flex items-center gap-3">
                     <span>Crafted for Indian Music Lovers ❤️</span>
                     <span>•</span>

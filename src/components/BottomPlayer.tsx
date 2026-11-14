@@ -203,12 +203,12 @@ export default function BottomPlayer({
               <Heart size={16} className={isLiked ? 'fill-rose-500 text-rose-500' : ''} />
             </button>
 
-            {/* Back / Previous Song */}
+            {/* Back / Previous Song (compact on small screens, expanded on xs+) */}
             <button
               type="button"
               onClick={onPrev}
               aria-label="Previous track"
-              className="grid size-9 place-items-center rounded-full text-white/80 hover:text-white active:scale-95 transition-all"
+              className="hidden xs:grid size-9 place-items-center rounded-full text-white/80 hover:text-white active:scale-95 transition-all"
               title="Previous Song"
             >
               <SkipBack size={16} fill="currentColor" />
@@ -242,12 +242,12 @@ export default function BottomPlayer({
               <SkipForward size={16} fill="currentColor" />
             </button>
 
-            {/* Open Full Player Sheet */}
+            {/* Open Full Player Sheet (compact on small screens, full bar tap expands on all) */}
             <button
               type="button"
               onClick={() => setNowPlayingOpen(true)}
               aria-label="Open Full Player"
-              className="grid size-8 place-items-center rounded-full text-white/45 hover:text-white active:scale-95"
+              className="hidden xs:grid size-8 place-items-center rounded-full text-white/45 hover:text-white active:scale-95"
               title="Expand Player"
             >
               <ChevronUp size={16} />

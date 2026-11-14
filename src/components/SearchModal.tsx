@@ -330,9 +330,11 @@ export default function SearchModal({ onPlayCustomVideoId }: SearchModalProps) {
           <button
             type="button"
             onClick={closeSearch}
-            className="rounded-lg bg-white/10 px-2 py-1 text-[0.65rem] sm:text-xs font-mono text-white/60 hover:bg-white/20 hover:text-white shrink-0"
+            aria-label="Close search"
+            className="rounded-lg bg-white/10 px-2.5 py-1 text-xs font-medium text-white/70 hover:bg-white/20 hover:text-white shrink-0 active:scale-95 transition-all"
           >
-            ESC
+            <span className="sm:hidden font-sans">Cancel</span>
+            <span className="hidden sm:inline font-mono text-[0.65rem]">ESC</span>
           </button>
         </div>
 

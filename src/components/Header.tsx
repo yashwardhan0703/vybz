@@ -46,7 +46,7 @@ export default function Header() {
     return () => window.removeEventListener('keydown', handleKey);
   }, [toggleSearch]);
 
-  const shareText = `🎵 ${currentWorld.nameHindi} - ${currentWorld.subtitle}\n"${currentWorld.subQuote}"\nSunoo yeh vibe playlist abhi VybZ par!\nhttps://www.vybzmusic.online/#vibe`;
+  const shareText = `🎵 ${currentWorld.nameHindi} - ${currentWorld.subtitle}\n"${currentWorld.subQuote}"\nSunoo yeh vibe playlist abhi VybZ par!\nhttps://vybzmusic.online/#vibe`;
 
   return (
     <header className="relative z-30 flex items-center justify-between gap-2 px-3 sm:px-8 pt-[max(0.75rem,env(safe-area-inset-top))] sm:pt-4">
