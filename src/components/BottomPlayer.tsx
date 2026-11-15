@@ -219,8 +219,7 @@ export default function BottomPlayer({
               type="button"
               onClick={isPlaying ? onPause : onPlay}
               aria-label={isPlaying ? 'Pause' : 'Play'}
-              className="grid size-9 place-items-center rounded-full text-black shadow active:scale-95 transition-transform"
-              style={{ backgroundColor: themeColor }}
+              className="grid size-10 place-items-center rounded-full bg-gradient-to-r from-amber-400 to-orange-500 text-black shadow-[0_3px_12px_rgba(245,158,11,0.4)] active:scale-95 transition-all"
             >
               {isLoading || isTuning ? (
                 <Loader2 size={16} className="animate-spin text-black" />
@@ -328,8 +327,7 @@ export default function BottomPlayer({
               type="button"
               onClick={isPlaying ? onPause : onPlay}
               aria-label={isPlaying ? 'Pause' : 'Play'}
-              className="grid size-10 place-items-center rounded-full text-black shadow-[0_4px_18px_rgba(245,158,11,0.35)] hover:scale-105 active:scale-95 transition-transform"
-              style={{ backgroundColor: themeColor }}
+              className="grid size-11 place-items-center rounded-full bg-gradient-to-r from-amber-400 to-orange-500 text-black shadow-[0_4px_18px_rgba(245,158,11,0.4)] hover:scale-105 active:scale-95 transition-all"
             >
               {isLoading || isTuning ? (
                 <Loader2 size={18} className="animate-spin text-black" />

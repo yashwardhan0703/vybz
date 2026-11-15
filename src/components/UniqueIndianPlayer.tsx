@@ -61,10 +61,10 @@ interface UniqueIndianPlayerProps {
 }
 
 const themeStyles = {
-  accentGradient: 'from-amber-400 via-amber-500 to-orange-500',
-  badgeBg: 'bg-amber-500/20 border-amber-500/40 text-amber-300',
-  borderGlow: 'border-amber-500/30',
-  heroGrad: 'from-[#191107] via-[#120d06] to-[#080c14]',
+  accentGradient: 'from-amber-400 via-orange-400 to-amber-500',
+  badgeBg: 'bg-amber-400/10 border-amber-400/30 text-amber-300',
+  borderGlow: 'border-amber-400/25',
+  heroGrad: 'from-amber-500/10 via-[#0e1420] to-[#070a10]',
 };
 
 interface BeforeInstallPromptEvent extends Event {
@@ -1031,9 +1031,9 @@ export default function UniqueIndianPlayer({
                 type="button"
                 onClick={handleInstallClick}
                 aria-label={isAndroid ? 'Download VybZ Android APK' : isIOS ? 'Install VybZ on iOS' : 'Install VybZ App'}
-                className="flex items-center gap-1.5 rounded-full border border-amber-400/40 bg-amber-400/15 px-2.5 sm:px-3 py-1.5 text-[0.7rem] sm:text-xs font-semibold text-amber-300 hover:bg-amber-400/25 active:scale-95 transition-all shadow-sm"
+                className="flex items-center gap-1.5 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 px-2.5 sm:px-3.5 py-1.5 text-[0.72rem] sm:text-xs font-bold text-black shadow-md hover:brightness-110 active:scale-95 transition-all"
               >
-                <Download size={13} className="text-amber-400 shrink-0" />
+                <Download size={13} className="shrink-0" />
                 <span className="hidden xs:inline">
                   {isAndroid ? 'Download APK' : 'Install App'}
                 </span>
@@ -1744,35 +1744,35 @@ export default function UniqueIndianPlayer({
                             key={`recent-${track.id}-${idx}`}
                             type="button"
                             onClick={() => handleTogglePlayStored(track, idx, recentHistory)}
-                            className={`group flex items-center gap-3 rounded-xl border p-2 text-left transition-all ${
+                            className={`group flex items-center gap-3 rounded-2xl border p-2.5 text-left transition-all ${
                               isCur
-                                ? 'border-amber-400/40 bg-amber-400/10'
-                                : 'border-white/5 bg-[#0d131e] hover:border-white/15 hover:bg-[#131b2b]'
+                                ? 'border-amber-400/50 bg-[#141b2a] shadow-md ring-1 ring-amber-400/25'
+                                : 'border-white/10 bg-[#0f1522] hover:border-amber-400/35 hover:bg-[#131b2a] shadow-sm'
                             }`}
                           >
-                            <div className="size-11 shrink-0 overflow-hidden rounded-lg bg-black/40 aspect-square">
+                            <div className="size-11 sm:size-12 shrink-0 overflow-hidden rounded-xl bg-black/40 aspect-square border border-white/5">
                               <img
                                 src={track.thumbnail}
                                 alt=""
                                 loading="lazy"
                                 onError={handleArtworkError}
-                                className="size-full object-cover"
+                                className="size-full object-cover transition-transform group-hover:scale-105"
                               />
                             </div>
                             <div className="min-w-0 flex-1">
                               <p
                                 translate="no"
-                                className={`notranslate truncate text-xs font-semibold ${
-                                  isCur ? 'text-amber-300' : 'text-white'
+                                className={`notranslate truncate text-xs sm:text-sm font-semibold transition-colors ${
+                                  isCur ? 'text-amber-300' : 'text-white group-hover:text-amber-300'
                                 }`}
                               >
                                 {track.title}
                               </p>
-                              <p translate="no" className="notranslate truncate text-[0.65rem] text-white/50">
+                              <p translate="no" className="notranslate truncate text-[0.68rem] text-white/50 mt-0.5">
                                 {track.artist}
                               </p>
                             </div>
-                            <span className="grid size-7 shrink-0 place-items-center rounded-full bg-amber-400 text-black opacity-90 sm:opacity-0 group-hover:opacity-100 transition-opacity">
+                            <span className="grid size-7 sm:size-8 shrink-0 place-items-center rounded-full bg-gradient-to-r from-amber-400 to-orange-500 text-black shadow-md opacity-90 sm:opacity-0 group-hover:opacity-100 transition-all group-hover:scale-105 active:scale-95">
                               {isCur && isPlaying ? (
                                 <Pause size={12} fill="black" />
                               ) : (
@@ -1793,14 +1793,15 @@ export default function UniqueIndianPlayer({
                   <section className="space-y-4">
                     {/* Billboard Banner */}
                     <div
-                      className={`relative overflow-hidden rounded-2xl sm:rounded-3xl border ${themeStyles.borderGlow} bg-gradient-to-r ${themeStyles.heroGrad} p-4 sm:p-7 shadow-xl`}
+                      className="relative overflow-hidden rounded-3xl border border-amber-400/25 bg-gradient-to-br from-amber-500/12 via-[#0e1420] to-[#070a10] p-4 sm:p-7 shadow-[0_15px_35px_rgba(0,0,0,0.5)]"
                     >
+                      <div className="pointer-events-none absolute -right-10 -top-10 size-64 sm:size-80 rounded-full bg-amber-500/15 blur-3xl" />
                       <div className="relative z-10 max-w-2xl">
-                        <div className="flex items-center gap-2 flex-wrap text-[0.62rem] sm:text-xs font-bold uppercase tracking-widest text-amber-300">
-                          <TrendingUp size={13} />
+                        <div className="inline-flex items-center gap-2 rounded-full border border-amber-400/30 bg-amber-400/10 px-3 py-1 text-[0.62rem] sm:text-xs font-bold uppercase tracking-widest text-amber-300">
+                          <TrendingUp size={13} className="text-amber-400" />
                           <span>Official VybZ India Chart • Top 25 Daily</span>
                         </div>
-                        <h2 className="mt-1 sm:mt-2 text-xl sm:text-3xl font-black text-white leading-tight">
+                        <h2 className="mt-2 text-xl sm:text-3xl font-black text-white leading-tight tracking-tight">
                           Top 25 Trending on vybz
                         </h2>
                         <p className="mt-1 text-xs sm:text-sm text-white/75 max-w-xl leading-relaxed">
@@ -1813,7 +1814,7 @@ export default function UniqueIndianPlayer({
                             onClick={() =>
                               top25Tracks[0] && handleTogglePlayTrending(top25Tracks[0], 0)
                             }
-                            className={`flex items-center justify-center gap-1.5 rounded-full bg-gradient-to-r ${themeStyles.accentGradient} px-5 py-2 sm:py-2.5 text-xs font-bold text-black shadow hover:scale-105 active:scale-95 transition-transform`}
+                            className={`flex items-center justify-center gap-1.5 rounded-full bg-gradient-to-r ${themeStyles.accentGradient} px-5 py-2.5 text-xs font-bold text-black shadow-[0_10px_25px_rgba(245,158,11,0.35)] hover:scale-105 hover:brightness-110 active:scale-95 transition-all`}
                           >
                             {top25Tracks[0] &&
                             currentTrackId === top25Tracks[0].id &&
@@ -2129,10 +2130,10 @@ export default function UniqueIndianPlayer({
                                 handlePlayVibeStation(world, false);
                               }
                             }}
-                            className={`group relative overflow-hidden rounded-2xl border p-2.5 sm:p-3.5 flex flex-col justify-between transition-all cursor-pointer hover:scale-[1.02] active:scale-[0.99] ${
+                            className={`group relative overflow-hidden rounded-3xl border p-3 sm:p-4 flex flex-col justify-between transition-all cursor-pointer hover:scale-[1.02] active:scale-[0.99] ${
                               isCurrentWorld
-                                ? 'border-amber-400/60 bg-[#141b2a] shadow-lg shadow-amber-500/15 ring-1 ring-amber-400/30'
-                                : 'border-white/10 bg-[#0d131f] hover:border-amber-400/40 hover:bg-[#121927]'
+                                ? 'border-amber-400/60 bg-[#141b2a] shadow-xl shadow-amber-500/15 ring-1 ring-amber-400/30'
+                                : 'border-white/10 bg-[#0f1522] hover:border-amber-400/40 hover:bg-[#131b2a] shadow-md'
                             }`}
                           >
                             {/* Background ambient subtle image accent */}
@@ -2140,12 +2141,12 @@ export default function UniqueIndianPlayer({
                               className="pointer-events-none absolute inset-0 opacity-20 group-hover:opacity-35 transition-opacity bg-cover bg-center"
                               style={{ backgroundImage: `url(${world.bg})` }}
                             />
-                            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#0d131f] via-[#0d131f]/85 to-transparent" />
+                            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#0f1522] via-[#0f1522]/85 to-transparent" />
 
                             <div className="relative z-10">
                               <div className="flex items-center justify-between">
                                 <span
-                                  className="size-7 sm:size-8 grid place-items-center rounded-xl text-sm shadow"
+                                  className="size-8 sm:size-9 grid place-items-center rounded-2xl text-sm shadow-md"
                                   style={{
                                     backgroundColor: `${world.themeColor}25`,
                                     border: `1px solid ${world.themeColor}50`,
@@ -2153,35 +2154,35 @@ export default function UniqueIndianPlayer({
                                 >
                                   {getVibeIcon(world)}
                                 </span>
-                                <span className="font-mono text-[0.58rem] sm:text-[0.6rem] uppercase tracking-wider text-white/40">
+                                <span className="font-mono text-[0.6rem] sm:text-xs uppercase tracking-wider text-amber-300/80 font-bold px-2 py-0.5 rounded-full bg-white/5 border border-white/5">
                                   {world.tracks.length} Songs
                                 </span>
                               </div>
 
-                              <h3 className="mt-2 text-xs sm:text-base font-bold text-white leading-snug group-hover:text-amber-300 transition-colors">
+                              <h3 className="mt-2.5 text-sm sm:text-base font-bold text-white leading-snug group-hover:text-amber-300 transition-colors">
                                 {world.nameHindi}
                               </h3>
-                              <p className="font-mono text-[0.62rem] sm:text-[0.68rem] text-amber-400/90 font-medium truncate mt-0.5">
+                              <p className="font-mono text-[0.65rem] sm:text-xs text-amber-400/90 font-medium truncate mt-0.5">
                                 {world.name}
                               </p>
-                              <p className="text-[0.62rem] sm:text-xs text-white/55 line-clamp-1 sm:line-clamp-2 mt-0.5 sm:mt-1 leading-relaxed">
+                              <p className="text-[0.62rem] sm:text-xs text-white/55 line-clamp-1 sm:line-clamp-2 mt-1 leading-relaxed">
                                 {world.tagline || world.subtitle}
                               </p>
                             </div>
 
-                            <div className="relative z-10 mt-2.5 sm:mt-3 pt-2 sm:pt-2.5 border-t border-white/5">
+                            <div className="relative z-10 mt-3 pt-2.5 border-t border-white/5">
                               <button
                                 type="button"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   handlePlayVibeStation(world, true);
                                 }}
-                                className={`w-full flex items-center justify-center gap-1.5 rounded-xl py-1.5 sm:py-2 px-2 sm:px-3 text-[0.68rem] sm:text-xs font-bold transition-all shadow-md ${
+                                className={`w-full flex items-center justify-center gap-1.5 rounded-xl py-2 px-3 text-xs font-bold transition-all shadow-md ${
                                   isCurrentWorld && isPlaying
-                                    ? 'bg-amber-400 text-black shadow-amber-400/30'
+                                    ? 'bg-gradient-to-r from-amber-400 to-orange-500 text-black shadow-amber-400/30'
                                     : isCurrentWorld && currentTrackId
                                       ? 'bg-amber-400/20 text-amber-300 border border-amber-400/40'
-                                      : 'bg-white/10 text-white group-hover:bg-amber-400 group-hover:text-black active:scale-95'
+                                      : 'bg-white/10 text-white group-hover:bg-gradient-to-r group-hover:from-amber-400 group-hover:to-orange-500 group-hover:text-black active:scale-95'
                                 }`}
                               >
                                 {isCurrentWorld && isPlaying ? (
