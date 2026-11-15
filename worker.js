@@ -234,11 +234,11 @@ export default {
     // -1.1 Live APK Version Endpoint for instant Android in-app update trigger
     if (url.pathname === '/version.json') {
       return new Response(JSON.stringify({
-        latestVersion: '2.9.2',
+        latestVersion: '2.9.3',
         minVersion: '2.9.0',
         apkUrl: 'https://vybzmusic.online/vybz.apk',
-        title: 'VybZ v2.9.2 Responsive Update! 🚀',
-        releaseNotes: '100% Responsive UI, auto-scaling for all mobile screens, and zero lag.',
+        title: 'VybZ v2.9.3 Official Release! 🚀',
+        releaseNotes: 'Official Release Signed APK, 100% Responsive UI, auto-scaling for all mobile screens, and zero lag.',
         timestamp: Date.now(),
       }), {
         headers: {

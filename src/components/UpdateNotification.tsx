@@ -4,7 +4,7 @@ import { Sparkles, RefreshCw, DownloadCloud, Zap, Music2, CheckCircle2, External
 export default function UpdateNotification() {
   const [hasWebUpdate, setHasWebUpdate] = useState(false);
   const [hasApkUpdate, setHasApkUpdate] = useState(false);
-  const [apkTargetVersion, setApkTargetVersion] = useState('2.9.2');
+  const [apkTargetVersion, setApkTargetVersion] = useState('2.9.3');
   const [isUpdating, setIsUpdating] = useState(false);
   const [downloadStarted, setDownloadStarted] = useState(false);
   const [dismissedWeb, setDismissedWeb] = useState(false);
