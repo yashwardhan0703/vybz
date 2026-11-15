@@ -67,9 +67,9 @@ export default function MobileBottomNav({ onCategorySelect }: MobileBottomNavPro
   return (
     <nav
       aria-label="Mobile navigation"
-      className="md:hidden shrink-0 z-40 border-t border-white/10 bg-[#080c13]/98 backdrop-blur-xl pb-[env(safe-area-inset-bottom)] select-none"
+      className="md:hidden shrink-0 z-40 border-t border-white/10 bg-[#080c13]/98 backdrop-blur-xl pb-[max(0.35rem,env(safe-area-inset-bottom))] select-none"
     >
-      <div className="flex items-stretch justify-around px-1">
+      <div className="flex items-stretch justify-around px-0.5 sm:px-1">
         {items.map((item) => {
           const isActive = activeCategory === item.id;
           return (
@@ -82,7 +82,7 @@ export default function MobileBottomNav({ onCategorySelect }: MobileBottomNavPro
                 onCategorySelect?.();
               }}
               aria-current={isActive ? 'page' : undefined}
-              className={`flex flex-1 min-w-0 flex-col items-center justify-center gap-0.5 py-2 min-h-[52px] transition-colors active:scale-95 ${
+              className={`flex flex-1 min-w-0 flex-col items-center justify-center gap-0.5 py-1.5 min-h-[48px] transition-colors active:scale-95 ${
                 isActive ? 'text-amber-400' : 'text-white/55 hover:text-white/90'
               }`}
             >

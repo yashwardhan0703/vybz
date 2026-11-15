@@ -1032,7 +1032,7 @@ export default function UniqueIndianPlayer({
 
         {/* SCROLLABLE DISCOVERY MAIN CONTENT */}
         <main ref={mainScrollRef} className="relative z-10 flex-1 min-h-0 overflow-y-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6">
-          <div className="mx-auto w-full max-w-[1440px] space-y-6 sm:space-y-8 pb-6">
+          <div className="mx-auto w-full max-w-[1440px] space-y-6 sm:space-y-8 pb-36 sm:pb-36 lg:pb-16">
             {/* ========================================================
                 ARTIST DETAIL VIEW
                ======================================================== */}

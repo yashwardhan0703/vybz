@@ -264,7 +264,7 @@ export default function NowPlayingSheet({
       </header>
 
       {/* Main Content Area: Responsive Split on md+ and Full Proportional Height on Mobile */}
-      <div className="relative z-10 flex-1 min-h-0 flex flex-col md:grid md:grid-cols-12 md:gap-8 px-4 py-3 sm:px-8 sm:py-6 pb-[max(1rem,env(safe-area-inset-bottom))] overflow-hidden">
+      <div className="relative z-10 flex-1 min-h-0 flex flex-col md:grid md:grid-cols-12 md:gap-8 px-3 py-2 sm:px-8 sm:py-6 pb-[max(1rem,env(safe-area-inset-bottom))] overflow-y-auto overflow-x-hidden">
         {/* LEFT / PLAYER PANEL (Proportionally filled on mobile, left column on desktop) */}
         <div
           className={`w-full md:col-span-6 lg:col-span-5 flex-1 min-h-0 flex-col justify-between max-w-md mx-auto ${

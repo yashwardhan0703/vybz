@@ -4,7 +4,7 @@ import { Sparkles, RefreshCw, DownloadCloud, Zap, Music2, CheckCircle2, External
 export default function UpdateNotification() {
   const [hasWebUpdate, setHasWebUpdate] = useState(false);
   const [hasApkUpdate, setHasApkUpdate] = useState(false);
-  const [apkTargetVersion] = useState('2.9.1');
+  const [apkTargetVersion] = useState('2.9.2');
   const [isUpdating, setIsUpdating] = useState(false);
   const [downloadStarted, setDownloadStarted] = useState(false);
   const [dismissedWeb, setDismissedWeb] = useState(false);
@@ -16,7 +16,7 @@ export default function UpdateNotification() {
     const match = ua.match(/VybZApp\/([\d.]+)/);
     if (match && match[1]) {
       const installed = match[1];
-      const latest = '2.9.1';
+      const latest = '2.9.2';
       if (installed !== latest) {
         setHasApkUpdate(true);
       }
