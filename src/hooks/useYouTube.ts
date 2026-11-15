@@ -133,6 +133,45 @@ export function useYouTube(containerRef: React.RefObject<HTMLDivElement | null>)
     } catch {}
   }, []);
 
+  // Throttled native Android sync: only fires IPC when track, play state, or like status actually changes
+  const lastNativeUpdateRef = useRef<{ title: string; isPlaying: boolean; isLiked: boolean }>({
+    title: '',
+    isPlaying: false,
+    isLiked: false,
+  });
+
+  const syncToNativeAndroid = useCallback(
+    (
+      isPlaying: boolean,
+      title: string,
+      artist: string,
+      thumbnail: string,
+      positionMs: number,
+      durationMs: number,
+      isLiked: boolean,
+      force = false
+    ) => {
+      if (typeof window === 'undefined' || !(window as any).VybZNative?.updatePlayback) return;
+      const last = lastNativeUpdateRef.current;
+      if (!force && last.title === title && last.isPlaying === isPlaying && last.isLiked === isLiked) {
+        return; // Zero IPC spam! Keep 60-120 FPS fluent scrolling
+      }
+      lastNativeUpdateRef.current = { title, isPlaying, isLiked };
+      try {
+        (window as any).VybZNative.updatePlayback(
+          isPlaying,
+          title || 'VybZ Music',
+          artist || 'Ad-Free Indian Music',
+          thumbnail || '',
+          positionMs,
+          durationMs,
+          isLiked
+        );
+      } catch {}
+    },
+    []
+  );
+
   const ensureSilentAudio = useCallback(() => {
     if (typeof window === 'undefined') return;
     try {
@@ -281,20 +320,16 @@ export function useYouTube(containerRef: React.RefObject<HTMLDivElement | null>)
         setupMediaSessionHandlersRef.current?.();
 
         // Sync to Native Android APK MediaNotification (Spotify style)
-        if (typeof window !== 'undefined' && (window as any).VybZNative?.updatePlayback) {
-          try {
-            const isLiked = usePlayerStore.getState().likedSongs.some((s) => s.title === title);
-            (window as any).VybZNative.updatePlayback(
-              userIntentPlayingRef.current,
-              title || 'VybZ Music',
-              artist || 'Ad-Free Indian Music',
-              thumbnail || '',
-              Math.floor((currentTime || 0) * 1000),
-              Math.floor((duration || 0) * 1000),
-              isLiked
-            );
-          } catch {}
-        }
+        const isLiked = usePlayerStore.getState().likedSongs.some((s) => s.title === title);
+        syncToNativeAndroid(
+          userIntentPlayingRef.current,
+          title || 'VybZ Music',
+          artist || 'Ad-Free Indian Music',
+          thumbnail || '',
+          Math.floor((currentTime || 0) * 1000),
+          Math.floor((duration || 0) * 1000),
+          isLiked
+        );
       } catch {}
     },
     []
@@ -673,18 +708,17 @@ export function useYouTube(containerRef: React.RefObject<HTMLDivElement | null>)
             thumbnail: state.trackThumbnail,
           };
           state.toggleLike(trackObj);
-          if ((window as any).VybZNative?.updatePlayback) {
-            const isLikedNow = !state.likedSongs.some((s) => s.id === state.currentTrackId);
-            (window as any).VybZNative.updatePlayback(
-              state.isPlaying,
-              state.trackTitle,
-              state.trackArtist,
-              state.trackThumbnail,
-              Math.floor(lastPositionRef.current * 1000),
-              0,
-              isLikedNow
-            );
-          }
+          const isLikedNow = !state.likedSongs.some((s) => s.id === state.currentTrackId);
+          syncToNativeAndroid(
+            state.isPlaying,
+            state.trackTitle,
+            state.trackArtist,
+            state.trackThumbnail,
+            Math.floor(lastPositionRef.current * 1000),
+            0,
+            isLikedNow,
+            true
+          );
         }
       },
     };
@@ -837,21 +871,19 @@ export function useYouTube(containerRef: React.RefObject<HTMLDivElement | null>)
               if (typeof navigator !== 'undefined' && 'mediaSession' in navigator) {
                 navigator.mediaSession.playbackState = 'playing';
               }
-              if (typeof window !== 'undefined' && (window as any).VybZNative?.updatePlayback) {
-                const cur = playerRef.current?.getCurrentTime?.() ?? 0;
-                const dur = playerRef.current?.getDuration?.() ?? 0;
-                const ps = usePlayerStore.getState();
-                const isLiked = ps.likedSongs.some((s) => s.id === ps.currentTrackId);
-                (window as any).VybZNative.updatePlayback(
-                  true,
-                  ps.trackTitle || 'VybZ Music',
-                  ps.trackArtist || 'Ad-Free Indian Music',
-                  ps.trackThumbnail || '',
-                  Math.floor(cur * 1000),
-                  Math.floor(dur * 1000),
-                  isLiked
-                );
-              }
+              const cur = playerRef.current?.getCurrentTime?.() ?? 0;
+              const dur = playerRef.current?.getDuration?.() ?? 0;
+              const ps = usePlayerStore.getState();
+              const isLiked = ps.likedSongs.some((s) => s.id === ps.currentTrackId);
+              syncToNativeAndroid(
+                true,
+                ps.trackTitle || 'VybZ Music',
+                ps.trackArtist || 'Ad-Free Indian Music',
+                ps.trackThumbnail || '',
+                Math.floor(cur * 1000),
+                Math.floor(dur * 1000),
+                isLiked
+              );
               startProgressInterval();
               updateTrackMeta();
               syncPlayerTimes();
@@ -880,21 +912,19 @@ export function useYouTube(containerRef: React.RefObject<HTMLDivElement | null>)
               if (typeof navigator !== 'undefined' && 'mediaSession' in navigator) {
                 navigator.mediaSession.playbackState = 'paused';
               }
-              if (typeof window !== 'undefined' && (window as any).VybZNative?.updatePlayback) {
-                const cur = playerRef.current?.getCurrentTime?.() ?? 0;
-                const dur = playerRef.current?.getDuration?.() ?? 0;
-                const ps = usePlayerStore.getState();
-                const isLiked = ps.likedSongs.some((s) => s.id === ps.currentTrackId);
-                (window as any).VybZNative.updatePlayback(
-                  false,
-                  ps.trackTitle || 'VybZ Music',
-                  ps.trackArtist || 'Ad-Free Indian Music',
-                  ps.trackThumbnail || '',
-                  Math.floor(cur * 1000),
-                  Math.floor(dur * 1000),
-                  isLiked
-                );
-              }
+              const cur = playerRef.current?.getCurrentTime?.() ?? 0;
+              const dur = playerRef.current?.getDuration?.() ?? 0;
+              const ps = usePlayerStore.getState();
+              const isLiked = ps.likedSongs.some((s) => s.id === ps.currentTrackId);
+              syncToNativeAndroid(
+                false,
+                ps.trackTitle || 'VybZ Music',
+                ps.trackArtist || 'Ad-Free Indian Music',
+                ps.trackThumbnail || '',
+                Math.floor(cur * 1000),
+                Math.floor(dur * 1000),
+                isLiked
+              );
               if (document.hidden) {
                 // Backgrounded by mobile browser (e.g. Home button pressed or switched to WhatsApp)
                 // Record the intent and exact playback position; DO NOT spam playVideo in a loop!
