@@ -42,6 +42,7 @@ import {
   findWorldBySlug,
 } from '../utils/navigation';
 import AmbientMixer from './AmbientMixer';
+import DownloadLandingPage from './DownloadLandingPage';
 
 interface UniqueIndianPlayerProps {
   onPlayCustomVideoId: (
@@ -227,6 +228,11 @@ export default function UniqueIndianPlayer({
   const [selectedArtist, setSelectedArtist] = useState<Artist | null>(getInitialArtist);
   const [selectedVibeWorld, setSelectedVibeWorld] = useState<ThemeWorld | null>(getInitialVibeWorld);
   const [selectedPlaylistId, setSelectedPlaylistId] = useState<string | null>(null);
+  const [isDownloadPage, setIsDownloadPage] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false;
+    const p = window.location.pathname.replace(/\/+$/, '');
+    return p === '/download' || p === '/app';
+  });
 
   // Pagination & Display State for Selected Vibe Station (Defaults to true for full 25 continuous scroll)
   const [vibePage, setVibePage] = useState<number>(1);
@@ -412,7 +418,10 @@ export default function UniqueIndianPlayer({
   // Synchronize initial route from URL (e.g. direct load on /top-25, /vibes/chai-tapri, /artists, etc.)
   useEffect(() => {
     const route = parseRoute();
-    if (route.category && route.category !== activeCategory) {
+    if (route.isDownload) {
+      setIsDownloadPage(true);
+    }
+    if (route.category && route.category !== 'download' && route.category !== activeCategory) {
       setActiveCategory(route.category);
     }
     if (route.vibeSlug) {
@@ -436,6 +445,8 @@ export default function UniqueIndianPlayer({
   // Listen to browser Back / Forward events for all routes
   useEffect(() => {
     const handlePopState = () => {
+      const cleanP = window.location.pathname.replace(/\/+$/, '');
+      setIsDownloadPage(cleanP === '/download' || cleanP === '/app');
       const route = parseRoute();
       if (route.artistId) {
         const nextArtist = ARTISTS_CATALOG.find((a) => a.id === route.artistId) || null;
@@ -445,7 +456,7 @@ export default function UniqueIndianPlayer({
       } else {
         setSelectedArtist(null);
       }
-      if (route.category) {
+      if (route.category && route.category !== 'download') {
         setActiveCategory(route.category);
       }
       if (route.vibeSlug) {
@@ -853,6 +864,17 @@ export default function UniqueIndianPlayer({
       badge: likedSongs.length,
     },
   ];
+
+  if (isDownloadPage) {
+    return (
+      <DownloadLandingPage
+        onBackToPlayer={() => {
+          setIsDownloadPage(false);
+          navigateTo('/', { replace: false });
+        }}
+      />
+    );
+  }
 
   return (
     <div className="relative flex flex-1 min-h-0 overflow-hidden bg-[#070a10] text-white">
@@ -2809,6 +2831,17 @@ export default function UniqueIndianPlayer({
                     <span>Crafted for Indian Music Lovers ❤️</span>
                     <span>•</span>
                     <span>No Ads</span>
+                    <span>•</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsDownloadPage(true);
+                        navigateTo('/download');
+                      }}
+                      className="hover:text-amber-300 underline transition-colors"
+                    >
+                      Android APK (v2.9.3)
+                    </button>
                   </div>
                 </div>
               </footer>

@@ -56,6 +56,12 @@ let xml = `<?xml version="1.0" encoding="UTF-8"?>
     <priority>0.95</priority>
   </url>
   <url>
+    <loc>https://vybzmusic.online/download</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.95</priority>
+  </url>
+  <url>
     <loc>https://vybzmusic.online/vibes</loc>
     <lastmod>${today}</lastmod>
     <changefreq>weekly</changefreq>
@@ -107,5 +113,6 @@ xml += `</urlset>\n`;
 
 const sitemapPath = path.join(rootDir, 'public/sitemap.xml');
 fs.writeFileSync(sitemapPath, xml);
-console.log(`[Sitemap Generator] Successfully generated ${sitemapPath} with ${6 + worlds.length + artists.length} URLs!`);
+const totalUrls = (xml.match(/<loc>/g) || []).length;
+console.log(`[Sitemap Generator] Successfully generated ${sitemapPath} with ${totalUrls} URLs!`);
 

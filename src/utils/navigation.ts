@@ -2,7 +2,8 @@ import { WORLDS, type ThemeWorld } from '../data/worlds';
 import type { PlayerCategory } from '../store/playerStore';
 
 export interface RouteMeta {
-  category: PlayerCategory;
+  category?: PlayerCategory | 'download';
+  isDownload?: boolean;
   artistId?: string;
   vibeSlug?: string;
   worldId?: string;
@@ -152,6 +153,15 @@ export function getWorldSlug(world: ThemeWorld | { id: string }): string {
  */
 export function parseRoute(pathname = window.location.pathname, hash = window.location.hash): RouteMeta {
   const cleanPath = pathname.replace(/\/+$/, '') || '/';
+
+  // 0. Dedicated Download Landing Route (/download, /app)
+  if (cleanPath === '/download' || cleanPath === '/app') {
+    return {
+      isDownload: true,
+      title: 'Download VybZ Music APK for Android (v2.9.3) – Free Ad-Free Music Player',
+      description: 'Download the official VybZ Music Android APK (v2.9.3 • 5.0 MB). 100% ad-free, 60 FPS buttery smooth playback, background audio, and synced lyrics.',
+    };
+  }
 
   // 1. Top 25
   if (cleanPath === '/top-25' || cleanPath === '/top25') {
