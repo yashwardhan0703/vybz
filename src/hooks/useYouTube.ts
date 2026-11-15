@@ -176,24 +176,30 @@ export function useYouTube(containerRef: React.RefObject<HTMLDivElement | null>)
     if (typeof window === 'undefined') return;
     try {
       if (!silentAudioRef.current) {
-        const a = document.createElement('audio');
-        a.src = '/silent.wav';
-        a.loop = true;
-        a.preload = 'auto';
-        (a as any).playsInline = true;
-        (a as any).webkitPlaysInline = true;
-        a.setAttribute('playsinline', 'true');
-        a.setAttribute('webkit-playsinline', 'true');
-        a.style.position = 'fixed';
-        a.style.width = '1px';
-        a.style.height = '1px';
-        a.style.opacity = '0.01';
-        a.style.pointerEvents = 'none';
-        a.style.bottom = '0';
-        a.style.right = '0';
-        document.body.appendChild(a);
-        silentAudioRef.current = a;
+        const existing = document.getElementById('vybz-ios-audio-anchor') as HTMLAudioElement | null;
+        if (existing) {
+          silentAudioRef.current = existing;
+        } else {
+          const a = document.createElement('audio');
+          a.src = '/silent.wav';
+          a.loop = true;
+          a.preload = 'auto';
+          (a as any).playsInline = true;
+          (a as any).webkitPlaysInline = true;
+          a.setAttribute('playsinline', 'true');
+          a.setAttribute('webkit-playsinline', 'true');
+          a.style.position = 'fixed';
+          a.style.width = '1px';
+          a.style.height = '1px';
+          a.style.opacity = '0.01';
+          a.style.pointerEvents = 'none';
+          a.style.bottom = '0';
+          a.style.right = '0';
+          document.body.appendChild(a);
+          silentAudioRef.current = a;
+        }
       }
+      silentAudioRef.current.volume = 0.05;
       silentAudioRef.current.play().catch(() => {});
       requestWakeLock();
     } catch {}
