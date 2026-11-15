@@ -87,7 +87,7 @@ export default function UpdateNotification() {
     setIsUpdating(true);
     setDownloadStarted(true);
 
-    const apkUrl = 'https://vybzmusic.online/VybZ.apk';
+    const apkUrl = 'https://vybzmusic.online/vybz.apk';
 
     // 1. Direct navigation trigger (catches in v2.9.0's shouldOverrideUrlLoading and opens Chrome)
     try {
@@ -98,7 +98,7 @@ export default function UpdateNotification() {
     try {
       const link = document.createElement('a');
       link.href = apkUrl;
-      link.setAttribute('download', 'VybZ.apk');
+      link.setAttribute('download', 'vybz.apk');
       link.target = '_blank';
       link.rel = 'noopener noreferrer';
       document.body.appendChild(link);
@@ -223,7 +223,7 @@ export default function UpdateNotification() {
           {/* External Browser Fallback Link */}
           <div className="mt-3 text-center">
             <a
-              href="https://vybzmusic.online/VybZ.apk"
+              href="https://vybzmusic.online/vybz.apk"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1 font-mono text-[11px] text-white/50 hover:text-amber-300 transition-colors underline"

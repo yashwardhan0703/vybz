@@ -198,6 +198,24 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
 
+    // -1. Dedicated APK Download Endpoint (Supports https://vybzmusic.online/vybz.apk)
+    if (url.pathname.toLowerCase() === '/vybz.apk') {
+      try {
+        const apkReq = new Request(new URL('/VybZ.apk', request.url), request);
+        const apkRes = await env.ASSETS.fetch(apkReq);
+        const headers = new Headers(apkRes.headers);
+        headers.set('Content-Type', 'application/vnd.android.package-archive');
+        headers.set('Content-Disposition', 'attachment; filename="vybz.apk"');
+        headers.set('Cache-Control', 'public, max-age=3600');
+        return new Response(apkRes.body, {
+          status: 200,
+          headers,
+        });
+      } catch (e) {
+        return new Response('APK download failed: ' + e.message, { status: 500 });
+      }
+    }
+
     // -1. Live Version Endpoint for zero-lag iOS/Android/PWA cache busting
     if (url.pathname === '/api/version') {
       return new Response(JSON.stringify({ version: '2.7.7-permanent-navigation-fix', timestamp: Date.now() }), {

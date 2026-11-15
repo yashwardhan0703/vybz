@@ -360,13 +360,13 @@ export default function UniqueIndianPlayer({
     if (isAndroid) {
       try {
         const link = document.createElement('a');
-        link.href = 'https://vybzmusic.online/VybZ.apk';
-        link.setAttribute('download', 'VybZ.apk');
+        link.href = 'https://vybzmusic.online/vybz.apk';
+        link.setAttribute('download', 'vybz.apk');
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
       } catch {
-        window.location.href = 'https://vybzmusic.online/VybZ.apk';
+        window.location.href = 'https://vybzmusic.online/vybz.apk';
       }
       return;
     }
