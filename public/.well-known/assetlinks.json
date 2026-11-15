@@ -1,0 +1,14 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.vybz.music",
+      "sha256_cert_fingerprints": [
+        "28:C4:7D:03:14:B4:57:B3:B1:AC:41:F5:E9:1A:DF:FE:50:D9:92:15:D1:47:C0:A6:87:2C:46:BF:A8:0A:AC:A7"
+      ]
+    }
+  }
+]
