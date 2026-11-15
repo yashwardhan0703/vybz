@@ -198,15 +198,18 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
 
-    // -1. Dedicated APK Download Endpoint (Supports https://vybzmusic.online/vybz.apk)
-    if (url.pathname.toLowerCase() === '/vybz.apk') {
+    // -1. Dedicated APK Download Endpoint (Supports https://vybzmusic.online/vybz.apk, /vybz-v2.9.3.apk, etc.)
+    if (url.pathname.toLowerCase().endsWith('.apk')) {
       try {
         const apkReq = new Request(new URL('/VybZ.apk', request.url), request);
         const apkRes = await env.ASSETS.fetch(apkReq);
         const headers = new Headers(apkRes.headers);
         headers.set('Content-Type', 'application/vnd.android.package-archive');
-        headers.set('Content-Disposition', 'attachment; filename="vybz.apk"');
-        headers.set('Cache-Control', 'public, max-age=3600');
+        headers.set('Cache-Control', 'private, no-cache, no-store, max-age=0, must-revalidate');
+        headers.set('CDN-Cache-Control', 'no-store, no-cache, max-age=0');
+        headers.set('Cloudflare-CDN-Cache-Control', 'no-store, no-cache, max-age=0');
+        const rawFileName = url.pathname.split('/').pop() || 'vybz-v2.9.3.apk';
+        headers.set('Content-Disposition', `attachment; filename="${rawFileName}"`);
         return new Response(apkRes.body, {
           status: 200,
           headers,
@@ -236,7 +239,7 @@ export default {
       return new Response(JSON.stringify({
         latestVersion: '2.9.3',
         minVersion: '2.9.0',
-        apkUrl: 'https://vybzmusic.online/vybz.apk',
+        apkUrl: 'https://vybzmusic.online/vybz-v2.9.3.apk',
         title: 'VybZ v2.9.3 Official Release! 🚀',
         releaseNotes: 'Official Release Signed APK, 100% Responsive UI, auto-scaling for all mobile screens, and zero lag.',
         timestamp: Date.now(),

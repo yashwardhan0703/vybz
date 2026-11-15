@@ -5,6 +5,7 @@ export default function UpdateNotification() {
   const [hasWebUpdate, setHasWebUpdate] = useState(false);
   const [hasApkUpdate, setHasApkUpdate] = useState(false);
   const [apkTargetVersion, setApkTargetVersion] = useState('2.9.3');
+  const [apkDownloadUrl, setApkDownloadUrl] = useState('https://vybzmusic.online/vybz-v2.9.3.apk');
   const [isUpdating, setIsUpdating] = useState(false);
   const [downloadStarted, setDownloadStarted] = useState(false);
   const [dismissedWeb, setDismissedWeb] = useState(false);
@@ -32,6 +33,7 @@ export default function UpdateNotification() {
         const data = await res.json();
         if (data && data.latestVersion) {
           setApkTargetVersion(data.latestVersion);
+          if (data.apkUrl) setApkDownloadUrl(data.apkUrl);
           if (installed !== data.latestVersion) {
             setHasApkUpdate(true);
           } else {
@@ -117,18 +119,18 @@ export default function UpdateNotification() {
     setIsUpdating(true);
     setDownloadStarted(true);
 
-    const apkUrl = 'https://vybzmusic.online/vybz.apk';
+    const downloadTarget = apkDownloadUrl || `https://vybzmusic.online/vybz-v${apkTargetVersion}.apk`;
 
     // 1. Direct navigation trigger (catches in v2.9.0's shouldOverrideUrlLoading and opens Chrome)
     try {
-      window.location.href = apkUrl;
+      window.location.href = downloadTarget;
     } catch {}
 
     // 2. Fallback via anchor
     try {
       const link = document.createElement('a');
-      link.href = apkUrl;
-      link.setAttribute('download', 'vybz.apk');
+      link.href = downloadTarget;
+      link.setAttribute('download', downloadTarget.split('/').pop() || 'vybz-v2.9.3.apk');
       link.target = '_blank';
       link.rel = 'noopener noreferrer';
       document.body.appendChild(link);
@@ -253,7 +255,7 @@ export default function UpdateNotification() {
           {/* External Browser Fallback Link */}
           <div className="mt-3 text-center">
             <a
-              href="https://vybzmusic.online/vybz.apk"
+              href={apkDownloadUrl || "https://vybzmusic.online/vybz-v2.9.3.apk"}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1 font-mono text-[11px] text-white/50 hover:text-amber-300 transition-colors underline"
