@@ -16,7 +16,6 @@ import {
 } from 'lucide-react';
 import { usePlayerStore } from '../store/playerStore';
 import { formatTime, handleArtworkError, shareTrackOrApp } from '../utils/mediaHelpers';
-import { triggerHaptic } from '../utils/haptics';
 
 interface BottomPlayerProps {
   onPlay: () => void;
@@ -122,7 +121,6 @@ export default function BottomPlayer({
 
   const handleToggleLike = (e: React.MouseEvent) => {
     e.stopPropagation();
-    triggerHaptic('medium');
     toggleLike({
       id: songId,
       title: displayTitle,
@@ -140,7 +138,7 @@ export default function BottomPlayer({
   return (
     <section
       aria-label="Now playing"
-      className="relative z-40 shrink-0 border-t border-white/10 bg-[#090d14]/85 backdrop-blur-md transform-gpu select-none shadow-[0_-8px_30px_rgba(0,0,0,0.5)]"
+      className="relative z-40 shrink-0 border-t border-white/10 bg-[#090d14]/95 backdrop-blur-xl select-none"
     >
       {/* ========================================================
           MOBILE COMPACT MINI-PLAYER (< 768px) — Tap or swipe up to expand
@@ -208,10 +206,7 @@ export default function BottomPlayer({
             {/* Back / Previous Song (compact on small screens, expanded on xs+) */}
             <button
               type="button"
-              onClick={() => {
-                triggerHaptic('light');
-                onPrev();
-              }}
+              onClick={onPrev}
               aria-label="Previous track"
               className="hidden xs:grid size-9 place-items-center rounded-full text-white/80 hover:text-white active:scale-95 transition-all"
               title="Previous Song"
@@ -222,11 +217,7 @@ export default function BottomPlayer({
             {/* Play / Pause */}
             <button
               type="button"
-              onClick={() => {
-                triggerHaptic('light');
-                if (isPlaying) onPause();
-                else onPlay();
-              }}
+              onClick={isPlaying ? onPause : onPlay}
               aria-label={isPlaying ? 'Pause' : 'Play'}
               className="grid size-9 place-items-center rounded-full text-black shadow active:scale-95 transition-transform"
               style={{ backgroundColor: themeColor }}
@@ -243,10 +234,7 @@ export default function BottomPlayer({
             {/* Next Song */}
             <button
               type="button"
-              onClick={() => {
-                triggerHaptic('light');
-                onNext();
-              }}
+              onClick={onNext}
               aria-label="Next track"
               className="grid size-9 place-items-center rounded-full text-white/80 hover:text-white active:scale-95 transition-all"
               title="Next Song"
@@ -318,10 +306,7 @@ export default function BottomPlayer({
           <div className="flex items-center gap-3 lg:gap-4">
             <button
               type="button"
-              onClick={() => {
-                triggerHaptic('light');
-                toggleShuffle();
-              }}
+              onClick={toggleShuffle}
               aria-label="Shuffle"
               aria-pressed={isShuffle}
               className="grid size-8 place-items-center rounded-full text-white/60 hover:bg-white/5 hover:text-white transition-colors"
@@ -332,10 +317,7 @@ export default function BottomPlayer({
 
             <button
               type="button"
-              onClick={() => {
-                triggerHaptic('light');
-                onPrev();
-              }}
+              onClick={onPrev}
               aria-label="Previous track"
               className="grid size-8 place-items-center rounded-full text-white/80 hover:bg-white/10 hover:text-white active:scale-95 transition-all"
             >
@@ -344,11 +326,7 @@ export default function BottomPlayer({
 
             <button
               type="button"
-              onClick={() => {
-                triggerHaptic('light');
-                if (isPlaying) onPause();
-                else onPlay();
-              }}
+              onClick={isPlaying ? onPause : onPlay}
               aria-label={isPlaying ? 'Pause' : 'Play'}
               className="grid size-10 place-items-center rounded-full text-black shadow-[0_4px_18px_rgba(245,158,11,0.35)] hover:scale-105 active:scale-95 transition-transform"
               style={{ backgroundColor: themeColor }}
@@ -364,10 +342,7 @@ export default function BottomPlayer({
 
             <button
               type="button"
-              onClick={() => {
-                triggerHaptic('light');
-                onNext();
-              }}
+              onClick={onNext}
               aria-label="Next track"
               className="grid size-8 place-items-center rounded-full text-white/80 hover:bg-white/10 hover:text-white active:scale-95 transition-all"
             >

@@ -18,7 +18,6 @@ import {
 } from 'lucide-react';
 import { usePlayerStore } from '../store/playerStore';
 import { formatTime, handleArtworkError, shareTrackOrApp } from '../utils/mediaHelpers';
-import { triggerHaptic } from '../utils/haptics';
 
 interface NowPlayingSheetProps {
   onPlay: () => void;
@@ -73,8 +72,6 @@ export default function NowPlayingSheet({
   const [showPlaylistPicker, setShowPlaylistPicker] = useState(false);
   const [addedToPlaylistId, setAddedToPlaylistId] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
-  const [dragOffset, setDragOffset] = useState<number>(0);
-  const [isDragging, setIsDragging] = useState<boolean>(false);
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
 
   const handleShareCurrentTrack = async () => {
@@ -147,37 +144,12 @@ export default function NowPlayingSheet({
   const activeQueueIndex =
     playbackQueue.length > 0 ? playbackQueueIndex : trackIndex;
 
-  // Touch swipe handlers with real-time spring physics (swipe down to close, swipe artwork horizontally)
+  // Touch swipe handlers: swipe down to close, horizontal swipe on artwork to change track
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStartRef.current = {
       x: e.touches[0].clientX,
       y: e.touches[0].clientY,
     };
-    setIsDragging(true);
-  };
-
-  const handleHeaderTouchMove = (e: React.TouchEvent) => {
-    if (!touchStartRef.current) return;
-    const dy = e.touches[0].clientY - touchStartRef.current.y;
-    if (dy > 0) {
-      // Damped spring physics when dragging down
-      setDragOffset(Math.min(dy, 320));
-    }
-  };
-
-  const handleHeaderTouchEnd = (e: React.TouchEvent) => {
-    if (!touchStartRef.current) return;
-    const dy = e.changedTouches[0].clientY - touchStartRef.current.y;
-    touchStartRef.current = null;
-    setIsDragging(false);
-
-    if (dy > 100) {
-      triggerHaptic('light');
-      handleClose();
-      setDragOffset(0);
-    } else {
-      setDragOffset(0);
-    }
   };
 
   const handleArtworkTouchEnd = (e: React.TouchEvent) => {
@@ -185,18 +157,23 @@ export default function NowPlayingSheet({
     const dx = e.changedTouches[0].clientX - touchStartRef.current.x;
     const dy = e.changedTouches[0].clientY - touchStartRef.current.y;
     touchStartRef.current = null;
-    setIsDragging(false);
-    setDragOffset(0);
 
-    if (Math.abs(dy) > 90 && dy > 0 && Math.abs(dy) > Math.abs(dx)) {
-      triggerHaptic('light');
+    if (Math.abs(dy) > 75 && dy > 0 && Math.abs(dy) > Math.abs(dx)) {
       handleClose();
       return;
     }
     if (Math.abs(dx) > 65 && Math.abs(dx) > Math.abs(dy)) {
-      triggerHaptic('light');
       if (dx < 0) onNext();
       else onPrev();
+    }
+  };
+
+  const handleHeaderTouchEnd = (e: React.TouchEvent) => {
+    if (!touchStartRef.current) return;
+    const dy = e.changedTouches[0].clientY - touchStartRef.current.y;
+    touchStartRef.current = null;
+    if (dy > 60) {
+      handleClose();
     }
   };
 
@@ -220,11 +197,7 @@ export default function NowPlayingSheet({
       role="dialog"
       aria-modal="true"
       aria-label="Now Playing Full Screen"
-      className="fixed inset-0 z-50 flex flex-col bg-[#070a10]/95 backdrop-blur-md transform-gpu text-white animate-fade-in overflow-hidden select-none"
-      style={{
-        transform: dragOffset > 0 ? `translateY(${dragOffset}px)` : undefined,
-        transition: isDragging ? 'none' : 'transform 0.3s cubic-bezier(0.2, 0.9, 0.3, 1)',
-      }}
+      className="fixed inset-0 z-50 flex flex-col bg-[#070a10] text-white animate-fade-in overflow-hidden"
     >
       {/* Subtle ambient background accent matching VYBZ identity */}
       <div
@@ -237,12 +210,9 @@ export default function NowPlayingSheet({
       {/* Top Bar (Swipe down handle on mobile) */}
       <header
         onTouchStart={handleTouchStart}
-        onTouchMove={handleHeaderTouchMove}
         onTouchEnd={handleHeaderTouchEnd}
         className="relative z-10 flex items-center justify-between px-4 pt-[max(0.75rem,env(safe-area-inset-top))] pb-3 sm:px-8 border-b border-white/5 shrink-0"
       >
-        {/* Apple-style physical pill handle for pull-down */}
-        <div className="absolute top-2 left-1/2 -translate-x-1/2 w-10 h-1.5 rounded-full bg-white/25 pointer-events-none" />
         <button
           type="button"
           onClick={handleClose}
@@ -333,16 +303,15 @@ export default function NowPlayingSheet({
               <div className="flex items-center gap-1 shrink-0">
                 <button
                   type="button"
-                  onClick={() => {
-                    triggerHaptic('light');
+                  onClick={() =>
                     toggleLike({
                       id: songId,
                       title: displayTitle,
                       artist: displayArtist,
                       thumbnail: displayThumbnail,
                       duration: duration > 0 ? formatTime(duration) : undefined,
-                    });
-                  }}
+                    })
+                  }
                   aria-label={isLiked ? 'Remove from Liked Songs' : 'Save to Liked Songs'}
                   className="grid size-10 place-items-center rounded-full text-white/65 hover:bg-white/5 hover:text-rose-500 active:scale-90 transition-all"
                 >
@@ -438,10 +407,7 @@ export default function NowPlayingSheet({
             <div className="w-full flex items-center justify-between px-1 sm:px-3">
               <button
                 type="button"
-                onClick={() => {
-                  triggerHaptic('light');
-                  toggleShuffle();
-                }}
+                onClick={toggleShuffle}
                 aria-label="Toggle Shuffle"
                 aria-pressed={isShuffle}
                 className="grid size-11 place-items-center rounded-full hover:bg-white/5 active:scale-90 transition-all"
@@ -452,10 +418,7 @@ export default function NowPlayingSheet({
 
               <button
                 type="button"
-                onClick={() => {
-                  triggerHaptic('light');
-                  onPrev();
-                }}
+                onClick={onPrev}
                 aria-label="Previous track"
                 className="grid size-12 place-items-center rounded-full text-white hover:bg-white/5 active:scale-90 transition-all"
               >
@@ -464,11 +427,7 @@ export default function NowPlayingSheet({
 
               <button
                 type="button"
-                onClick={() => {
-                  triggerHaptic('medium');
-                  if (isPlaying) onPause();
-                  else onPlay();
-                }}
+                onClick={isPlaying ? onPause : onPlay}
                 aria-label={isPlaying ? 'Pause' : 'Play'}
                 className="grid size-16 sm:size-[4.25rem] place-items-center rounded-full text-black shadow-[0_8px_30px_rgba(245,158,11,0.5)] hover:scale-105 active:scale-95 transition-all"
                 style={{ backgroundColor: themeColor }}
@@ -484,10 +443,7 @@ export default function NowPlayingSheet({
 
               <button
                 type="button"
-                onClick={() => {
-                  triggerHaptic('light');
-                  onNext();
-                }}
+                onClick={onNext}
                 aria-label="Next track"
                 className="grid size-12 place-items-center rounded-full text-white hover:bg-white/5 active:scale-90 transition-all"
               >
@@ -496,10 +452,7 @@ export default function NowPlayingSheet({
 
               <button
                 type="button"
-                onClick={() => {
-                  triggerHaptic('light');
-                  cycleRepeat();
-                }}
+                onClick={cycleRepeat}
                 aria-label={`Repeat mode: ${repeatMode}`}
                 className="grid size-11 place-items-center rounded-full hover:bg-white/5 active:scale-90 transition-all"
                 style={{ color: repeatMode !== 'none' ? themeColor : 'rgba(255,255,255,0.65)' }}
