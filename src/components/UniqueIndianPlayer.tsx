@@ -1056,12 +1056,13 @@ export default function UniqueIndianPlayer({
         </header>
 
         {/* SCROLLABLE DISCOVERY MAIN CONTENT */}
-        <main ref={mainScrollRef} className="relative z-10 flex-1 min-h-0 overflow-y-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6">
-          <div className="mx-auto w-full max-w-[1440px] space-y-6 sm:space-y-8 pb-36 sm:pb-36 lg:pb-16">
-            {/* ========================================================
-                ARTIST DETAIL VIEW
-               ======================================================== */}
-            {selectedArtist ? (
+        <main ref={mainScrollRef} className="relative z-10 flex-1 min-h-0 overflow-y-auto px-3 sm:px-6 lg:px-8 py-3 sm:py-5">
+          <div className="mx-auto w-full max-w-[1440px] min-h-full flex flex-col justify-between">
+            <div className="space-y-6 sm:space-y-8 flex-1">
+              {/* ========================================================
+                  ARTIST DETAIL VIEW
+                 ======================================================== */}
+              {selectedArtist ? (
               <div className="space-y-6">
                 <div className="flex items-center justify-between gap-3">
                   <button
@@ -2717,12 +2718,12 @@ export default function UniqueIndianPlayer({
                 )}
               </>
             )}
+            </div>
 
             {/* ========================================================
-                SLIM & STREAMLINED FOOTER (Home & Vibes Discovery)
+                SLIM & STREAMLINED FOOTER (All Routes)
                ======================================================== */}
-            {(activeCategory === 'all' || activeCategory === 'vibes') && (
-              <footer className="mt-12 border-t border-white/5 pt-8 pb-6 text-white/50 space-y-6">
+            <footer className="mt-8 sm:mt-10 border-t border-white/5 pt-6 sm:pt-8 pb-3 text-white/50 space-y-6 shrink-0">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-xs">
                   {/* Column 1: Brand Info */}
                   <div className="space-y-2.5">
@@ -2841,12 +2842,11 @@ export default function UniqueIndianPlayer({
                       }}
                       className="hover:text-amber-300 underline transition-colors"
                     >
-                      Android APK (v2.9.3)
+                      Android APK (v2.9.4)
                     </button>
                   </div>
                 </div>
               </footer>
-            )}
           </div>
         </main>
       </div>
