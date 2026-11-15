@@ -215,7 +215,7 @@ export default {
         headers.set('Cache-Control', 'private, no-cache, no-store, max-age=0, must-revalidate');
         headers.set('CDN-Cache-Control', 'no-store, no-cache, max-age=0');
         headers.set('Cloudflare-CDN-Cache-Control', 'no-store, no-cache, max-age=0');
-        const rawFileName = url.pathname.split('/').pop() || 'vybz-v2.9.4.apk';
+        const rawFileName = url.pathname.split('/').pop() || 'vybz.apk';
         headers.set('Content-Disposition', `attachment; filename="${rawFileName}"`);
         return new Response(apkRes.body, {
           status: 200,
@@ -246,7 +246,7 @@ export default {
       return new Response(JSON.stringify({
         latestVersion: '2.9.4',
         minVersion: '2.9.0',
-        apkUrl: 'https://vybzmusic.online/vybz-v2.9.4.apk',
+        apkUrl: 'https://vybzmusic.online/vybz.apk',
         title: 'VybZ v2.9.4 Official Release! 🚀',
         releaseNotes: '100% Offline-Bundled UI, instant 0.1s launch, zero lag, pixel-perfect iOS standard mobile alignment.',
         timestamp: Date.now(),
@@ -863,7 +863,7 @@ export default {
   "applicationCategory": "MusicApplication",
   "fileSize": "9.7MB",
   "softwareVersion": "2.9.4",
-  "downloadUrl": "https://vybzmusic.online/vybz-v2.9.4.apk",
+  "downloadUrl": "https://vybzmusic.online/vybz.apk",
   "offers": {
     "@type": "Offer",
     "price": "0",

@@ -66,14 +66,14 @@ export default function DownloadLandingPage({ onBackToPlayer }: DownloadLandingP
     return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
   }, []);
 
-  const apkUrl = 'https://vybzmusic.online/vybz-v2.9.4.apk';
+  const apkUrl = 'https://vybzmusic.online/vybz.apk';
 
   const triggerApkDownload = () => {
     setDownloadStarted(true);
     try {
       const link = document.createElement('a');
       link.href = apkUrl;
-      link.setAttribute('download', 'vybz-v2.9.4.apk');
+      link.setAttribute('download', 'vybz.apk');
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -318,7 +318,7 @@ export default function DownloadLandingPage({ onBackToPlayer }: DownloadLandingP
                   </span>
                   <h3 className="text-sm font-bold text-white">Tap Downloaded File</h3>
                   <p className="text-xs text-white/60 leading-relaxed">
-                    Tap the completed <code className="text-amber-300 font-mono text-[11px]">vybz-v2.9.4.apk</code> from your notifications or Downloads folder.
+                    Tap the completed <code className="text-amber-300 font-mono text-[11px]">vybz.apk</code> from your notifications or Downloads folder.
                   </p>
                 </div>
 
