@@ -231,6 +231,28 @@ export default {
       });
     }
 
+    // -1.1 Live APK Version Endpoint for instant Android in-app update trigger
+    if (url.pathname === '/version.json') {
+      return new Response(JSON.stringify({
+        latestVersion: '2.9.2',
+        minVersion: '2.9.0',
+        apkUrl: 'https://vybzmusic.online/vybz.apk',
+        title: 'VybZ v2.9.2 Responsive Update! 🚀',
+        releaseNotes: '100% Responsive UI, auto-scaling for all mobile screens, and zero lag.',
+        timestamp: Date.now(),
+      }), {
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+          'Cache-Control': 'private, no-cache, no-store, max-age=0, must-revalidate',
+          'CDN-Cache-Control': 'no-store, no-cache, max-age=0',
+          'Cloudflare-CDN-Cache-Control': 'no-store, no-cache, max-age=0',
+          'Pragma': 'no-cache',
+          'Expires': '0',
+        },
+      });
+    }
+
     // 0. Live YouTube Music India Top 25 Chart Endpoint
     if (url.pathname === '/api/top25') {
       try {
