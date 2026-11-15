@@ -342,6 +342,7 @@ export default function UniqueIndianPlayer({
     );
   });
   const [showIOSInstallModal, setShowIOSInstallModal] = useState(false);
+  const [showAndroidInstallModal, setShowAndroidInstallModal] = useState(false);
 
   const iosBrowserType = useMemo<'chrome' | 'google' | 'inapp' | 'safari'>(() => {
     if (typeof window === 'undefined') return 'safari';
@@ -365,18 +366,20 @@ export default function UniqueIndianPlayer({
   }, []);
 
   const handleInstallClick = async () => {
-    // 1. Android Mobile Browser -> Direct APK download
+    // 1. Android Mobile Browser -> Direct APK download + Contextual Guide Drawer
     if (isAndroid) {
+      const apkUrl = 'https://vybzmusic.online/vybz-v2.9.3.apk';
       try {
         const link = document.createElement('a');
-        link.href = 'https://vybzmusic.online/vybz.apk';
-        link.setAttribute('download', 'vybz.apk');
+        link.href = apkUrl;
+        link.setAttribute('download', 'vybz-v2.9.3.apk');
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
       } catch {
-        window.location.href = 'https://vybzmusic.online/vybz.apk';
+        window.location.href = apkUrl;
       }
+      setShowAndroidInstallModal(true);
       return;
     }
 
@@ -3005,6 +3008,98 @@ export default function UniqueIndianPlayer({
             >
               Samajh Gaya (Done)
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Android APK Download & Quick Installation Guide Modal */}
+      {showAndroidInstallModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/85 backdrop-blur-sm p-4 animate-fade-in"
+          onClick={() => setShowAndroidInstallModal(false)}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label="Download VybZ Android APK"
+            className="w-full max-w-sm rounded-3xl border border-amber-400/30 bg-[#0f1522] p-5 sm:p-6 shadow-2xl text-white space-y-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex items-center gap-3">
+              <div className="size-11 rounded-2xl bg-amber-400/10 border border-amber-400/30 p-1.5 shadow">
+                <img src="/logo.png" alt="VybZ Music" className="size-full object-contain" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <h3 className="text-base font-bold text-white">Downloading VybZ Music</h3>
+                <p className="text-xs text-amber-300 font-medium">
+                  Official Android APK (v2.9.3 • 5.0 MB)
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowAndroidInstallModal(false)}
+                className="grid size-7 place-items-center rounded-full bg-white/10 text-white/70 hover:text-white"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Quick 3-Step Guide (100% English) */}
+            <div className="space-y-2.5 text-xs text-white/80 py-1">
+              <div className="flex items-start gap-3 rounded-xl bg-white/5 p-2.5">
+                <span className="grid size-6 place-items-center rounded-full bg-amber-400 text-black font-bold text-xs shrink-0">
+                  1
+                </span>
+                <p className="leading-relaxed">
+                  <strong className="text-white">Download in progress...</strong> Check your notification bar or Downloads folder once complete.
+                </p>
+              </div>
+
+              <div className="flex items-start gap-3 rounded-xl bg-white/5 p-2.5">
+                <span className="grid size-6 place-items-center rounded-full bg-amber-400 text-black font-bold text-xs shrink-0">
+                  2
+                </span>
+                <p className="leading-relaxed">
+                  If Android displays a security check, tap <strong className="text-white">&apos;More details ∨&apos;</strong> to expand it.
+                </p>
+              </div>
+
+              <div className="flex items-start gap-3 rounded-xl bg-white/5 p-2.5">
+                <span className="grid size-6 place-items-center rounded-full bg-amber-400 text-black font-bold text-xs shrink-0">
+                  3
+                </span>
+                <p className="leading-relaxed">
+                  Tap <strong className="text-amber-300">&apos;Install anyway&apos;</strong> to enjoy 100% ad-free 60 FPS background music!
+                </p>
+              </div>
+            </div>
+
+            {/* Trust Badges */}
+            <div className="rounded-xl border border-white/5 bg-white/[0.03] px-3 py-2 flex items-center justify-between text-[11px] text-white/60">
+              <span className="flex items-center gap-1.5 text-emerald-400 font-medium">
+                ✓ Verified & Malware-Free
+              </span>
+              <span>No Login Required</span>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex items-center gap-2 pt-1">
+              <a
+                href="https://vybzmusic.online/vybz-v2.9.3.apk"
+                download="vybz-v2.9.3.apk"
+                className="flex-1 rounded-xl border border-amber-400/30 bg-amber-400/10 py-2.5 text-center text-xs font-semibold text-amber-300 hover:bg-amber-400/20 active:scale-95 transition-all"
+              >
+                Download Again ⟳
+              </a>
+              <button
+                type="button"
+                onClick={() => setShowAndroidInstallModal(false)}
+                className="flex-1 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 py-2.5 text-xs font-bold text-black shadow active:scale-95 transition-transform"
+              >
+                Got It
+              </button>
+            </div>
           </div>
         </div>
       )}

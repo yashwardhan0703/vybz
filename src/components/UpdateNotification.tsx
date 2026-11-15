@@ -184,19 +184,19 @@ export default function UpdateNotification() {
           {/* Badge */}
           <div className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/30 bg-amber-400/10 px-3 py-1 font-mono text-[11px] font-bold text-amber-300">
             <Sparkles size={11} className="animate-spin text-amber-400" />
-            <span>Naya Version v{apkTargetVersion} Available</span>
+            <span>New Version v{apkTargetVersion} Available</span>
           </div>
 
           {/* Heading */}
           <h2 className="mt-3 text-xl sm:text-2xl font-black text-white leading-snug">
-            VybZ Super-Smooth Update! 🚀
+            VybZ Super-Smooth Update 🚀
           </h2>
 
           <p className="mt-1.5 text-xs sm:text-sm text-white/70 leading-relaxed">
-            Aapki app ko <span className="text-amber-300 font-semibold">100% lag-free</span> aur <span className="text-amber-300 font-semibold">smooth</span> banane ke liye yeh zaroori update hai:
+            Essential performance update for <span className="text-amber-300 font-semibold">100% lag-free</span> and <span className="text-amber-300 font-semibold">smooth</span> playback:
           </p>
 
-          {/* Feature Highlights (Simple, clear language) */}
+          {/* Feature Highlights */}
           <div className="my-4 space-y-2 text-left">
             <div className="flex items-start gap-2.5 rounded-xl border border-white/5 bg-white/[0.03] p-2.5">
               <div className="mt-0.5 grid size-6 shrink-0 place-items-center rounded-lg bg-amber-400/15 text-amber-400">
@@ -204,7 +204,7 @@ export default function UpdateNotification() {
               </div>
               <div>
                 <p className="text-xs font-bold text-white">60 / 120 FPS Buttery Smooth</p>
-                <p className="text-[11px] text-white/55">App ab bina kisi lag ya freeze ke super-fast chalegi.</p>
+                <p className="text-[11px] text-white/55">Ultra-fast scrolling with zero lag or freezes.</p>
               </div>
             </div>
 
@@ -214,7 +214,7 @@ export default function UpdateNotification() {
               </div>
               <div>
                 <p className="text-xs font-bold text-white">Continuous Background Playback</p>
-                <p className="text-[11px] text-white/55">WhatsApp chalate waqt ya screen lock par gana nahi rukega.</p>
+                <p className="text-[11px] text-white/55">Music keeps playing while multitasking or screen locked.</p>
               </div>
             </div>
 
@@ -224,7 +224,7 @@ export default function UpdateNotification() {
               </div>
               <div>
                 <p className="text-xs font-bold text-white">Clean Notification Dismiss</p>
-                <p className="text-[11px] text-white/55">App band (swipe-away) karte hi notification apne aap hat jayegi.</p>
+                <p className="text-[11px] text-white/55">Closing or swiping away the app cleanly clears the player notification.</p>
               </div>
             </div>
           </div>
@@ -237,17 +237,17 @@ export default function UpdateNotification() {
             className="group relative flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-amber-400 via-orange-400 to-amber-500 py-3.5 text-sm font-black text-black shadow-[0_10px_30px_rgba(245,158,11,0.4)] transition hover:brightness-110 active:scale-95 disabled:opacity-75"
           >
             <DownloadCloud size={18} className={isUpdating ? 'animate-bounce' : 'group-hover:scale-110 transition-transform'} />
-            <span>{isUpdating ? 'Downloading APK...' : downloadStarted ? 'Dobara Download Karein 🚀' : 'Abhi Update Karein (1-Click) 🚀'}</span>
+            <span>{isUpdating ? 'Downloading APK...' : downloadStarted ? 'Download Again 🚀' : 'Update Now (1-Click) 🚀'}</span>
           </button>
 
           {/* Download Instructions / Fallback */}
           {downloadStarted && (
             <div className="mt-3.5 animate-fade-in rounded-xl border border-emerald-400/30 bg-emerald-400/10 p-2.5 text-center">
               <p className="text-xs font-semibold text-emerald-300">
-                ✓ Download shuru ho gaya hai!
+                ✓ Download started!
               </p>
               <p className="text-[11px] text-white/70 mt-0.5">
-                Phone ke notification bar par tap karke <strong>'Install / Update'</strong> dabayein.
+                Tap your notification bar or open Downloads to install the update.
               </p>
             </div>
           )}
@@ -260,7 +260,7 @@ export default function UpdateNotification() {
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1 font-mono text-[11px] text-white/50 hover:text-amber-300 transition-colors underline"
             >
-              <span>Download shuru na ho to Chrome me kholen</span>
+              <span>Download not starting? Open in Chrome</span>
               <ExternalLink size={10} />
             </a>
           </div>
@@ -286,7 +286,7 @@ export default function UpdateNotification() {
       </div>
 
       <div className="flex items-center gap-1.5 text-xs font-medium text-white/90">
-        <span className="hidden sm:inline">Naya VybZ Music update ready hai!</span>
+        <span className="hidden sm:inline">New VybZ Music update ready!</span>
         <span className="sm:hidden">Update ready!</span>
       </div>
 
