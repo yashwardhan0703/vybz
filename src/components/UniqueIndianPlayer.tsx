@@ -343,6 +343,15 @@ export default function UniqueIndianPlayer({
   });
   const [showIOSInstallModal, setShowIOSInstallModal] = useState(false);
 
+  const iosBrowserType = useMemo<'chrome' | 'google' | 'inapp' | 'safari'>(() => {
+    if (typeof window === 'undefined') return 'safari';
+    const ua = navigator.userAgent;
+    if (/CriOS/i.test(ua)) return 'chrome';
+    if (/GSA/i.test(ua)) return 'google';
+    if (/FBAN|FBAV|Instagram|WhatsApp|Line|Twitter/i.test(ua)) return 'inapp';
+    return 'safari';
+  }, []);
+
   useEffect(() => {
     const handleBeforeInstall = (e: Event) => {
       // For desktop PC, keep standard PWA install prompt
@@ -2887,7 +2896,13 @@ export default function UniqueIndianPlayer({
               </div>
               <div className="min-w-0 flex-1">
                 <h3 className="text-base font-bold text-white">Install VybZ on iOS</h3>
-                <p className="text-xs text-amber-300 font-medium">Apple Safari Web App</p>
+                <p className="text-xs text-amber-300 font-medium">
+                  {iosBrowserType === 'chrome'
+                    ? 'Google Chrome for iOS'
+                    : iosBrowserType === 'google' || iosBrowserType === 'inapp'
+                    ? 'In-App Browser Detected'
+                    : 'Apple Safari Web App'}
+                </p>
               </div>
               <button
                 type="button"
@@ -2899,32 +2914,88 @@ export default function UniqueIndianPlayer({
             </div>
 
             <div className="space-y-2.5 text-xs text-white/80 py-1">
-              <div className="flex items-start gap-3 rounded-xl bg-white/5 p-2.5">
-                <span className="grid size-6 place-items-center rounded-full bg-amber-400 text-black font-bold text-xs shrink-0">
-                  1
-                </span>
-                <p className="leading-relaxed">
-                  Safari ke bottom toolbar me <strong className="text-white">Share button</strong> (square box with arrow up <span className="inline-block px-1 bg-white/10 rounded">⎋</span>) par tap karein.
-                </p>
-              </div>
-
-              <div className="flex items-start gap-3 rounded-xl bg-white/5 p-2.5">
-                <span className="grid size-6 place-items-center rounded-full bg-amber-400 text-black font-bold text-xs shrink-0">
-                  2
-                </span>
-                <p className="leading-relaxed">
-                  Menu ko neeche scroll karein aur <strong className="text-white">&apos;Add to Home Screen&apos; (+)</strong> par tap karein.
-                </p>
-              </div>
-
-              <div className="flex items-start gap-3 rounded-xl bg-white/5 p-2.5">
-                <span className="grid size-6 place-items-center rounded-full bg-amber-400 text-black font-bold text-xs shrink-0">
-                  3
-                </span>
-                <p className="leading-relaxed">
-                  Top right me <strong className="text-white">&apos;Add&apos;</strong> dabayein. VybZ aapke iPhone par standalone ad-free app ban jayega!
-                </p>
-              </div>
+              {iosBrowserType === 'chrome' ? (
+                <>
+                  <div className="flex items-start gap-3 rounded-xl bg-white/5 p-2.5">
+                    <span className="grid size-6 place-items-center rounded-full bg-amber-400 text-black font-bold text-xs shrink-0">
+                      1
+                    </span>
+                    <p className="leading-relaxed">
+                      Chrome ke address bar me <strong className="text-white">Share button (⬆️)</strong> ya bottom toolbar me <strong className="text-white">3-dots (⋯)</strong> menu par tap karein.
+                    </p>
+                  </div>
+                  <div className="flex items-start gap-3 rounded-xl bg-white/5 p-2.5">
+                    <span className="grid size-6 place-items-center rounded-full bg-amber-400 text-black font-bold text-xs shrink-0">
+                      2
+                    </span>
+                    <p className="leading-relaxed">
+                      Menu me scroll karke <strong className="text-white">&apos;Add to Home Screen&apos; (+)</strong> select karein.
+                    </p>
+                  </div>
+                  <div className="flex items-start gap-3 rounded-xl bg-white/5 p-2.5">
+                    <span className="grid size-6 place-items-center rounded-full bg-amber-400 text-black font-bold text-xs shrink-0">
+                      3
+                    </span>
+                    <p className="leading-relaxed">
+                      Top-right me <strong className="text-white">&apos;Add&apos;</strong> dabayein. VybZ aapke iPhone par standalone ad-free app ban jayega!
+                    </p>
+                  </div>
+                </>
+              ) : iosBrowserType === 'google' || iosBrowserType === 'inapp' ? (
+                <>
+                  <div className="flex items-start gap-3 rounded-xl bg-white/5 p-2.5">
+                    <span className="grid size-6 place-items-center rounded-full bg-amber-400 text-black font-bold text-xs shrink-0">
+                      1
+                    </span>
+                    <p className="leading-relaxed">
+                      Apple in-app browsers se direct install allow nahi karta. Screen ke top ya bottom me <strong className="text-white">3-dots (⋯) ya Share</strong> par tap karein.
+                    </p>
+                  </div>
+                  <div className="flex items-start gap-3 rounded-xl bg-white/5 p-2.5">
+                    <span className="grid size-6 place-items-center rounded-full bg-amber-400 text-black font-bold text-xs shrink-0">
+                      2
+                    </span>
+                    <p className="leading-relaxed">
+                      Menu me se <strong className="text-white">&apos;Open in Safari&apos;</strong> (ya &apos;Open in Chrome&apos;) select karein.
+                    </p>
+                  </div>
+                  <div className="flex items-start gap-3 rounded-xl bg-white/5 p-2.5">
+                    <span className="grid size-6 place-items-center rounded-full bg-amber-400 text-black font-bold text-xs shrink-0">
+                      3
+                    </span>
+                    <p className="leading-relaxed">
+                      Safari khulte hi <strong className="text-white">Share (⬆️)</strong> dabakar <strong className="text-white">&apos;Add to Home Screen&apos;</strong> karein!
+                    </p>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="flex items-start gap-3 rounded-xl bg-white/5 p-2.5">
+                    <span className="grid size-6 place-items-center rounded-full bg-amber-400 text-black font-bold text-xs shrink-0">
+                      1
+                    </span>
+                    <p className="leading-relaxed">
+                      Safari ke bottom toolbar me <strong className="text-white">Share button</strong> (square box with arrow up <span className="inline-block px-1 bg-white/10 rounded">⎋</span>) par tap karein.
+                    </p>
+                  </div>
+                  <div className="flex items-start gap-3 rounded-xl bg-white/5 p-2.5">
+                    <span className="grid size-6 place-items-center rounded-full bg-amber-400 text-black font-bold text-xs shrink-0">
+                      2
+                    </span>
+                    <p className="leading-relaxed">
+                      Menu ko neeche scroll karein aur <strong className="text-white">&apos;Add to Home Screen&apos; (+)</strong> par tap karein.
+                    </p>
+                  </div>
+                  <div className="flex items-start gap-3 rounded-xl bg-white/5 p-2.5">
+                    <span className="grid size-6 place-items-center rounded-full bg-amber-400 text-black font-bold text-xs shrink-0">
+                      3
+                    </span>
+                    <p className="leading-relaxed">
+                      Top right me <strong className="text-white">&apos;Add&apos;</strong> dabayein. VybZ aapke iPhone par standalone ad-free app ban jayega!
+                    </p>
+                  </div>
+                </>
+              )}
             </div>
 
             <button
