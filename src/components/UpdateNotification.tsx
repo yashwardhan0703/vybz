@@ -4,7 +4,7 @@ import { Sparkles, RefreshCw, DownloadCloud, Zap, Music2, CheckCircle2, External
 export default function UpdateNotification() {
   const [hasWebUpdate, setHasWebUpdate] = useState(false);
   const [hasApkUpdate, setHasApkUpdate] = useState(false);
-  const [apkTargetVersion] = useState('2.9.0');
+  const [apkTargetVersion] = useState('2.9.1');
   const [isUpdating, setIsUpdating] = useState(false);
   const [downloadStarted, setDownloadStarted] = useState(false);
   const [dismissedWeb, setDismissedWeb] = useState(false);
@@ -16,7 +16,7 @@ export default function UpdateNotification() {
     const match = ua.match(/VybZApp\/([\d.]+)/);
     if (match && match[1]) {
       const installed = match[1];
-      const latest = '2.9.0';
+      const latest = '2.9.1';
       if (installed !== latest) {
         setHasApkUpdate(true);
       }
@@ -89,7 +89,12 @@ export default function UpdateNotification() {
 
     const apkUrl = 'https://vybzmusic.online/VybZ.apk';
 
-    // 1. Trigger via standard download anchor (works on Android Chrome and WebViews with DownloadListener)
+    // 1. Direct navigation trigger (catches in v2.9.0's shouldOverrideUrlLoading and opens Chrome)
+    try {
+      window.location.href = apkUrl;
+    } catch {}
+
+    // 2. Fallback via anchor
     try {
       const link = document.createElement('a');
       link.href = apkUrl;
@@ -101,16 +106,9 @@ export default function UpdateNotification() {
       document.body.removeChild(link);
     } catch {}
 
-    // 2. Also dispatch location change after 200ms to guarantee OS trigger
-    setTimeout(() => {
-      try {
-        window.location.href = apkUrl;
-      } catch {}
-    }, 250);
-
     setTimeout(() => {
       setIsUpdating(false);
-    }, 3000);
+    }, 2500);
   };
 
   const handleWebUpdate = () => {
