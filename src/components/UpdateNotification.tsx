@@ -4,23 +4,53 @@ import { Sparkles, RefreshCw, DownloadCloud, Zap, Music2, CheckCircle2, External
 export default function UpdateNotification() {
   const [hasWebUpdate, setHasWebUpdate] = useState(false);
   const [hasApkUpdate, setHasApkUpdate] = useState(false);
-  const [apkTargetVersion] = useState('2.9.2');
+  const [apkTargetVersion, setApkTargetVersion] = useState('2.9.2');
   const [isUpdating, setIsUpdating] = useState(false);
   const [downloadStarted, setDownloadStarted] = useState(false);
   const [dismissedWeb, setDismissedWeb] = useState(false);
 
-  // 1. Android APK native in-app update check (compares installed VybZApp UA version with latest)
+  // 1. Android APK native in-app live update check (fetches live version.json bypassing cache)
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const ua = navigator.userAgent;
+    const isVybZApp = /VybZApp/i.test(ua) || Boolean((window as unknown as { VybZNative?: unknown }).VybZNative);
+    if (!isVybZApp) return;
+
     const match = ua.match(/VybZApp\/([\d.]+)/);
-    if (match && match[1]) {
-      const installed = match[1];
-      const latest = '2.9.2';
-      if (installed !== latest) {
-        setHasApkUpdate(true);
+    const installed = match && match[1] ? match[1] : '2.9.0';
+
+    const checkLiveVersion = async () => {
+      try {
+        const res = await fetch(`/version.json?t=${Date.now()}`, {
+          cache: 'no-store',
+          headers: {
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            Pragma: 'no-cache',
+          },
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data && data.latestVersion) {
+          setApkTargetVersion(data.latestVersion);
+          if (installed !== data.latestVersion) {
+            setHasApkUpdate(true);
+          } else {
+            setHasApkUpdate(false);
+          }
+        }
+      } catch (err) {
+        console.warn('[UpdateNotification] Live version check:', err);
       }
-    }
+    };
+
+    checkLiveVersion();
+    const handleVis = () => {
+      if (document.visibilityState === 'visible') {
+        checkLiveVersion();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVis);
+    return () => document.removeEventListener('visibilitychange', handleVis);
   }, []);
 
   // 2. Web PWA Service Worker update check
