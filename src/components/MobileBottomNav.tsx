@@ -67,7 +67,7 @@ export default function MobileBottomNav({ onCategorySelect }: MobileBottomNavPro
   return (
     <nav
       aria-label="Mobile navigation"
-      className="md:hidden shrink-0 z-40 border-t border-white/10 bg-[#080c13]/98 backdrop-blur-xl pb-[max(0.35rem,env(safe-area-inset-bottom))] select-none"
+      className="md:hidden shrink-0 z-40 border-t border-white/10 bg-[#080c13]/98 backdrop-blur-xl pb-[max(0.55rem,env(safe-area-inset-bottom))] pt-1 select-none"
     >
       <div className="flex items-stretch justify-around px-0.5 sm:px-1">
         {items.map((item) => {
@@ -82,12 +82,12 @@ export default function MobileBottomNav({ onCategorySelect }: MobileBottomNavPro
                 onCategorySelect?.();
               }}
               aria-current={isActive ? 'page' : undefined}
-              className={`flex flex-1 min-w-0 flex-col items-center justify-center gap-0.5 py-1.5 min-h-[48px] transition-colors active:scale-95 ${
+              className={`flex flex-1 min-w-0 flex-col items-center justify-center gap-0.5 py-1 min-h-[46px] transition-colors active:scale-95 ${
                 isActive ? 'text-amber-400' : 'text-white/55 hover:text-white/90'
               }`}
             >
               {item.icon}
-              <span className="truncate max-w-full px-0.5 text-[0.62rem] font-semibold tracking-tight">
+              <span className="truncate max-w-full px-0.5 text-[0.6rem] font-medium tracking-tight">
                 {item.label}
               </span>
             </button>

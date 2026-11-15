@@ -66,14 +66,14 @@ export default function DownloadLandingPage({ onBackToPlayer }: DownloadLandingP
     return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
   }, []);
 
-  const apkUrl = 'https://vybzmusic.online/vybz-v2.9.3.apk';
+  const apkUrl = 'https://vybzmusic.online/vybz-v2.9.4.apk';
 
   const triggerApkDownload = () => {
     setDownloadStarted(true);
     try {
       const link = document.createElement('a');
       link.href = apkUrl;
-      link.setAttribute('download', 'vybz-v2.9.3.apk');
+      link.setAttribute('download', 'vybz-v2.9.4.apk');
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -250,14 +250,14 @@ export default function DownloadLandingPage({ onBackToPlayer }: DownloadLandingP
               <div className="relative inline-flex flex-wrap items-center justify-center gap-2">
                 <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/30 bg-amber-400/10 px-3 py-1 text-xs font-bold text-amber-300">
                   <Sparkles size={12} className="animate-pulse text-amber-400" />
-                  Official Release v2.9.3
+                  Official Release v2.9.4
                 </span>
                 <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1 text-xs font-semibold text-emerald-300">
                   <ShieldCheck size={13} />
                   Verified Safe & Clean
                 </span>
                 <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-xs text-white/70">
-                  5.0 MB
+                  9.7 MB
                 </span>
               </div>
 
@@ -276,7 +276,7 @@ export default function DownloadLandingPage({ onBackToPlayer }: DownloadLandingP
                   className="group relative flex w-full max-w-xs sm:max-w-md items-center justify-center gap-2.5 rounded-2xl bg-gradient-to-r from-amber-400 via-orange-400 to-amber-500 py-3.5 sm:py-4 px-6 text-sm sm:text-base font-black text-black shadow-[0_15px_35px_rgba(245,158,11,0.35)] transition-all hover:scale-[1.02] hover:brightness-110 active:scale-95"
                 >
                   <DownloadCloud size={20} className="group-hover:scale-110 transition-transform shrink-0" />
-                  <span className="truncate">Download APK (v2.9.3 • 5.0 MB)</span>
+                  <span className="truncate">Download APK (v2.9.4 • 9.7 MB)</span>
                 </button>
 
                 {downloadStarted && (
@@ -318,7 +318,7 @@ export default function DownloadLandingPage({ onBackToPlayer }: DownloadLandingP
                   </span>
                   <h3 className="text-sm font-bold text-white">Tap Downloaded File</h3>
                   <p className="text-xs text-white/60 leading-relaxed">
-                    Tap the completed <code className="text-amber-300 font-mono text-[11px]">vybz-v2.9.3.apk</code> from your notifications or Downloads folder.
+                    Tap the completed <code className="text-amber-300 font-mono text-[11px]">vybz-v2.9.4.apk</code> from your notifications or Downloads folder.
                   </p>
                 </div>
 
@@ -481,7 +481,7 @@ export default function DownloadLandingPage({ onBackToPlayer }: DownloadLandingP
                   className="flex w-full max-w-xs sm:max-w-xs items-center justify-center gap-2 rounded-2xl border border-amber-400/30 bg-amber-400/10 py-3.5 sm:py-4 px-6 text-sm font-bold text-amber-300 hover:bg-amber-400/20 active:scale-95 transition-all"
                 >
                   <Smartphone size={16} />
-                  <span>Download Android APK (5.0 MB)</span>
+                  <span>Download Android APK (9.7 MB)</span>
                 </button>
               </div>
 
@@ -627,11 +627,11 @@ export default function DownloadLandingPage({ onBackToPlayer }: DownloadLandingP
             </div>
             <div className="flex items-center justify-between py-2.5">
               <span className="text-white/60">Android Package</span>
-              <span className="font-mono text-amber-300 text-xs">com.vybz.music (v2.9.3)</span>
+              <span className="font-mono text-amber-300 text-xs">com.vybz.music (v2.9.4)</span>
             </div>
             <div className="flex items-center justify-between py-2.5">
               <span className="text-white/60">Android APK Size</span>
-              <span className="font-semibold text-white">5.0 MB (5,195,165 bytes)</span>
+              <span className="font-semibold text-white">9.7 MB (10,221,399 bytes)</span>
             </div>
             <div className="flex items-center justify-between py-2.5">
               <span className="text-white/60">Desktop Support</span>
@@ -698,7 +698,7 @@ export default function DownloadLandingPage({ onBackToPlayer }: DownloadLandingP
               onClick={selectedDevice === 'android' ? triggerApkDownload : onBackToPlayer}
               className="rounded-2xl bg-gradient-to-r from-amber-400 to-orange-500 px-6 py-3 text-xs sm:text-sm font-bold text-black shadow-lg hover:brightness-110 active:scale-95 transition-all"
             >
-              {selectedDevice === 'android' ? 'Download VybZ APK (v2.9.3)' : 'Open VybZ Web Player'}
+              {selectedDevice === 'android' ? 'Download VybZ APK (v2.9.4)' : 'Open VybZ Web Player'}
             </button>
           </div>
         </div>

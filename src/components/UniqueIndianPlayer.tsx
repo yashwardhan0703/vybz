@@ -1031,7 +1031,7 @@ export default function UniqueIndianPlayer({
                 type="button"
                 onClick={handleInstallClick}
                 aria-label={isAndroid ? 'Download VybZ Android APK' : isIOS ? 'Install VybZ on iOS' : 'Install VybZ App'}
-                className="flex items-center gap-1.5 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 px-2.5 sm:px-3.5 py-1.5 text-[0.72rem] sm:text-xs font-bold text-black shadow-md hover:brightness-110 active:scale-95 transition-all"
+                className="hidden md:flex items-center gap-1.5 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 px-2.5 sm:px-3.5 py-1.5 text-[0.72rem] sm:text-xs font-bold text-black shadow-md hover:brightness-110 active:scale-95 transition-all"
               >
                 <Download size={13} className="shrink-0" />
                 <span className="hidden xs:inline">
@@ -1736,7 +1736,7 @@ export default function UniqueIndianPlayer({
                       </span>
                     </div>
 
-                    <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
                       {recentHistory.slice(0, 4).map((track, idx) => {
                         const isCur = currentTrackId === track.id;
                         return (
@@ -2271,7 +2271,7 @@ export default function UniqueIndianPlayer({
                       </div>
                     )}
 
-                    <div className="grid grid-cols-2 xs:grid-cols-3 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-2.5 sm:gap-4">
+                    <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 sm:gap-3.5">
                       {visibleArtists.map((artist, aIdx) => {
                         if (!artist) return null;
                         return (
@@ -2286,7 +2286,7 @@ export default function UniqueIndianPlayer({
                                 openArtist(artist);
                               }
                             }}
-                            className="group relative flex flex-col rounded-xl sm:rounded-2xl border border-white/5 bg-[#0e1420] p-2.5 sm:p-3.5 transition-colors hover:border-amber-400/40 hover:bg-[#131c2b] cursor-pointer shadow-md"
+                            className="group relative flex flex-col rounded-xl sm:rounded-2xl border border-white/5 bg-[#0e1420] p-2 sm:p-3.5 transition-colors hover:border-amber-400/40 hover:bg-[#131c2b] cursor-pointer shadow-md"
                           >
                             <div className="relative aspect-square w-full overflow-hidden rounded-full shadow-lg bg-black/40 border-2 border-white/10 group-hover:border-amber-400 transition-colors">
                               <img
@@ -2303,7 +2303,7 @@ export default function UniqueIndianPlayer({
                                 type="button"
                                 onClick={(e) => handleTogglePlayArtist(artist, e)}
                                 aria-label={`Play ${artist.name}`}
-                                className="absolute bottom-1 right-1 grid size-8 sm:size-10 place-items-center rounded-full bg-gradient-to-tr from-amber-400 to-yellow-300 text-black shadow opacity-100 sm:opacity-0 sm:translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-200 hover:scale-105 active:scale-95"
+                                className="absolute bottom-1 right-1 grid size-7 sm:size-9 place-items-center rounded-full bg-gradient-to-tr from-amber-400 to-yellow-300 text-black shadow opacity-100 sm:opacity-0 sm:translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-200 hover:scale-105 active:scale-95"
                               >
                                 {artist.topTracks?.[0] &&
                                 currentTrackId === artist.topTracks[0].id &&

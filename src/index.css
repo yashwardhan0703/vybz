@@ -40,6 +40,8 @@ html {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  -webkit-tap-highlight-color: transparent;
   overscroll-behavior: none;
 }
 
@@ -47,6 +49,7 @@ body {
   margin: 0;
   background: var(--world-bg);
   color: var(--world-fg);
+  -webkit-tap-highlight-color: transparent;
   overscroll-behavior: none;
 }
 

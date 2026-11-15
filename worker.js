@@ -177,8 +177,8 @@ function getRouteMetadata(pathname) {
 
   if (clean === '/download' || clean === '/app') {
     return {
-      title: 'Download VybZ Music APK for Android (v2.9.3) – Free Ad-Free Music Player',
-      description: 'Download official VybZ Music Android APK (v2.9.3 • 5.0 MB). 100% ad-free, 60 FPS smooth playback, continuous background audio, and synced karaoke lyrics.',
+      title: 'Download VybZ Music APK for Android (v2.9.4) – Free Ad-Free Music Player',
+      description: 'Download official VybZ Music Android APK (v2.9.4 • 9.7 MB). 100% ad-free, instant 0.1s offline launch, 60 FPS smooth playback, continuous background audio, and synced karaoke lyrics.',
     };
   }
 
@@ -215,7 +215,7 @@ export default {
         headers.set('Cache-Control', 'private, no-cache, no-store, max-age=0, must-revalidate');
         headers.set('CDN-Cache-Control', 'no-store, no-cache, max-age=0');
         headers.set('Cloudflare-CDN-Cache-Control', 'no-store, no-cache, max-age=0');
-        const rawFileName = url.pathname.split('/').pop() || 'vybz-v2.9.3.apk';
+        const rawFileName = url.pathname.split('/').pop() || 'vybz-v2.9.4.apk';
         headers.set('Content-Disposition', `attachment; filename="${rawFileName}"`);
         return new Response(apkRes.body, {
           status: 200,
@@ -244,11 +244,11 @@ export default {
     // -1.1 Live APK Version Endpoint for instant Android in-app update trigger
     if (url.pathname === '/version.json') {
       return new Response(JSON.stringify({
-        latestVersion: '2.9.3',
+        latestVersion: '2.9.4',
         minVersion: '2.9.0',
-        apkUrl: 'https://vybzmusic.online/vybz-v2.9.3.apk',
-        title: 'VybZ v2.9.3 Official Release! 🚀',
-        releaseNotes: 'Official Release Signed APK, 100% Responsive UI, auto-scaling for all mobile screens, and zero lag.',
+        apkUrl: 'https://vybzmusic.online/vybz-v2.9.4.apk',
+        title: 'VybZ v2.9.4 Official Release! 🚀',
+        releaseNotes: '100% Offline-Bundled UI, instant 0.1s launch, zero lag, pixel-perfect iOS standard mobile alignment.',
         timestamp: Date.now(),
       }), {
         headers: {
@@ -861,9 +861,9 @@ export default {
   "name": "VybZ Music",
   "operatingSystem": "Android",
   "applicationCategory": "MusicApplication",
-  "fileSize": "5MB",
-  "softwareVersion": "2.9.3",
-  "downloadUrl": "https://vybzmusic.online/vybz-v2.9.3.apk",
+  "fileSize": "9.7MB",
+  "softwareVersion": "2.9.4",
+  "downloadUrl": "https://vybzmusic.online/vybz-v2.9.4.apk",
   "offers": {
     "@type": "Offer",
     "price": "0",
