@@ -317,8 +317,16 @@ export default function UniqueIndianPlayer({
   const [newPlaylistTitle, setNewPlaylistTitle] = useState('');
   const [isCreatingNewPl, setIsCreatingNewPl] = useState(false);
 
-  // PWA install prompt & iOS detection
+  // PWA install prompt & Platform detection
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const [isNativeApp] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return Boolean((window as any).VybZNative || navigator.userAgent.includes('VybZApp'));
+  });
+  const [isAndroid] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return /Android/i.test(navigator.userAgent) && !navigator.userAgent.includes('VybZApp') && !(window as any).VybZNative;
+  });
   const [isIOS] = useState(() => {
     if (typeof window === 'undefined') return false;
     return (
@@ -337,14 +345,39 @@ export default function UniqueIndianPlayer({
 
   useEffect(() => {
     const handleBeforeInstall = (e: Event) => {
-      e.preventDefault();
-      setInstallPrompt(e as BeforeInstallPromptEvent);
+      // For desktop PC, keep standard PWA install prompt
+      if (!/Android/i.test(navigator.userAgent)) {
+        e.preventDefault();
+        setInstallPrompt(e as BeforeInstallPromptEvent);
+      }
     };
     window.addEventListener('beforeinstallprompt', handleBeforeInstall);
     return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
   }, []);
 
   const handleInstallClick = async () => {
+    // 1. Android Mobile Browser -> Direct APK download
+    if (isAndroid) {
+      try {
+        const link = document.createElement('a');
+        link.href = 'https://vybzmusic.online/VybZ.apk';
+        link.setAttribute('download', 'VybZ.apk');
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } catch {
+        window.location.href = 'https://vybzmusic.online/VybZ.apk';
+      }
+      return;
+    }
+
+    // 2. iOS Safari -> Show sleek iOS "Add to Home Screen" instructions
+    if (isIOS) {
+      setShowIOSInstallModal(true);
+      return;
+    }
+
+    // 3. Desktop PC (Chrome / Edge) -> Native PWA installation
     if (installPrompt) {
       try {
         await installPrompt.prompt();
@@ -353,12 +386,11 @@ export default function UniqueIndianPlayer({
           setInstallPrompt(null);
         }
       } catch {}
-    } else if (isIOS) {
-      setShowIOSInstallModal(true);
     }
   };
 
-  const showInstallBtn = !isStandalone && (Boolean(installPrompt) || isIOS);
+  // Hide install button if already in native APK or installed as standalone PWA
+  const showInstallBtn = !isNativeApp && !isStandalone && (isAndroid || isIOS || Boolean(installPrompt));
 
   // Auto-sync live YouTube India Top 25 chart on app mount
   useEffect(() => {
@@ -964,11 +996,16 @@ export default function UniqueIndianPlayer({
               <button
                 type="button"
                 onClick={handleInstallClick}
-                aria-label="Install VybZ App"
-                className="flex items-center gap-1.5 rounded-full border border-amber-400/40 bg-amber-400/15 px-2.5 sm:px-3 py-1.5 text-[0.7rem] sm:text-xs font-semibold text-amber-300 hover:bg-amber-400/25 active:scale-95 transition-all"
+                aria-label={isAndroid ? 'Download VybZ Android APK' : isIOS ? 'Install VybZ on iOS' : 'Install VybZ App'}
+                className="flex items-center gap-1.5 rounded-full border border-amber-400/40 bg-amber-400/15 px-2.5 sm:px-3 py-1.5 text-[0.7rem] sm:text-xs font-semibold text-amber-300 hover:bg-amber-400/25 active:scale-95 transition-all shadow-sm"
               >
                 <Download size={13} className="text-amber-400 shrink-0" />
-                <span className="hidden xs:inline">Install</span>
+                <span className="hidden xs:inline">
+                  {isAndroid ? 'Download APK' : 'Install App'}
+                </span>
+                <span className="xs:hidden">
+                  {isAndroid ? 'APK' : 'App'}
+                </span>
               </button>
             )}
 
@@ -2737,13 +2774,18 @@ export default function UniqueIndianPlayer({
                         <button
                           type="button"
                           onClick={handleInstallClick}
-                          className="flex items-center justify-center gap-1.5 rounded-lg border border-white/10 bg-white/5 py-1.5 px-3 text-xs font-medium text-white hover:bg-white/10 active:scale-95 transition-all"
+                          className="flex items-center justify-center gap-1.5 rounded-lg border border-amber-400/40 bg-amber-400/15 py-1.5 px-3 text-xs font-semibold text-amber-300 hover:bg-amber-400/25 active:scale-95 transition-all shadow-sm"
                         >
-                          <Download size={13} /> Install Web App (PWA)
+                          <Download size={13} className="text-amber-400" />
+                          <span>{isAndroid ? 'Download Android App (APK)' : isIOS ? 'Install on iPhone (Web App)' : 'Install Desktop App'}</span>
                         </button>
                       )}
                       <p className="text-[0.65rem] text-white/40 leading-relaxed">
-                        Install VybZ directly as a standalone app on Android or iOS.
+                        {isAndroid
+                          ? 'Get the official 60FPS background audio Android APK directly.'
+                          : isIOS
+                          ? 'Add VybZ directly to your iPhone Home Screen via Safari.'
+                          : 'Install VybZ as a desktop app on your PC.'}
                       </p>
                     </div>
                   </div>
