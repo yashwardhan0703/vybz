@@ -108,8 +108,7 @@ export function useYouTube(containerRef: React.RefObject<HTMLDivElement | null>)
     initialDuration?: string | number;
   } | null>(null);
 
-  // Silent audio anchor & Screen WakeLock for continuous Web/PWA lock screen and background audio
-  const silentAudioRef = useRef<HTMLAudioElement | null>(null);
+  // Screen WakeLock for active playback
   const wakeLockRef = useRef<any>(null);
 
   const requestWakeLock = useCallback(async () => {
@@ -172,45 +171,9 @@ export function useYouTube(containerRef: React.RefObject<HTMLDivElement | null>)
     []
   );
 
-  const ensureSilentAudio = useCallback(() => {
-    if (typeof window === 'undefined') return;
-    try {
-      if (!silentAudioRef.current) {
-        const existing = document.getElementById('vybz-ios-audio-anchor') as HTMLAudioElement | null;
-        if (existing) {
-          silentAudioRef.current = existing;
-        } else {
-          const a = document.createElement('audio');
-          a.src = '/silent.wav';
-          a.loop = true;
-          a.preload = 'auto';
-          (a as any).playsInline = true;
-          (a as any).webkitPlaysInline = true;
-          a.setAttribute('playsinline', 'true');
-          a.setAttribute('webkit-playsinline', 'true');
-          a.style.position = 'fixed';
-          a.style.width = '1px';
-          a.style.height = '1px';
-          a.style.opacity = '0.01';
-          a.style.pointerEvents = 'none';
-          a.style.bottom = '0';
-          a.style.right = '0';
-          document.body.appendChild(a);
-          silentAudioRef.current = a;
-        }
-      }
-      silentAudioRef.current.volume = 0.05;
-      silentAudioRef.current.play().catch(() => {});
-      requestWakeLock();
-    } catch {}
-  }, [requestWakeLock]);
-
-  const pauseSilentAudio = useCallback(() => {
-    try {
-      silentAudioRef.current?.pause();
-      releaseWakeLock();
-    } catch {}
-  }, [releaseWakeLock]);
+  // Cleanup any legacy audio anchor
+  const ensureSilentAudio = useCallback(() => {}, []);
+  const pauseSilentAudio = useCallback(() => {}, []);
 
   const {
     currentWorld,
@@ -479,33 +442,15 @@ export function useYouTube(containerRef: React.RefObject<HTMLDivElement | null>)
       const p = playerRef.current;
       if (document.hidden) {
         if (userIntentPlayingRef.current) {
-          // Both in APK and Web/PWA: Keep audio playing continuously in background!
-          ensureSilentAudio();
-          // YouTube triggers pause inside its iframe upon visibility change.
-          // Re-assert playVideo with small delays to counteract YouTube's internal hidden pause:
-          setTimeout(() => {
-            if (userIntentPlayingRef.current) {
-              try {
-                playerRef.current?.playVideo();
-              } catch {}
-            }
-          }, 100);
-          setTimeout(() => {
-            if (userIntentPlayingRef.current) {
-              try {
-                playerRef.current?.playVideo();
-              } catch {}
-            }
-          }, 350);
-          return;
-        }
-        // App minimized while paused
-        if (p) {
+          wasPlayingBeforeHideRef.current = true;
+          try {
+            const cur = p?.getCurrentTime?.() ?? 0;
+            if (cur > 0) lastPositionRef.current = cur;
+          } catch {}
+        } else if (p) {
           try {
             const cur = p.getCurrentTime?.() ?? 0;
-            if (cur > 0) {
-              lastPositionRef.current = cur;
-            }
+            if (cur > 0) lastPositionRef.current = cur;
           } catch {}
         }
         persistState();
@@ -516,7 +461,7 @@ export function useYouTube(containerRef: React.RefObject<HTMLDivElement | null>)
           try {
             const cur = p.getCurrentTime?.() ?? 0;
             const targetPos = lastPositionRef.current;
-            // If the player got reset to 0 by Chrome background suspension, restore exact position!
+            // If the player got reset to 0 by browser background suspension, restore exact position!
             if (
               targetPos > 1 &&
               (cur < 1 || Math.abs(cur - targetPos) > 3)
@@ -549,33 +494,36 @@ export function useYouTube(containerRef: React.RefObject<HTMLDivElement | null>)
         } catch {}
       };
 
+      // Direct synchronous execution on user gesture from iOS Lock Screen / Control Center
       safeSetHandler('play', () => {
         userIntentPlayingRef.current = true;
         wasPlayingBeforeHideRef.current = true;
-        ensureSilentAudio();
         try {
           playerRef.current?.playVideo();
         } catch {}
         setIsPlaying(true);
-        ms.playbackState = 'playing';
+        try {
+          ms.playbackState = 'playing';
+        } catch {}
       });
 
       safeSetHandler('pause', () => {
         userIntentPlayingRef.current = false;
         wasPlayingBeforeHideRef.current = false;
-        pauseSilentAudio();
+        releaseWakeLock();
         try {
           playerRef.current?.pauseVideo();
         } catch {}
         setIsPlaying(false);
-        ms.playbackState = 'paused';
+        try {
+          ms.playbackState = 'paused';
+        } catch {}
         persistState();
       });
 
       safeSetHandler('nexttrack', () => {
         userIntentPlayingRef.current = true;
         wasPlayingBeforeHideRef.current = true;
-        ensureSilentAudio();
         try {
           playNextTrackRef.current();
         } catch (e) {
@@ -586,7 +534,6 @@ export function useYouTube(containerRef: React.RefObject<HTMLDivElement | null>)
       safeSetHandler('previoustrack', () => {
         userIntentPlayingRef.current = true;
         wasPlayingBeforeHideRef.current = true;
-        ensureSilentAudio();
         try {
           playPrevTrackRef.current();
         } catch (e) {
@@ -774,6 +721,14 @@ export function useYouTube(containerRef: React.RefObject<HTMLDivElement | null>)
             isReadyRef.current = true;
 
             try {
+              const iframe = e.target.getIframe?.();
+              if (iframe) {
+                iframe.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share');
+                iframe.setAttribute('playsinline', '1');
+              }
+            } catch {}
+
+            try {
               e.target.setVolume(volumeRef.current);
               if (isMutedRef.current) {
                 e.target.mute();
@@ -895,29 +850,18 @@ export function useYouTube(containerRef: React.RefObject<HTMLDivElement | null>)
               syncPlayerTimes();
               persistState();
             } else if (state === window.YT.PlayerState.PAUSED) {
-              if (userIntentPlayingRef.current) {
-                // Keep playing in background when screen turns off or user switches apps (Both APK and Web/PWA!)
-                if (document.hidden) {
-                  ensureSilentAudio();
-                  wasPlayingBeforeHideRef.current = true;
-                  setTimeout(() => {
-                    if (userIntentPlayingRef.current) {
-                      try {
-                        playerRef.current?.playVideo();
-                      } catch {}
-                    }
-                  }, 120);
-                  if (typeof navigator !== 'undefined' && 'mediaSession' in navigator) {
-                    navigator.mediaSession.playbackState = 'playing';
-                  }
-                  return;
-                }
+              setIsPlaying(false);
+              setIsLoading(false);
+              syncPlayerTimes();
+              stopProgressInterval();
+              persistState();
+
+              if (typeof navigator !== 'undefined' && 'mediaSession' in navigator) {
+                try {
+                  navigator.mediaSession.playbackState = 'paused';
+                } catch {}
               }
 
-              pauseSilentAudio();
-              if (typeof navigator !== 'undefined' && 'mediaSession' in navigator) {
-                navigator.mediaSession.playbackState = 'paused';
-              }
               const cur = playerRef.current?.getCurrentTime?.() ?? 0;
               const dur = playerRef.current?.getDuration?.() ?? 0;
               const ps = usePlayerStore.getState();
@@ -931,9 +875,9 @@ export function useYouTube(containerRef: React.RefObject<HTMLDivElement | null>)
                 Math.floor(dur * 1000),
                 isLiked
               );
+
               if (document.hidden) {
-                // Backgrounded by mobile browser (e.g. Home button pressed or switched to WhatsApp)
-                // Record the intent and exact playback position; DO NOT spam playVideo in a loop!
+                // Backgrounded by mobile browser (e.g. Home button pressed or screen locked)
                 if (userIntentPlayingRef.current) {
                   wasPlayingBeforeHideRef.current = true;
                   try {
@@ -941,14 +885,7 @@ export function useYouTube(containerRef: React.RefObject<HTMLDivElement | null>)
                     if (cur > 0) lastPositionRef.current = cur;
                   } catch {}
                 }
-                persistState();
-                return;
               }
-              setIsPlaying(false);
-              setIsLoading(false);
-              syncPlayerTimes();
-              stopProgressInterval();
-              persistState();
             } else if (state === window.YT.PlayerState.BUFFERING) {
               setIsLoading(true);
               syncPlayerTimes();
