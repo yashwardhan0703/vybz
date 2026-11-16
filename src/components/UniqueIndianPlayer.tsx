@@ -374,11 +374,11 @@ export default function UniqueIndianPlayer({
   const handleInstallClick = async () => {
     // 1. Android Mobile Browser -> Direct APK download + Contextual Guide Drawer
     if (isAndroid) {
-      const apkUrl = 'https://vybzmusic.online/vybz-v2.9.3.apk';
+      const apkUrl = 'https://vybzmusic.online/vybz.apk';
       try {
         const link = document.createElement('a');
         link.href = apkUrl;
-        link.setAttribute('download', 'vybz-v2.9.3.apk');
+        link.setAttribute('download', 'vybz.apk');
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -389,13 +389,13 @@ export default function UniqueIndianPlayer({
       return;
     }
 
-    // 2. iOS Safari -> Show sleek iOS "Add to Home Screen" instructions
+    // 2. iOS Safari / Chrome on iOS -> Show sleek iOS "Add to Home Screen" instructions
     if (isIOS) {
       setShowIOSInstallModal(true);
       return;
     }
 
-    // 3. Desktop PC (Chrome / Edge) -> Native PWA installation
+    // 3. Desktop PC (Chrome / Edge) -> Native PWA installation or navigate to /download
     if (installPrompt) {
       try {
         await installPrompt.prompt();
@@ -403,12 +403,18 @@ export default function UniqueIndianPlayer({
         if (choice?.outcome === 'accepted') {
           setInstallPrompt(null);
         }
-      } catch {}
+      } catch {
+        navigateTo('/download');
+        setIsDownloadPage(true);
+      }
+    } else {
+      navigateTo('/download');
+      setIsDownloadPage(true);
     }
   };
 
   // Hide install button if already in native APK or installed as standalone PWA
-  const showInstallBtn = !isNativeApp && !isStandalone && (isAndroid || isIOS || Boolean(installPrompt));
+  const showInstallBtn = !isNativeApp && !isStandalone;
 
   // Auto-sync live YouTube India Top 25 chart on app mount
   useEffect(() => {
@@ -1031,7 +1037,7 @@ export default function UniqueIndianPlayer({
                 type="button"
                 onClick={handleInstallClick}
                 aria-label={isAndroid ? 'Download VybZ Android APK' : isIOS ? 'Install VybZ on iOS' : 'Install VybZ App'}
-                className="hidden md:flex items-center gap-1.5 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 px-2.5 sm:px-3.5 py-1.5 text-[0.72rem] sm:text-xs font-bold text-black shadow-md hover:brightness-110 active:scale-95 transition-all"
+                className="flex items-center gap-1.5 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 px-2.5 sm:px-3.5 py-1.5 text-[0.72rem] sm:text-xs font-bold text-black shadow-md hover:brightness-110 active:scale-95 transition-all"
               >
                 <Download size={13} className="shrink-0" />
                 <span className="hidden xs:inline">
@@ -3065,7 +3071,7 @@ export default function UniqueIndianPlayer({
               <div className="min-w-0 flex-1">
                 <h3 className="text-base font-bold text-white">Downloading VybZ Music</h3>
                 <p className="text-xs text-amber-300 font-medium">
-                  Official Android APK (v2.9.3 • 5.0 MB)
+                  Official Android APK (v2.9.4)
                 </p>
               </div>
               <button
@@ -3118,8 +3124,8 @@ export default function UniqueIndianPlayer({
             {/* Action Buttons */}
             <div className="flex items-center gap-2 pt-1">
               <a
-                href="https://vybzmusic.online/vybz-v2.9.3.apk"
-                download="vybz-v2.9.3.apk"
+                href="https://vybzmusic.online/vybz.apk"
+                download="vybz.apk"
                 className="flex-1 rounded-xl border border-amber-400/30 bg-amber-400/10 py-2.5 text-center text-xs font-semibold text-amber-300 hover:bg-amber-400/20 active:scale-95 transition-all"
               >
                 Download Again ⟳
