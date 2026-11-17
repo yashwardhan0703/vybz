@@ -2901,7 +2901,7 @@ export default function UniqueIndianPlayer({
                       }}
                       className="hover:text-amber-300 underline transition-colors"
                     >
-                      Android APK (v2.9.7)
+                      Android APK (v2.9.8)
                     </button>
                   </div>
                 </div>
@@ -3126,7 +3126,7 @@ export default function UniqueIndianPlayer({
               <div className="min-w-0 flex-1">
                 <h3 className="text-base font-bold text-white">Downloading VybZ Music</h3>
                 <p className="text-xs text-amber-300 font-medium">
-                  Official Android APK (v2.9.7)
+                  Official Android APK (v2.9.8)
                 </p>
               </div>
               <button

@@ -4,7 +4,7 @@ import { Sparkles, RefreshCw, DownloadCloud, Zap, Music2, CheckCircle2, External
 export default function UpdateNotification() {
   const [hasWebUpdate, setHasWebUpdate] = useState(false);
   const [hasApkUpdate, setHasApkUpdate] = useState(false);
-  const [apkTargetVersion, setApkTargetVersion] = useState('2.9.7');
+  const [apkTargetVersion, setApkTargetVersion] = useState('2.9.8');
   const [apkDownloadUrl, setApkDownloadUrl] = useState('https://vybzmusic.online/vybz.apk');
   const [isUpdating, setIsUpdating] = useState(false);
   const [downloadStarted, setDownloadStarted] = useState(false);
@@ -142,7 +142,7 @@ export default function UpdateNotification() {
     try {
       const link = document.createElement('a');
       link.href = downloadTarget;
-      link.setAttribute('download', downloadTarget.split('/').pop() || 'vybz-v2.9.3.apk');
+      link.setAttribute('download', downloadTarget.split('/').pop() || 'vybz.apk');
       link.target = '_blank';
       link.rel = 'noopener noreferrer';
       document.body.appendChild(link);
@@ -267,7 +267,7 @@ export default function UpdateNotification() {
           {/* External Browser Fallback Link */}
           <div className="mt-3 text-center">
             <a
-              href={apkDownloadUrl || "https://vybzmusic.online/vybz-v2.9.3.apk"}
+              href={apkDownloadUrl || "https://vybzmusic.online/vybz.apk"}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1 font-mono text-[11px] text-white/50 hover:text-amber-300 transition-colors underline"
