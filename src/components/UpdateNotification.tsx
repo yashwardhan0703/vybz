@@ -22,14 +22,26 @@ export default function UpdateNotification() {
 
     const checkLiveVersion = async () => {
       try {
-        const res = await fetch(`/version.json?t=${Date.now()}`, {
+        // Dynamic /api/apk-version is never precached by ServiceWorker, guaranteeing a fresh check
+        let res = await fetch(`/api/apk-version?t=${Date.now()}`, {
           cache: 'no-store',
           headers: {
             'Cache-Control': 'no-cache, no-store, must-revalidate',
             Pragma: 'no-cache',
           },
-        });
-        if (!res.ok) return;
+        }).catch(() => null);
+
+        if (!res || !res.ok) {
+          res = await fetch(`/version.json?t=${Date.now()}`, {
+            cache: 'no-store',
+            headers: {
+              'Cache-Control': 'no-cache, no-store, must-revalidate',
+              Pragma: 'no-cache',
+            },
+          }).catch(() => null);
+        }
+
+        if (!res || !res.ok) return;
         const data = await res.json();
         if (data && data.latestVersion) {
           setApkTargetVersion(data.latestVersion);

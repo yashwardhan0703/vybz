@@ -241,8 +241,8 @@ export default {
       });
     }
 
-    // -1.1 Live APK Version Endpoint for instant Android in-app update trigger
-    if (url.pathname === '/version.json') {
+    // -1.1 Live APK Version Endpoint for instant Android in-app update trigger (Uncached API route bypasses PWA ServiceWorker)
+    if (url.pathname === '/api/apk-version' || url.pathname === '/api/version-apk' || url.pathname === '/version.json') {
       return new Response(JSON.stringify({
         latestVersion: '2.9.7',
         minVersion: '2.9.0',

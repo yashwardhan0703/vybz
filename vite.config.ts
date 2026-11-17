@@ -358,6 +358,7 @@ export default defineConfig({
         cleanupOutdatedCaches: true,
         navigateFallback: null,
         globPatterns: ['**/*.{js,css,html,ico,png,svg,json,webmanifest}'],
+        globIgnores: ['**/version.json'],
       },
     }),
   ],
