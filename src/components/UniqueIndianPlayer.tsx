@@ -240,10 +240,46 @@ export default function UniqueIndianPlayer({
 
   // Automatically reset scroll position to top whenever changing tab, artist, vibe, or playlist
   useEffect(() => {
-    if (mainScrollRef.current) {
-      mainScrollRef.current.scrollTo({ top: 0, behavior: 'instant' });
+    const el = mainScrollRef.current;
+    if (el) {
+      el.scrollTop = 0;
+      const raf = requestAnimationFrame(() => {
+        if (el) el.scrollTop = 0;
+      });
+      return () => cancelAnimationFrame(raf);
     }
   }, [activeCategory, selectedArtist?.id, selectedVibeWorld?.id, selectedPlaylistId]);
+
+  // Listen for mobile bottom nav category selections to reset sub-views and scroll to top
+  useEffect(() => {
+    const handleCategorySelect = () => {
+      setSelectedPlaylistId(null);
+      setSelectedArtist(null);
+      setSelectedVibeWorld(null);
+      const el = mainScrollRef.current;
+      if (el) {
+        el.scrollTop = 0;
+        requestAnimationFrame(() => {
+          if (el) el.scrollTop = 0;
+        });
+      }
+    };
+    const handleScrollTop = () => {
+      const el = mainScrollRef.current;
+      if (el) {
+        el.scrollTop = 0;
+        requestAnimationFrame(() => {
+          if (el) el.scrollTop = 0;
+        });
+      }
+    };
+    window.addEventListener('vybz-category-select', handleCategorySelect);
+    window.addEventListener('vybz-scroll-top', handleScrollTop);
+    return () => {
+      window.removeEventListener('vybz-category-select', handleCategorySelect);
+      window.removeEventListener('vybz-scroll-top', handleScrollTop);
+    };
+  }, []);
 
   // Handler for opening a Vibe Station with dedicated hero UI & smart seamless playback
   const handlePlayVibeStation = (world: ThemeWorld, userExplicitPlay: boolean = false) => {
@@ -317,6 +353,20 @@ export default function UniqueIndianPlayer({
   const [isArtistExpandAll, setIsArtistExpandAll] = useState<boolean>(true);
   const [artistTracksMap, setArtistTracksMap] = useState<Record<string, ArtistSong[]>>({});
   const [isSearchingArtist, setIsSearchingArtist] = useState<boolean>(false);
+
+  // Progressive rendering for Popular Artists to guarantee 60fps instant tab switch without WebView blank frames
+  const [artistDisplayLimit, setArtistDisplayLimit] = useState<number>(18);
+  useEffect(() => {
+    if (activeCategory === 'artists') {
+      setArtistDisplayLimit(18);
+      const timer = setTimeout(() => {
+        setArtistDisplayLimit(ARTISTS_CATALOG.length);
+      }, 80);
+      return () => clearTimeout(timer);
+    } else {
+      setArtistDisplayLimit(18);
+    }
+  }, [activeCategory]);
 
   // Playlist creation & modal state
   const [playlistModalSong, setPlaylistModalSong] = useState<StoredTrack | null>(null);
@@ -823,10 +873,10 @@ export default function UniqueIndianPlayer({
     ? currentVibeTracks
     : currentVibeTracks.slice(vibeStartIdx, vibeStartIdx + 5);
 
-  // Popular Artists: Home page shows Top 6 preview; dedicated /artists shows all 50 artists
+  // Popular Artists: Home page shows Top 6 preview; dedicated /artists uses progressive batching
   const visibleArtists =
     activeCategory === 'artists'
-      ? ARTISTS_CATALOG
+      ? ARTISTS_CATALOG.slice(0, artistDisplayLimit)
       : ARTISTS_CATALOG.slice(0, 6);
 
   const inspectedPlaylist = selectedPlaylistId
@@ -1062,7 +1112,7 @@ export default function UniqueIndianPlayer({
         </header>
 
         {/* SCROLLABLE DISCOVERY MAIN CONTENT */}
-        <main ref={mainScrollRef} className="relative z-10 flex-1 min-h-0 overflow-y-auto px-3 sm:px-6 lg:px-8 py-3 sm:py-5">
+        <main ref={mainScrollRef} className="relative z-10 flex-1 min-h-0 overflow-y-auto px-3 sm:px-6 lg:px-8 py-3 sm:py-5 [transform:translateZ(0)] [-webkit-overflow-scrolling:touch]">
           <div className="mx-auto w-full max-w-[1440px] space-y-6 sm:space-y-8 pb-6">
             {/* ========================================================
                 ARTIST DETAIL VIEW
@@ -1756,13 +1806,14 @@ export default function UniqueIndianPlayer({
                                 : 'border-white/10 bg-[#0f1522] hover:border-amber-400/35 hover:bg-[#131b2a] shadow-sm'
                             }`}
                           >
-                            <div className="size-11 sm:size-12 shrink-0 overflow-hidden rounded-xl bg-black/40 aspect-square border border-white/5">
+                            <div className="relative size-11 sm:size-12 shrink-0 overflow-hidden rounded-xl bg-gradient-to-br from-amber-500/20 via-[#131b29] to-[#0a0f18] aspect-square border border-white/5 flex items-center justify-center">
+                              <Sparkles size={14} className="absolute text-amber-400/40" />
                               <img
                                 src={track.thumbnail}
                                 alt=""
-                                loading="lazy"
+                                loading="eager"
                                 onError={handleArtworkError}
-                                className="size-full object-cover transition-transform group-hover:scale-105"
+                                className="relative z-10 size-full object-cover transition-transform group-hover:scale-105"
                               />
                             </div>
                             <div className="min-w-0 flex-1">
@@ -1801,7 +1852,7 @@ export default function UniqueIndianPlayer({
                     <div
                       className="relative overflow-hidden rounded-3xl border border-amber-400/25 bg-gradient-to-br from-amber-500/12 via-[#0e1420] to-[#070a10] p-4 sm:p-7 shadow-[0_15px_35px_rgba(0,0,0,0.5)]"
                     >
-                      <div className="pointer-events-none absolute -right-10 -top-10 size-64 sm:size-80 rounded-full bg-amber-500/15 blur-3xl" />
+                      <div className="pointer-events-none absolute -right-10 -top-10 size-64 sm:size-80 rounded-full bg-[radial-gradient(circle,rgba(245,158,11,0.18)_0%,transparent_70%)]" />
                       <div className="relative z-10 max-w-2xl">
                         <div className="inline-flex items-center gap-2 rounded-full border border-amber-400/30 bg-amber-400/10 px-3 py-1 text-[0.62rem] sm:text-xs font-bold uppercase tracking-widest text-amber-300">
                           <TrendingUp size={13} className="text-amber-400" />
@@ -2294,15 +2345,19 @@ export default function UniqueIndianPlayer({
                             }}
                             className="group relative flex flex-col rounded-xl sm:rounded-2xl border border-white/5 bg-[#0e1420] p-2 sm:p-3.5 transition-colors hover:border-amber-400/40 hover:bg-[#131c2b] cursor-pointer shadow-md"
                           >
-                            <div className="relative aspect-square w-full overflow-hidden rounded-full shadow-lg bg-black/40 border-2 border-white/10 group-hover:border-amber-400 transition-colors">
+                            <div className="relative aspect-square w-full overflow-hidden rounded-full shadow-md bg-gradient-to-tr from-amber-500/15 via-[#131b29] to-[#0c121d] border-2 border-white/10 group-hover:border-amber-400 transition-colors">
+                              {/* Glowing fallback icon so it never looks black */}
+                              <div className="absolute inset-0 grid place-items-center text-amber-400/35">
+                                <Mic2 size={20} className="opacity-40" />
+                              </div>
                               <img
                                 src={artist.avatar}
                                 alt={artist.name}
-                                loading="lazy"
+                                loading={aIdx < 12 ? 'eager' : 'lazy'}
                                 decoding="async"
                                 referrerPolicy="no-referrer"
                                 onError={handleArtworkError}
-                                className="size-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                className="relative z-10 size-full object-cover transition-transform duration-300 group-hover:scale-105"
                               />
 
                               <button
@@ -2846,7 +2901,7 @@ export default function UniqueIndianPlayer({
                       }}
                       className="hover:text-amber-300 underline transition-colors"
                     >
-                      Android APK (v2.9.4)
+                      Android APK (v2.9.7)
                     </button>
                   </div>
                 </div>
@@ -3071,7 +3126,7 @@ export default function UniqueIndianPlayer({
               <div className="min-w-0 flex-1">
                 <h3 className="text-base font-bold text-white">Downloading VybZ Music</h3>
                 <p className="text-xs text-amber-300 font-medium">
-                  Official Android APK (v2.9.4)
+                  Official Android APK (v2.9.7)
                 </p>
               </div>
               <button

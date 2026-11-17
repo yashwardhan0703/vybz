@@ -4,7 +4,7 @@ import { Sparkles, RefreshCw, DownloadCloud, Zap, Music2, CheckCircle2, External
 export default function UpdateNotification() {
   const [hasWebUpdate, setHasWebUpdate] = useState(false);
   const [hasApkUpdate, setHasApkUpdate] = useState(false);
-  const [apkTargetVersion, setApkTargetVersion] = useState('2.9.4');
+  const [apkTargetVersion, setApkTargetVersion] = useState('2.9.7');
   const [apkDownloadUrl, setApkDownloadUrl] = useState('https://vybzmusic.online/vybz.apk');
   const [isUpdating, setIsUpdating] = useState(false);
   const [downloadStarted, setDownloadStarted] = useState(false);

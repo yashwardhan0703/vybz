@@ -67,7 +67,7 @@ export default function MobileBottomNav({ onCategorySelect }: MobileBottomNavPro
   return (
     <nav
       aria-label="Mobile navigation"
-      className="md:hidden shrink-0 z-40 border-t border-white/10 bg-[#080c13]/98 backdrop-blur-xl pb-[max(0.55rem,env(safe-area-inset-bottom))] pt-1 select-none"
+      className="md:hidden shrink-0 z-40 border-t border-white/10 bg-[#080c13] pb-[max(0.55rem,env(safe-area-inset-bottom))] pt-1 select-none"
     >
       <div className="flex items-stretch justify-around px-0.5 sm:px-1">
         {items.map((item) => {
@@ -79,6 +79,10 @@ export default function MobileBottomNav({ onCategorySelect }: MobileBottomNavPro
               onClick={() => {
                 navigateTo(pathMap[item.id] || '/');
                 setActiveCategory(item.id);
+                if (typeof window !== 'undefined') {
+                  window.dispatchEvent(new CustomEvent('vybz-category-select', { detail: item.id }));
+                  window.dispatchEvent(new CustomEvent('vybz-scroll-top'));
+                }
                 onCategorySelect?.();
               }}
               aria-current={isActive ? 'page' : undefined}
