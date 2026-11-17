@@ -177,8 +177,8 @@ function getRouteMetadata(pathname) {
 
   if (clean === '/download' || clean === '/app') {
     return {
-      title: 'Download VybZ Music APK for Android (v2.9.4) – Free Ad-Free Music Player',
-      description: 'Download official VybZ Music Android APK (v2.9.4 • 9.7 MB). 100% ad-free, instant 0.1s offline launch, 60 FPS smooth playback, continuous background audio, and synced karaoke lyrics.',
+      title: 'Download VybZ Music APK for Android (v2.9.7) – Free Ad-Free Music Player',
+      description: 'Download official VybZ Music Android APK (v2.9.7 • 9.7 MB). 100% ad-free, instant 0.1s offline launch, 60 FPS smooth playback, continuous background audio, and synced karaoke lyrics.',
     };
   }
 
@@ -244,11 +244,11 @@ export default {
     // -1.1 Live APK Version Endpoint for instant Android in-app update trigger
     if (url.pathname === '/version.json') {
       return new Response(JSON.stringify({
-        latestVersion: '2.9.4',
+        latestVersion: '2.9.7',
         minVersion: '2.9.0',
         apkUrl: 'https://vybzmusic.online/vybz.apk',
-        title: 'VybZ v2.9.4 Official Release! 🚀',
-        releaseNotes: '100% Offline-Bundled UI, instant 0.1s launch, zero lag, pixel-perfect iOS standard mobile alignment.',
+        title: 'VybZ v2.9.7 Official Release! 🚀',
+        releaseNotes: 'Universal certified APK with Multi-Scheme V1+V2+V3 signatures, instant 0.1s launch, zero lag, smooth lock-screen audio.',
         timestamp: Date.now(),
       }), {
         headers: {
@@ -862,7 +862,7 @@ export default {
   "operatingSystem": "Android",
   "applicationCategory": "MusicApplication",
   "fileSize": "9.7MB",
-  "softwareVersion": "2.9.4",
+  "softwareVersion": "2.9.7",
   "downloadUrl": "https://vybzmusic.online/vybz.apk",
   "offers": {
     "@type": "Offer",
