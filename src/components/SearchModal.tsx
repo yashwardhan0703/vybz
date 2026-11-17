@@ -371,7 +371,26 @@ export default function SearchModal({ onPlayCustomVideoId }: SearchModalProps) {
                 Live search unreachable — showing cached library &amp; Top 25 matches.
               </div>
             )}
-            {results.map((item, idx) => {
+            {isLoading ? (
+              <div className="space-y-1 p-1">
+                {Array.from({ length: 4 }).map((_, sIdx) => (
+                  <div
+                    key={`search-skel-${sIdx}`}
+                    className="flex items-center justify-between gap-3 p-2 sm:p-3 rounded-xl"
+                  >
+                    <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
+                      <div className="size-10 sm:size-12 rounded-lg shimmer-skeleton shrink-0" />
+                      <div className="space-y-1.5 flex-1 min-w-0">
+                        <div className="h-3.5 w-40 sm:w-56 rounded shimmer-skeleton" />
+                        <div className="h-2.5 w-24 sm:w-36 rounded shimmer-skeleton opacity-60" />
+                      </div>
+                    </div>
+                    <div className="size-8 rounded-full shimmer-skeleton shrink-0" />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              results.map((item, idx) => {
               const isSelected = idx === selectedIndex;
               return (
                 <div
@@ -425,7 +444,8 @@ export default function SearchModal({ onPlayCustomVideoId }: SearchModalProps) {
                   </div>
                 </div>
               );
-            })}
+            })
+            )}
 
             {results.length === 0 && !isLoading && (
               <div className="py-10 text-center">

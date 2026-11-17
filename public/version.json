@@ -1,8 +1,8 @@
 {
-  "latestVersion": "2.9.8",
+  "latestVersion": "2.9.9",
   "minVersion": "2.9.0",
   "apkUrl": "https://vybzmusic.online/vybz.apk",
-  "title": "VybZ v2.9.8 Official Release! 🚀",
-  "releaseNotes": "Zero-blank instant artist batching, local asset acceleration, and certified Multi-Scheme V1+V2+V3 signatures.",
-  "timestamp": 1731845000000
+  "title": "VybZ v2.9.9 Official Release! 🚀",
+  "releaseNotes": "Universal Zero-Blank Architecture: YouTube-style infinite auto-scroll, glowing shimmer skeletons, and 0ms local asset acceleration.",
+  "timestamp": 1731889900000
 }

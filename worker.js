@@ -244,11 +244,11 @@ export default {
     // -1.1 Live APK Version Endpoint for instant Android in-app update trigger (Uncached API route bypasses PWA ServiceWorker)
     if (url.pathname === '/api/apk-version' || url.pathname === '/api/version-apk' || url.pathname === '/version.json') {
       return new Response(JSON.stringify({
-        latestVersion: '2.9.8',
+        latestVersion: '2.9.9',
         minVersion: '2.9.0',
         apkUrl: 'https://vybzmusic.online/vybz.apk',
-        title: 'VybZ v2.9.8 Official Release! 🚀',
-        releaseNotes: 'Universal certified APK with Multi-Scheme V1+V2+V3 signatures, instant 0.1s launch, zero lag, smooth lock-screen audio.',
+        title: 'VybZ v2.9.9 Official Release! 🚀',
+        releaseNotes: 'Universal Zero-Blank Architecture: YouTube-style infinite auto-scroll, glowing shimmer skeletons, and 0ms local asset acceleration.',
         timestamp: Date.now(),
       }), {
         headers: {
@@ -862,7 +862,7 @@ export default {
   "operatingSystem": "Android",
   "applicationCategory": "MusicApplication",
   "fileSize": "9.7MB",
-  "softwareVersion": "2.9.7",
+  "softwareVersion": "2.9.9",
   "downloadUrl": "https://vybzmusic.online/vybz.apk",
   "offers": {
     "@type": "Offer",

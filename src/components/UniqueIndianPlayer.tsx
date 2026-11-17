@@ -354,19 +354,37 @@ export default function UniqueIndianPlayer({
   const [artistTracksMap, setArtistTracksMap] = useState<Record<string, ArtistSong[]>>({});
   const [isSearchingArtist, setIsSearchingArtist] = useState<boolean>(false);
 
-  // Progressive rendering for Popular Artists to guarantee 60fps instant tab switch without WebView blank frames
-  const [artistDisplayLimit, setArtistDisplayLimit] = useState<number>(18);
+  // Progressive YouTube-style auto-scroll rendering for Popular Artists (infinite scroll with zero blank frames)
+  const [artistDisplayLimit, setArtistDisplayLimit] = useState<number>(12);
+  const artistSentinelRef = useRef<HTMLDivElement | null>(null);
+
   useEffect(() => {
     if (activeCategory === 'artists') {
-      setArtistDisplayLimit(18);
-      const timer = setTimeout(() => {
-        setArtistDisplayLimit(ARTISTS_CATALOG.length);
-      }, 80);
-      return () => clearTimeout(timer);
+      setArtistDisplayLimit(12);
     } else {
-      setArtistDisplayLimit(18);
+      setArtistDisplayLimit(6);
     }
   }, [activeCategory]);
+
+  // YouTube-Style Auto-Scroll Sentinel for Artists Tab
+  useEffect(() => {
+    if (activeCategory !== 'artists') return;
+    const sentinel = artistSentinelRef.current;
+    if (!sentinel) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const first = entries[0];
+        if (first.isIntersecting && artistDisplayLimit < ARTISTS_CATALOG.length) {
+          setArtistDisplayLimit((prev) => Math.min(prev + 12, ARTISTS_CATALOG.length));
+        }
+      },
+      { root: mainScrollRef.current, rootMargin: '350px' }
+    );
+
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [activeCategory, artistDisplayLimit]);
 
   // Playlist creation & modal state
   const [playlistModalSong, setPlaylistModalSong] = useState<StoredTrack | null>(null);
@@ -934,9 +952,8 @@ export default function UniqueIndianPlayer({
 
   return (
     <div className="relative flex flex-1 min-h-0 overflow-hidden bg-[#070a10] text-white">
-      {/* Background radial glow & acoustic dot matrix */}
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(245,158,11,0.11),transparent_70%)]" />
-      <div className="pointer-events-none absolute inset-0 opacity-15 [background-image:radial-gradient(rgba(245,158,11,0.2)_1px,transparent_1px)] [background-size:24px_24px]" />
+      {/* Lightweight GPU-friendly dark ambient backdrop */}
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-amber-500/[0.04] via-transparent to-black/40" />
 
       {/* ========================================================
           TABLET (Compact Rail) & DESKTOP SIDEBAR (md:flex)
@@ -1111,8 +1128,8 @@ export default function UniqueIndianPlayer({
           </div>
         </header>
 
-        {/* SCROLLABLE DISCOVERY MAIN CONTENT */}
-        <main ref={mainScrollRef} className="relative z-10 flex-1 min-h-0 overflow-y-auto px-3 sm:px-6 lg:px-8 py-3 sm:py-5 [transform:translateZ(0)] [-webkit-overflow-scrolling:touch]">
+        {/* SCROLLABLE DISCOVERY MAIN CONTENT (Zero-lag native scrolling without GPU layer clipping) */}
+        <main ref={mainScrollRef} className="relative z-10 flex-1 min-h-0 overflow-y-auto px-3 sm:px-6 lg:px-8 py-3 sm:py-5 [-webkit-overflow-scrolling:touch] [overscroll-behavior:contain]">
           <div className="mx-auto w-full max-w-[1440px] space-y-6 sm:space-y-8 pb-6">
             {/* ========================================================
                 ARTIST DETAIL VIEW
@@ -1289,7 +1306,26 @@ export default function UniqueIndianPlayer({
                     </div>
                   </div>
 
-                  {visibleArtistTracks.length === 0 ? (
+                  {isSearchingArtist ? (
+                    <div className="divide-y divide-white/5 py-1">
+                      {Array.from({ length: 5 }).map((_, sIdx) => (
+                        <div
+                          key={`artist-track-skel-${sIdx}`}
+                          className="flex items-center justify-between p-2 sm:p-3 rounded-xl gap-2"
+                        >
+                          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
+                            <div className="w-5 h-3 rounded shimmer-skeleton shrink-0" />
+                            <div className="size-10 sm:size-11 rounded-lg shimmer-skeleton shrink-0" />
+                            <div className="space-y-1.5 flex-1 min-w-0">
+                              <div className="h-3.5 w-36 sm:w-52 rounded shimmer-skeleton" />
+                              <div className="h-2.5 w-24 sm:w-32 rounded shimmer-skeleton opacity-60" />
+                            </div>
+                          </div>
+                          <div className="size-8 rounded-full shimmer-skeleton shrink-0" />
+                        </div>
+                      ))}
+                    </div>
+                  ) : visibleArtistTracks.length === 0 ? (
                     <div className="py-10 text-center text-sm text-white/45">
                       No tracks available for this artist yet.
                     </div>
@@ -2392,11 +2428,29 @@ export default function UniqueIndianPlayer({
                       })}
                     </div>
 
+                    {/* YouTube-Style Infinite Auto-Scroll Sentinel & Glowing Shimmer Skeleton Grid */}
+                    {activeCategory === 'artists' && artistDisplayLimit < ARTISTS_CATALOG.length && (
+                      <div ref={artistSentinelRef} className="pt-2 pb-3">
+                        <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 sm:gap-3.5">
+                          {Array.from({ length: 6 }).map((_, sIdx) => (
+                            <div
+                              key={`artist-auto-skel-${sIdx}`}
+                              className="flex flex-col items-center rounded-xl sm:rounded-2xl border border-white/5 bg-[#0e1420]/70 p-2 sm:p-3.5 shadow-sm space-y-2.5"
+                            >
+                              <div className="size-20 sm:size-24 rounded-full shimmer-skeleton border border-white/5" />
+                              <div className="h-3 w-16 sm:w-20 rounded shimmer-skeleton" />
+                              <div className="h-2 w-10 rounded shimmer-skeleton opacity-50" />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
                     {activeCategory === 'artists' && (
                       <div className="mt-3 sm:mt-5 pt-3 border-t border-white/5 flex items-center justify-between text-xs text-white/45 px-1 py-1">
                         <span className="flex items-center gap-1.5">
                           <span className="inline-block size-2 rounded-full bg-emerald-400" />
-                          Complete Indian Artists Catalog • {ARTISTS_CATALOG.length} Curated Artists
+                          Showing {Math.min(artistDisplayLimit, ARTISTS_CATALOG.length)} of {ARTISTS_CATALOG.length} Curated Artists
                         </span>
                         <button
                           type="button"
@@ -3126,7 +3180,7 @@ export default function UniqueIndianPlayer({
               <div className="min-w-0 flex-1">
                 <h3 className="text-base font-bold text-white">Downloading VybZ Music</h3>
                 <p className="text-xs text-amber-300 font-medium">
-                  Official Android APK (v2.9.8)
+                  Official Android APK (v2.9.9)
                 </p>
               </div>
               <button
