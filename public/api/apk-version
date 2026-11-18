@@ -1,8 +1,8 @@
 {
-  "latestVersion": "2.9.9",
+  "latestVersion": "3.0.0",
   "minVersion": "2.9.0",
   "apkUrl": "https://vybzmusic.online/vybz.apk",
-  "title": "VybZ v2.9.9 Official Release! 🚀",
-  "releaseNotes": "Universal Zero-Blank Architecture: YouTube-style infinite auto-scroll, glowing shimmer skeletons, and 0ms local asset acceleration.",
-  "timestamp": 1731889900000
+  "title": "VybZ v3.0.0 Official Release! 🚀",
+  "releaseNotes": "100% Non-Stop Lock-Screen & Background Playback, YouTube-Style Infinite Auto-Scroll, and Shimmer Skeletons.",
+  "timestamp": 1731902800000
 }
