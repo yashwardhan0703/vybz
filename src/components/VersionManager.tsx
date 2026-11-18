@@ -176,6 +176,19 @@ export default function VersionManager() {
     };
   }, [executeSilentUpdate]);
 
+  // Back key / Escape key dismiss support for modal
+  useEffect(() => {
+    if (!showWhatsNew) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        localStorage.setItem('vybz_seen_v3_250', 'true');
+        setShowWhatsNew(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [showWhatsNew]);
+
   const handleDismiss = () => {
     localStorage.setItem('vybz_seen_v3_250', 'true');
     setShowWhatsNew(false);
@@ -205,88 +218,94 @@ export default function VersionManager() {
         </div>
       )}
 
-      {/* 2. What's New Modal (Only for 1st time viewers of 250 songs) */}
+      {/* 2. What's New Modal (Auto-Adaptive Responsive Fluid Modal for all phone layouts) */}
       {showWhatsNew && (
         <div
           role="dialog"
           aria-modal="true"
-          className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/80 p-4 backdrop-blur-md animate-fade-in"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) handleDismiss();
+          }}
+          className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/85 p-3 sm:p-4 backdrop-blur-md animate-fade-in"
         >
-          <div className="relative w-full max-w-md overflow-hidden rounded-3xl border border-amber-500/30 bg-[#0e1420] p-6 text-white shadow-[0_20px_60px_rgba(0,0,0,0.9)] sm:p-7">
+          <div className="relative w-full max-w-[calc(100vw-1.5rem)] sm:max-w-md max-h-[85dvh] flex flex-col rounded-2xl sm:rounded-3xl border border-amber-500/30 bg-[#0e1420] text-white shadow-[0_20px_60px_rgba(0,0,0,0.9)] overflow-hidden">
             {/* Glow backdrop */}
             <div className="pointer-events-none absolute -top-16 -right-16 size-48 rounded-full bg-amber-500/15 blur-3xl" />
             <div className="pointer-events-none absolute -bottom-16 -left-16 size-48 rounded-full bg-orange-500/15 blur-3xl" />
 
-            {/* Close Button */}
-            <button
-              type="button"
-              onClick={handleDismiss}
-              aria-label="Close"
-              className="absolute top-4 right-4 flex size-8 items-center justify-center rounded-full bg-white/5 text-white/60 transition hover:bg-white/10 hover:text-white"
-            >
-              <X size={16} />
-            </button>
+            {/* 1. STICKY TOP HEADER (Always 100% visible, never cut off) */}
+            <div className="shrink-0 flex items-start justify-between gap-3 px-5 pt-5 pb-3 border-b border-white/5 bg-[#0e1420]/95 backdrop-blur-sm z-10">
+              <div className="flex-1 min-w-0 pr-2">
+                <div className="flex items-center gap-2">
+                  <span className="inline-flex items-center gap-1 rounded-full border border-sky-400/40 bg-sky-500/10 px-2.5 py-0.5 text-[10px] font-bold tracking-wider text-sky-400 uppercase">
+                    <Sparkles size={11} />
+                    Mega Update Live
+                  </span>
+                </div>
+                <h3 className="mt-2 text-base sm:text-lg font-extrabold tracking-tight text-white leading-tight">
+                  250 Songs Across 10 Mood Stations! 🎵
+                </h3>
+                <p className="mt-1 text-[11px] sm:text-xs text-white/70 leading-relaxed">
+                  Alfaaz &amp; Ehsaas, Hostel Ki Raat, aur Train Ki Khidki samet 10 curated stations live hain.
+                </p>
+              </div>
 
-            {/* Badge & Title */}
-            <div className="flex items-center gap-2">
-              <span className="inline-flex items-center gap-1 rounded-full border border-sky-400/40 bg-sky-500/10 px-3 py-1 text-[11px] font-bold tracking-wider text-sky-400 uppercase">
-                <Sparkles size={12} />
-                Mega Update Live
-              </span>
+              {/* Close Button */}
+              <button
+                type="button"
+                onClick={handleDismiss}
+                aria-label="Close"
+                className="shrink-0 -mr-1 -mt-1 flex size-8 items-center justify-center rounded-full bg-white/10 text-white/70 hover:bg-white/20 hover:text-white transition active:scale-95"
+              >
+                <X size={16} />
+              </button>
             </div>
 
-            <h3 className="mt-3 text-xl font-extrabold tracking-tight text-white sm:text-2xl">
-              250 Songs Across 10 Mood Stations! 🎵
-            </h3>
-            <p className="mt-1.5 text-xs text-white/70 sm:text-sm">
-              Alfaaz &amp; Ehsaas, Hostel Ki Raat, aur Train Ki Khidki samet 10 curated stations live hain.
-            </p>
-
-            {/* Feature Cards Grid */}
-            <div className="mt-4 space-y-2 text-xs">
+            {/* 2. SCROLLABLE MIDDLE BODY (Adapts to any mobile screen height) */}
+            <div className="flex-1 min-h-0 overflow-y-auto px-5 py-3 space-y-2 text-xs [-webkit-overflow-scrolling:touch] [overscroll-behavior:contain]">
               <div className="flex items-center gap-3 rounded-xl border border-sky-500/20 bg-sky-500/5 p-2.5 transition hover:bg-sky-500/10">
-                <span className="text-xl">🌙</span>
-                <div className="flex-1">
-                  <span className="font-bold text-sky-400">अल्फ़ाज़ और अहसास:</span>
-                  <p className="text-[11px] text-white/60">Jhol, Khasara, Faasle &amp; Viral Urdu Indie</p>
+                <span className="text-xl shrink-0">🌙</span>
+                <div className="flex-1 min-w-0">
+                  <span className="font-bold text-sky-400 block truncate">अल्फ़ाज़ और अहसास:</span>
+                  <p className="text-[11px] text-white/60 truncate">Jhol, Khasara, Faasle &amp; Viral Urdu Indie</p>
                 </div>
-                <span className="rounded bg-sky-500/20 px-2 py-0.5 text-[10px] font-bold text-sky-300">New • 25 Songs</span>
+                <span className="shrink-0 rounded bg-sky-500/20 px-2 py-0.5 text-[10px] font-bold text-sky-300">New • 25</span>
               </div>
 
               <div className="flex items-center gap-3 rounded-xl border border-orange-500/20 bg-orange-500/5 p-2.5 transition hover:bg-orange-500/10">
-                <span className="text-xl">🎸</span>
-                <div className="flex-1">
-                  <span className="font-bold text-orange-400">होस्टल की रात:</span>
-                  <p className="text-[11px] text-white/60">Lucky Ali, Maggi Jam &amp; 2 AM Nostalgia</p>
+                <span className="text-xl shrink-0">🎸</span>
+                <div className="flex-1 min-w-0">
+                  <span className="font-bold text-orange-400 block truncate">होस्टल की रात:</span>
+                  <p className="text-[11px] text-white/60 truncate">Lucky Ali, Maggi Jam &amp; 2 AM Nostalgia</p>
                 </div>
-                <span className="rounded bg-orange-500/20 px-2 py-0.5 text-[10px] font-bold text-orange-300">New • 25 Songs</span>
+                <span className="shrink-0 rounded bg-orange-500/20 px-2 py-0.5 text-[10px] font-bold text-orange-300">New • 25</span>
               </div>
 
               <div className="flex items-center gap-3 rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-2.5 transition hover:bg-emerald-500/10">
-                <span className="text-xl">🚂</span>
-                <div className="flex-1">
-                  <span className="font-bold text-emerald-400">ट्रेन की खिड़की:</span>
-                  <p className="text-[11px] text-white/60">Chaiyya Chaiyya, Window Seat &amp; Safar Hits</p>
+                <span className="text-xl shrink-0">🚂</span>
+                <div className="flex-1 min-w-0">
+                  <span className="font-bold text-emerald-400 block truncate">ट्रेन की खिड़की:</span>
+                  <p className="text-[11px] text-white/60 truncate">Chaiyya Chaiyya, Window Seat &amp; Safar Hits</p>
                 </div>
-                <span className="rounded bg-emerald-500/20 px-2 py-0.5 text-[10px] font-bold text-emerald-300">New • 25 Songs</span>
+                <span className="shrink-0 rounded bg-emerald-500/20 px-2 py-0.5 text-[10px] font-bold text-emerald-300">New • 25</span>
               </div>
 
               <div className="flex items-center gap-3 rounded-xl border border-white/5 bg-white/[0.03] p-2.5 transition hover:bg-white/[0.06]">
-                <span className="text-xl">☕</span>
-                <div className="flex-1">
-                  <span className="font-bold text-amber-400">चाय टपरी:</span>
-                  <p className="text-[11px] text-white/60">Kishore Kumar, Rafi &amp; Desi Acoustic Retro</p>
+                <span className="text-xl shrink-0">☕</span>
+                <div className="flex-1 min-w-0">
+                  <span className="font-bold text-amber-400 block truncate">चाय टपरी:</span>
+                  <p className="text-[11px] text-white/60 truncate">Kishore Kumar, Rafi &amp; Desi Acoustic Retro</p>
                 </div>
-                <span className="rounded bg-amber-500/20 px-2 py-0.5 text-[10px] font-bold text-amber-300">25 Songs</span>
+                <span className="shrink-0 rounded bg-amber-500/20 px-2 py-0.5 text-[10px] font-bold text-amber-300">25 Songs</span>
               </div>
             </div>
 
-            {/* CTA Buttons */}
-            <div className="mt-5 flex gap-2.5">
+            {/* 3. STICKY BOTTOM ACTIONS (Never pushed below 3-button navigation bar) */}
+            <div className="shrink-0 p-4 border-t border-white/5 bg-[#0e1420]/95 backdrop-blur-sm flex gap-2.5 pb-[max(1rem,env(safe-area-inset-bottom))] z-10">
               <button
                 type="button"
                 onClick={handleExploreVibes}
-                className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-sky-400 via-amber-400 to-orange-500 py-3 text-xs font-bold text-black shadow-lg shadow-sky-500/20 transition hover:brightness-110 active:scale-98"
+                className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-sky-400 via-amber-400 to-orange-500 py-2.5 sm:py-3 text-xs font-bold text-black shadow-lg shadow-sky-500/20 transition hover:brightness-110 active:scale-98"
               >
                 <Radio size={15} />
                 <span>10 Vibe Stations Suno 🎧</span>
@@ -294,7 +313,7 @@ export default function VersionManager() {
               <button
                 type="button"
                 onClick={handleDismiss}
-                className="rounded-xl border border-white/10 px-4 py-3 text-xs font-semibold text-white/70 transition hover:bg-white/5 hover:text-white"
+                className="rounded-xl border border-white/10 px-4 py-2.5 sm:py-3 text-xs font-semibold text-white/70 transition hover:bg-white/5 hover:text-white active:scale-98"
               >
                 Baad Me
               </button>

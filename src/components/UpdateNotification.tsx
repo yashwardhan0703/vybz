@@ -180,8 +180,8 @@ export default function UpdateNotification() {
   // ========================================================
   if (hasApkUpdate) {
     return (
-      <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-fade-in select-none">
-        <div className="relative w-full max-w-sm sm:max-w-md overflow-hidden rounded-3xl border border-amber-400/40 bg-[#0d131f] p-6 text-center shadow-[0_25px_60px_rgba(0,0,0,0.95)]">
+      <div className="fixed inset-0 z-[10000] flex items-center justify-center p-3 sm:p-4 bg-black/90 backdrop-blur-md animate-fade-in select-none">
+        <div className="relative w-full max-w-[calc(100vw-1.5rem)] sm:max-w-md max-h-[85dvh] flex flex-col overflow-y-auto rounded-2xl sm:rounded-3xl border border-amber-400/40 bg-[#0d131f] p-5 sm:p-6 text-center shadow-[0_25px_60px_rgba(0,0,0,0.95)] [-webkit-overflow-scrolling:touch]">
           {/* Ambient Gold Glow Behind Icon */}
           <div className="pointer-events-none absolute -top-20 left-1/2 -translate-x-1/2 size-48 rounded-full bg-amber-400/20 blur-3xl" />
 
