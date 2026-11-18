@@ -149,6 +149,11 @@ export function getStoredPlaybackState(): PersistedPlaybackState | null {
     if (!raw) return null;
     const parsed = JSON.parse(raw) as PersistedPlaybackState;
     if (parsed && typeof parsed.currentTrackId === 'string' && parsed.currentTrackId) {
+      // 6-hour TTL: If saved playback state is older than 6 hours, discard stale queue so user starts fresh
+      if (typeof parsed.updatedAt === 'number' && Date.now() - parsed.updatedAt > 6 * 60 * 60 * 1000) {
+        clearStoredPlaybackState();
+        return null;
+      }
       return parsed;
     }
     return null;

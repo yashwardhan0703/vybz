@@ -39,6 +39,25 @@ function AppLayout() {
     playSearchQuery,
   } = useYouTube(playerContainerRef);
 
+  // Auto-heal single-page app chunk mismatches across updates without user having to clear cache
+  useEffect(() => {
+    const handleChunkError = (e: ErrorEvent | PromiseRejectionEvent) => {
+      const msg = 'message' in e ? e.message : ((e as PromiseRejectionEvent).reason?.message || String((e as PromiseRejectionEvent).reason || ''));
+      if (/Failed to fetch dynamically imported module|ChunkLoadError|Loading chunk/i.test(msg)) {
+        if (!sessionStorage.getItem('chunk_heal_retry')) {
+          sessionStorage.setItem('chunk_heal_retry', '1');
+          window.location.reload();
+        }
+      }
+    };
+    window.addEventListener('error', handleChunkError);
+    window.addEventListener('unhandledrejection', handleChunkError);
+    return () => {
+      window.removeEventListener('error', handleChunkError);
+      window.removeEventListener('unhandledrejection', handleChunkError);
+    };
+  }, []);
+
   // Sync Vibe / Studio mode with browser back/forward buttons without breaking modal hashes
   useEffect(() => {
     // Initial mount check: unless URL hash explicitly requests #vibe, always default to Home (studio)
@@ -140,10 +159,10 @@ function AppLayout() {
       <UpdateNotification />
       <VersionManager />
 
-      {/* Persistent YouTube mount with full opacity placed behind UI (-z-50) for Android MediaSession compatibility */}
+      {/* Persistent YouTube mount placed in active viewport layer for continuous background auto-play */}
       <div
         aria-hidden="true"
-        className="pointer-events-none fixed bottom-0 right-0 -z-50 h-[240px] w-[240px] opacity-100 overflow-hidden"
+        className="pointer-events-none fixed bottom-1 right-1 z-0 size-1 opacity-[0.002] overflow-hidden"
       >
         <div ref={playerContainerRef} className="size-full" />
       </div>

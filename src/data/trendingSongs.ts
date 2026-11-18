@@ -176,13 +176,13 @@ export const TOP_25_TRENDING_INDIAN: TrendingTrack[] = [
   },
   {
     rank: 17,
-    id: 'b4b1cMVZOUU',
+    id: '59mHbOOYY0E',
     title: 'Hookah Bar',
     movie: 'YouTube India Chart',
     singers: 'Himesh Reshammiya, Vineet Singh & Aaman Trikha',
     duration: '2:55',
     tag: '🎵 Trending India',
-    thumbnail: 'https://img.youtube.com/vi/b4b1cMVZOUU/mqdefault.jpg',
+    thumbnail: 'https://img.youtube.com/vi/59mHbOOYY0E/mqdefault.jpg',
   },
   {
     rank: 18,

@@ -1,8 +1,9 @@
 {
-  "latestVersion": "3.0.0",
+  "latestVersion": "3.1.0",
+  "versionCode": 15,
   "minVersion": "2.9.0",
   "apkUrl": "https://vybzmusic.online/vybz.apk",
-  "title": "VybZ v3.0.0 Official Release! 🚀",
-  "releaseNotes": "100% Non-Stop Lock-Screen & Background Playback, YouTube-Style Infinite Auto-Scroll, and Shimmer Skeletons.",
-  "timestamp": 1731902800000
+  "title": "VybZ v3.1.0 Universal Music Engine! 🚀",
+  "releaseNotes": "Universal Auto-Healing Engine across all routes: zero song skips, automatic playback recovery, and instantaneous smooth background transitions.",
+  "timestamp": 1731920000000
 }

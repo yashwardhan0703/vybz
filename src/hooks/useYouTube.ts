@@ -91,6 +91,7 @@ export function useYouTube(containerRef: React.RefObject<HTMLDivElement | null>)
   const lastPrevTapTimeRef = useRef<number>(0);
   const userIntentPlayingRef = useRef<boolean>(false);
   const lastPositionRef = useRef<number>(0);
+  const failedTrackIdsRef = useRef<Set<string>>(new Set());
   const wasPlayingBeforeHideRef = useRef<boolean>(false);
   const currentWorldRef = useRef(usePlayerStore.getState().currentWorld);
   const repeatModeRef = useRef(usePlayerStore.getState().repeatMode);
@@ -350,7 +351,12 @@ export function useYouTube(containerRef: React.RefObject<HTMLDivElement | null>)
       const dur = player.getDuration?.() ?? 0;
       if (typeof cur === 'number' && isFinite(cur)) {
         if (cur > 0) {
-          lastPositionRef.current = cur;
+          // If track is near the very end (> duration - 1.5s), don't store near-end position as resume point
+          if (dur > 0 && cur >= dur - 1.5) {
+            lastPositionRef.current = 0;
+          } else {
+            lastPositionRef.current = cur;
+          }
           setCurrentTime(cur);
 
           // Periodically persist playback progress to localStorage (when time changes by at least 1s)
@@ -966,25 +972,53 @@ export function useYouTube(containerRef: React.RefObject<HTMLDivElement | null>)
             }
           },
           onError: () => {
-            // When document is hidden, mobile Chrome suspends the iframe decoding pipeline.
-            // Do NOT reload, search or skip track while in background!
-            if (document.hidden) {
-              return;
-            }
             const failedTrack = activeCustomTrackRef.current;
+            const failedId = failedTrack?.videoId;
+
+            if (failedId) {
+              failedTrackIdsRef.current.add(failedId);
+            }
+
+            // Universal Auto-Healing: Find clean, embeddable replacement for ANY route/song
             if (failedTrack && failedTrack.title && failedTrack.title.trim()) {
               const q = `${failedTrack.title} ${failedTrack.artist || ''} official audio`;
               fetch(`/api/search?q=${encodeURIComponent(q)}`)
                 .then((r) => (r.ok ? r.json() : null))
                 .then((data) => {
-                  const best = data?.results?.[0];
-                  if (best && best.id && best.id !== failedTrack.videoId && playerRef.current) {
-                    failedTrack.videoId = best.id;
-                    if (best.thumbnail) failedTrack.thumbnail = best.thumbnail;
-                    playerRef.current.loadVideoById({
-                      videoId: best.id,
-                      startSeconds: lastPositionRef.current > 0 ? lastPositionRef.current : 0,
-                    });
+                  const results: Array<{ id: string; title: string; thumbnail?: string }> = data?.results || [];
+                  // Find the first alternate video whose ID is not already failed and not the current failed ID
+                  const alternate = results.find(
+                    (r) => r.id && r.id !== failedId && !failedTrackIdsRef.current.has(r.id)
+                  );
+
+                  if (alternate && playerRef.current) {
+                    failedTrack.videoId = alternate.id;
+                    if (alternate.thumbnail) failedTrack.thumbnail = alternate.thumbnail;
+
+                    // Update current queue in-memory so subsequent user navigation uses the working ID
+                    queueRef.current = queueRef.current.map((item) =>
+                      item.id === failedId
+                        ? { ...item, id: alternate.id, thumbnail: alternate.thumbnail || item.thumbnail }
+                        : item
+                    );
+                    setPlaybackQueue([...queueRef.current], queueIndexRef.current);
+
+                    // Always start replacement at 0s (never carry over ghost previous position!)
+                    lastPositionRef.current = 0;
+                    setCurrentTime(0);
+
+                    try {
+                      playerRef.current.loadVideoById({
+                        videoId: alternate.id,
+                        startSeconds: 0,
+                      });
+                      setTimeout(() => {
+                        try {
+                          playerRef.current?.playVideo();
+                        } catch {}
+                      }, 100);
+                    } catch {}
+
                     persistState();
                     return;
                   }
