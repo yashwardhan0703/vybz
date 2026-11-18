@@ -1237,6 +1237,8 @@ export function useYouTube(containerRef: React.RefObject<HTMLDivElement | null>)
         }
 
         // Populate context queue initially
+        let isNewRadioSeed = false;
+
         if (contextQueue && contextQueue.length > 0) {
           queueRef.current = contextQueue;
           queueIndexRef.current =
@@ -1274,9 +1276,10 @@ export function useYouTube(containerRef: React.RefObject<HTMLDivElement | null>)
             ];
             queueIndexRef.current = 0;
             isVibeRadioModeRef.current = true;
+            isNewRadioSeed = true;
           }
         } else {
-          // Song already in existing queue
+          // Song already in existing queue: keep queue rock solid and update index
           const idx = queueRef.current.findIndex((q) => q.id === videoId);
           if (idx !== -1) queueIndexRef.current = idx;
         }
@@ -1325,30 +1328,27 @@ export function useYouTube(containerRef: React.RefObject<HTMLDivElement | null>)
         );
         persistState();
 
-        // In Vibe Radio mode (e.g. after search or radio autoplay), fetch YouTube watch-next recommendations in background
-        if (isVibeRadioModeRef.current) {
+        // In Vibe Radio mode: fetch pure music recommendations only if starting new seed OR queue running low (<= 2 tracks left)
+        const queueRemaining = queueRef.current.length - queueIndexRef.current;
+        if (isVibeRadioModeRef.current && (isNewRadioSeed || queueRemaining <= 2)) {
           fetchRelatedVibeQueue(videoId, resolvedTitle, resolvedArtist).then((related) => {
             if (related && related.length > 0) {
-              const curTrack = {
-                id: videoId,
-                title: resolvedTitle,
-                artist: resolvedArtist,
-                thumbnail: resolvedThumb,
-                duration: initSec > 0 ? initSec : undefined,
-              };
-              // Only keep unique same-vibe songs
-              queueRef.current = [curTrack, ...related];
-              queueIndexRef.current = 0;
-              setTrackInfo(
-                0,
-                queueRef.current.length,
-                resolvedTitle,
-                resolvedArtist,
-                resolvedThumb,
-                videoId
-              );
-              setPlaybackQueue([...queueRef.current], 0);
-              persistState();
+              const existingIds = new Set(queueRef.current.map((q) => q.id));
+              const freshTracks = related.filter((r) => !existingIds.has(r.id));
+              if (freshTracks.length > 0) {
+                // Rock-solid append: never wipe existing queue or reset current index!
+                queueRef.current = [...queueRef.current, ...freshTracks].slice(0, 50);
+                setTrackInfo(
+                  queueIndexRef.current,
+                  queueRef.current.length,
+                  resolvedTitle,
+                  resolvedArtist,
+                  resolvedThumb,
+                  videoId
+                );
+                setPlaybackQueue([...queueRef.current], queueIndexRef.current);
+                persistState();
+              }
             }
           });
         }

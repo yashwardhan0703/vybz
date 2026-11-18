@@ -4,7 +4,7 @@ import { Sparkles, RefreshCw, DownloadCloud, Zap, Music2, CheckCircle2, External
 export default function UpdateNotification() {
   const [hasWebUpdate, setHasWebUpdate] = useState(false);
   const [hasApkUpdate, setHasApkUpdate] = useState(false);
-  const [apkTargetVersion, setApkTargetVersion] = useState('3.1.0');
+  const [apkTargetVersion, setApkTargetVersion] = useState('3.2.0');
   const [apkDownloadUrl, setApkDownloadUrl] = useState('https://vybzmusic.online/vybz.apk');
   const [isUpdating, setIsUpdating] = useState(false);
   const [downloadStarted, setDownloadStarted] = useState(false);
@@ -133,16 +133,28 @@ export default function UpdateNotification() {
 
     const downloadTarget = apkDownloadUrl || `https://vybzmusic.online/vybz-v${apkTargetVersion}.apk`;
 
-    // 1. Direct navigation trigger (catches in v2.9.0's shouldOverrideUrlLoading and opens Chrome)
+    // 0. Native Android IPC trigger (100% reliable inside VybZ APK WebView)
+    if (typeof window !== 'undefined' && (window as any).VybZNative?.downloadApk) {
+      try {
+        (window as any).VybZNative.downloadApk(downloadTarget);
+      } catch {}
+    }
+
+    // 1. Direct navigation trigger
     try {
       window.location.href = downloadTarget;
     } catch {}
 
-    // 2. Fallback via anchor
+    // 2. Open in system external browser
+    try {
+      window.open(downloadTarget, '_system');
+    } catch {}
+
+    // 3. Fallback via anchor
     try {
       const link = document.createElement('a');
       link.href = downloadTarget;
-      link.setAttribute('download', downloadTarget.split('/').pop() || 'vybz.apk');
+      link.setAttribute('download', 'vybz.apk');
       link.target = '_blank';
       link.rel = 'noopener noreferrer';
       document.body.appendChild(link);
@@ -241,16 +253,17 @@ export default function UpdateNotification() {
             </div>
           </div>
 
-          {/* Action Button */}
-          <button
-            type="button"
+          {/* Action Button: Direct Link for 100% Android WebView & Browser compatibility */}
+          <a
+            href={apkDownloadUrl || `https://vybzmusic.online/vybz-v${apkTargetVersion}.apk`}
+            download="vybz.apk"
+            target="_system"
             onClick={triggerApkDownload}
-            disabled={isUpdating}
-            className="group relative flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-amber-400 via-orange-400 to-amber-500 py-3.5 text-sm font-black text-black shadow-[0_10px_30px_rgba(245,158,11,0.4)] transition hover:brightness-110 active:scale-95 disabled:opacity-75"
+            className="group relative flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-amber-400 via-orange-400 to-amber-500 py-3.5 text-sm font-black text-black shadow-[0_10px_30px_rgba(245,158,11,0.4)] transition hover:brightness-110 active:scale-95 no-underline cursor-pointer"
           >
             <DownloadCloud size={18} className={isUpdating ? 'animate-bounce' : 'group-hover:scale-110 transition-transform'} />
-            <span>{isUpdating ? 'Downloading APK...' : downloadStarted ? 'Download Again 🚀' : 'Update Now (1-Click) 🚀'}</span>
-          </button>
+            <span>{isUpdating ? 'Starting Download...' : downloadStarted ? 'Download Again 🚀' : 'Update Now (1-Click) 🚀'}</span>
+          </a>
 
           {/* Download Instructions / Fallback */}
           {downloadStarted && (

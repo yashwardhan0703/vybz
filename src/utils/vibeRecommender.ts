@@ -156,7 +156,7 @@ export function getLocalVibeTracks(currentId: string, title: string, artist: str
   return results.slice(0, 15);
 }
 
-// Fetch YouTube Up Next related songs with duplicate song filter
+// Fetch YouTube Up Next related songs with duplicate song filter & verified local blending
 export async function fetchRelatedVibeQueue(
   videoId: string,
   title: string,
@@ -164,7 +164,7 @@ export async function fetchRelatedVibeQueue(
 ): Promise<QueueTrack[]> {
   try {
     const res = await fetch(
-      `/api/related?v=${encodeURIComponent(videoId)}&title=${encodeURIComponent(title)}`
+      `/api/related?v=${encodeURIComponent(videoId)}&title=${encodeURIComponent(title)}&artist=${encodeURIComponent(artist || '')}`
     );
     if (res.ok) {
       const data = await res.json();
@@ -179,8 +179,19 @@ export async function fetchRelatedVibeQueue(
             thumbnail: item.thumbnail || `https://img.youtube.com/vi/${item.id}/mqdefault.jpg`,
           });
         }
-        if (queue.length > 0) {
-          return queue;
+        if (queue.length >= 6) {
+          return queue.slice(0, 15);
+        } else if (queue.length > 0) {
+          // If less than 6 songs from API, blend in verified local tracks to guarantee a full queue
+          const localTracks = getLocalVibeTracks(videoId, title, artist);
+          const existingIds = new Set([videoId, ...queue.map((q) => q.id)]);
+          for (const lt of localTracks) {
+            if (!existingIds.has(lt.id)) {
+              queue.push(lt);
+              existingIds.add(lt.id);
+            }
+          }
+          return queue.slice(0, 15);
         }
       }
     }

@@ -244,12 +244,12 @@ export default {
     // -1.1 Live APK Version Endpoint for instant Android in-app update trigger (Uncached API route bypasses PWA ServiceWorker)
     if (url.pathname === '/api/apk-version' || url.pathname === '/api/version-apk' || url.pathname === '/version.json') {
       return new Response(JSON.stringify({
-        latestVersion: '3.1.0',
-        versionCode: 15,
+        latestVersion: '3.2.0',
+        versionCode: 16,
         minVersion: '2.9.0',
         apkUrl: 'https://vybzmusic.online/vybz.apk',
-        title: 'VybZ v3.1.0 Universal Music Engine! 🚀',
-        releaseNotes: 'Universal Auto-Healing Engine across all routes: zero song skips, automatic playback recovery, and instantaneous smooth background transitions.',
+        title: 'VybZ v3.2.0 Spotify-Grade Stable Queue & Pure Music Engine! 🚀',
+        releaseNotes: 'Rock-solid stable queue (no resets on song change), pure music-only recommendations (no podcasts/comedy), and seamless background auto-refill.',
         timestamp: Date.now(),
       }), {
         headers: {
@@ -582,10 +582,11 @@ export default {
       }
     }
 
-    // 2. YouTube Watch-Next / Related Video API Endpoint
+    // 2. YouTube Watch-Next / Related Video API Endpoint (Pure Music Only, Anti-Comedy/Podcast)
     if (url.pathname === '/api/related') {
       const videoId = url.searchParams.get('v');
       const currentTitle = (url.searchParams.get('title') || '').toLowerCase();
+      const currentArtist = (url.searchParams.get('artist') || '').toLowerCase();
       if (!videoId) {
         return new Response(JSON.stringify({ error: 'Missing videoId' }), {
           status: 400,
@@ -631,13 +632,55 @@ export default {
             .trim();
         }
 
-        const normalizedCurrentTitle = cleanTitle(currentTitle);
+        function isNonMusic(t) {
+          if (!t) return true;
+          const s = t.toLowerCase();
+          return (
+            s.includes('standup') ||
+            s.includes('stand-up') ||
+            s.includes('comedy') ||
+            s.includes('roast') ||
+            s.includes('vlog') ||
+            s.includes('prank') ||
+            s.includes('podcast') ||
+            s.includes('news') ||
+            s.includes('trailer') ||
+            s.includes('teaser') ||
+            s.includes('interview') ||
+            s.includes('full movie') ||
+            s.includes('reaction') ||
+            s.includes('episode') ||
+            s.includes('review') ||
+            s.includes('talk show') ||
+            s.includes('highlights') ||
+            s.includes('cricket') ||
+            s.includes('football') ||
+            s.includes('kabaddi') ||
+            s.includes('match') ||
+            s.includes('web series') ||
+            s.includes('shorts') ||
+            s.includes('behind the scene') ||
+            s.includes('making of') ||
+            s.includes('uncut') ||
+            s.includes('jukebox') ||
+            s.includes('all songs') ||
+            s.includes('non stop') ||
+            s.includes('nonstop') ||
+            s.includes('top 10') ||
+            s.includes('top 20') ||
+            s.includes('top 50') ||
+            s.includes('mashup')
+          );
+        }
 
-        function isDuplicate(candTitle, curTitleNorm) {
-          if (!curTitleNorm) return false;
-          const candNorm = cleanTitle(candTitle);
-          if (candNorm === curTitleNorm) return true;
-          if (candNorm.includes(curTitleNorm) || curTitleNorm.includes(candNorm)) return true;
+        function isSameTrack(candTitle, curTitle) {
+          if (!candTitle || !curTitle) return false;
+          const c1 = cleanTitle(candTitle).split(' ').filter((w) => w.length > 2);
+          const c2 = cleanTitle(curTitle).split(' ').filter((w) => w.length > 2);
+          if (c1.length === 0 || c2.length === 0) return false;
+          if (c1[0] === c2[0] && (c1.length === 1 || c2.length === 1 || c1[1] === c2[1])) {
+            return true;
+          }
           return false;
         }
 
@@ -667,25 +710,9 @@ export default {
 
           if (!id || id === videoId || id.length !== 11) continue;
           if (!title) continue;
-
-          const lowerTitle = title.toLowerCase();
-          if (
-            lowerTitle.includes('jukebox') ||
-            lowerTitle.includes('all songs') ||
-            lowerTitle.includes('non stop') ||
-            lowerTitle.includes('episode') ||
-            lowerTitle.includes('podcast') ||
-            lowerTitle.includes('trailer') ||
-            lowerTitle.includes('teaser') ||
-            lowerTitle.includes('interview') ||
-            lowerTitle.includes('full movie') ||
-            lowerTitle.includes('reaction')
-          ) {
-            continue;
-          }
-
-          if (isDuplicate(title, normalizedCurrentTitle)) continue;
-          if (relatedVideos.some((rv) => isDuplicate(rv.title, title))) continue;
+          if (isNonMusic(title)) continue;
+          if (isSameTrack(title, currentTitle)) continue;
+          if (relatedVideos.some((rv) => isSameTrack(rv.title, title))) continue;
 
           relatedVideos.push({
             id,
@@ -695,9 +722,14 @@ export default {
           });
         }
 
-        // Search fallback if /next recommendations returned too few results
-        if (relatedVideos.length < 5 && currentTitle) {
+        // Targeted pure-music search fallback if /next recommendations returned too few results
+        if (relatedVideos.length < 8 && (currentTitle || currentArtist)) {
           try {
+            const cleanArtist = currentArtist.replace('youtube music', '').trim();
+            const searchQuery = cleanArtist && cleanArtist.length > 2
+              ? `${cleanArtist} songs`
+              : `${currentTitle} songs`;
+
             const searchFallbackRes = await fetch('https://www.youtube.com/youtubei/v1/search', {
               method: 'POST',
               headers: {
@@ -714,7 +746,7 @@ export default {
                     gl: 'IN',
                   },
                 },
-                query: `${currentTitle} songs`,
+                query: searchQuery,
               }),
             });
 
@@ -729,13 +761,13 @@ export default {
                 const vr = item.videoRenderer;
                 if (vr && vr.videoId && vr.videoId !== videoId) {
                   const t = vr.title?.runs?.[0]?.text || '';
-                  if (!t || isDuplicate(t, normalizedCurrentTitle)) continue;
-                  if (relatedVideos.some((rv) => isDuplicate(rv.title, t))) continue;
+                  if (!t || isNonMusic(t) || isSameTrack(t, currentTitle)) continue;
+                  if (relatedVideos.some((rv) => isSameTrack(rv.title, t))) continue;
 
                   relatedVideos.push({
                     id: vr.videoId,
                     title: t,
-                    artist: vr.ownerText?.runs?.[0]?.text || 'YouTube Music',
+                    artist: vr.ownerText?.runs?.[0]?.text || currentArtist || 'YouTube Music',
                     thumbnail:
                       vr.thumbnail?.thumbnails?.slice(-1)[0]?.url ||
                       `https://img.youtube.com/vi/${vr.videoId}/mqdefault.jpg`,
@@ -863,7 +895,7 @@ export default {
   "operatingSystem": "Android",
   "applicationCategory": "MusicApplication",
   "fileSize": "9.7MB",
-  "softwareVersion": "3.1.0",
+  "softwareVersion": "3.2.0",
   "downloadUrl": "https://vybzmusic.online/vybz.apk",
   "offers": {
     "@type": "Offer",

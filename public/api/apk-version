@@ -1,8 +1,9 @@
 {
-  "latestVersion": "3.0.0",
+  "latestVersion": "3.2.0",
+  "versionCode": 16,
   "minVersion": "2.9.0",
   "apkUrl": "https://vybzmusic.online/vybz.apk",
-  "title": "VybZ v3.0.0 Official Release! 🚀",
-  "releaseNotes": "100% Non-Stop Lock-Screen & Background Playback, YouTube-Style Infinite Auto-Scroll, and Shimmer Skeletons.",
-  "timestamp": 1731902800000
+  "title": "VybZ v3.2.0 Spotify-Grade Stable Queue & Pure Music Engine! 🚀",
+  "releaseNotes": "Rock-solid stable queue (no resets on song change), pure music-only recommendations (no podcasts/comedy), and seamless background auto-refill.",
+  "timestamp": 1731960000000
 }
