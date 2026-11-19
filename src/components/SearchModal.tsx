@@ -3,7 +3,7 @@ import { Search, X, Play, Music, Sparkles, Loader2, PlayCircle } from 'lucide-re
 import { usePlayerStore } from '../store/playerStore';
 import { THEMES } from '../data/worlds';
 import { ARTISTS_CATALOG } from '../data/artistsData';
-import { getLocalVibeTracks } from '../utils/vibeRecommender';
+import { getLocalVibeTracks, isDuplicateSong } from '../utils/vibeRecommender';
 import type { QueueTrack } from '../hooks/useYouTube';
 import { handleArtworkError } from '../utils/mediaHelpers';
 
@@ -236,20 +236,24 @@ export default function SearchModal({ onPlayCustomVideoId }: SearchModalProps) {
   const handleSelectTrack = useCallback(
     (item: SearchResultItem, _index?: number) => {
       if (!item.id) return;
-      // If user selected from search results, preserve search context:
-      // Other search results form the most relevant and natural queue!
-      let radioQueue: QueueTrack[] = [];
-      const validSearchTracks = (results || [])
-        .filter((r) => r.id && r.id !== item.id)
-        .map((r) => ({
+      // 1. Filter out search results that are duplicate covers/versions of the selected song
+      const distinctOtherTracks: QueueTrack[] = [];
+      for (const r of results || []) {
+        if (!r.id || r.id === item.id) continue;
+        if (isDuplicateSong(r.title, item.title)) continue;
+        if (distinctOtherTracks.some((d) => isDuplicateSong(d.title, r.title))) continue;
+        distinctOtherTracks.push({
           id: r.id,
           title: r.title,
           artist: r.artist,
           thumbnail: r.thumbnail,
           duration: r.duration,
-        }));
+        });
+      }
 
-      if (validSearchTracks.length > 0) {
+      let radioQueue: QueueTrack[] = [];
+      // If user searched for a category/genre (e.g. "haryanvi song"), distinctOtherTracks will have 3+ distinct songs
+      if (distinctOtherTracks.length >= 3) {
         radioQueue = [
           {
             id: item.id,
@@ -258,11 +262,13 @@ export default function SearchModal({ onPlayCustomVideoId }: SearchModalProps) {
             thumbnail: item.thumbnail,
             duration: item.duration,
           },
-          ...validSearchTracks,
+          ...distinctOtherTracks,
         ];
       } else {
-        // Fallback for single item or direct link
+        // Targeted song search (e.g. "hum tere pyaar me" where results were duplicate covers):
+        // Trigger clean Vibe Radio Engine (Film / Era / Artist Radio)
         const localVibe = getLocalVibeTracks(item.id, item.title, item.artist);
+        const filteredVibe = localVibe.filter((lv) => !isDuplicateSong(lv.title, item.title));
         radioQueue = [
           {
             id: item.id,
@@ -271,7 +277,7 @@ export default function SearchModal({ onPlayCustomVideoId }: SearchModalProps) {
             thumbnail: item.thumbnail,
             duration: item.duration,
           },
-          ...localVibe,
+          ...filteredVibe,
         ];
       }
 

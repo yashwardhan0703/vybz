@@ -1,7 +1,7 @@
 /// <reference types="youtube" />
 import { useEffect, useRef, useCallback } from 'react';
 import { usePlayerStore } from '../store/playerStore';
-import { fetchRelatedVibeQueue, getLocalVibeTracks } from '../utils/vibeRecommender';
+import { fetchRelatedVibeQueue, getLocalVibeTracks, isDuplicateSong } from '../utils/vibeRecommender';
 import { getStoredPlaybackState, saveStoredPlaybackState } from '../utils/localStorageHelper';
 
 export interface QueueTrack {
@@ -1334,10 +1334,19 @@ export function useYouTube(containerRef: React.RefObject<HTMLDivElement | null>)
           fetchRelatedVibeQueue(videoId, resolvedTitle, resolvedArtist).then((related) => {
             if (related && related.length > 0) {
               const existingIds = new Set(queueRef.current.map((q) => q.id));
-              const freshTracks = related.filter((r) => !existingIds.has(r.id));
+              const freshTracks = related.filter(
+                (r) =>
+                  !existingIds.has(r.id) &&
+                  !isDuplicateSong(r.title, resolvedTitle) &&
+                  !queueRef.current.some((q) => isDuplicateSong(q.title, r.title))
+              );
               if (freshTracks.length > 0) {
-                // Rock-solid append: never wipe existing queue or reset current index!
-                queueRef.current = [...queueRef.current, ...freshTracks].slice(0, 50);
+                // If queue currently only contains the seed track, initialize queue cleanly; otherwise append
+                if (queueRef.current.length <= 1) {
+                  queueRef.current = [queueRef.current[0], ...freshTracks].slice(0, 50);
+                } else {
+                  queueRef.current = [...queueRef.current, ...freshTracks].slice(0, 50);
+                }
                 setTrackInfo(
                   queueIndexRef.current,
                   queueRef.current.length,

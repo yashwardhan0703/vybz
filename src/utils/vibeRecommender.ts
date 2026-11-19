@@ -163,6 +163,7 @@ const STOP_WORDS = new Set([
   'remix',
   'slowed',
   'reverb',
+  'reloaded',
   'feat',
   'music',
   'mms',
@@ -183,6 +184,18 @@ const STOP_WORDS = new Set([
   '8k',
   'film',
   'movie',
+  'cover',
+  'unplugged',
+  'remake',
+  'ai',
+  'male',
+  'female',
+  'duet',
+  'karaoke',
+  'instrumental',
+  'acoustic',
+  'clip',
+  'scene'
 ]);
 
 // Clean title words to detect duplicates
@@ -191,20 +204,29 @@ function extractCoreKeywords(t: string): string[] {
     .toLowerCase()
     .replace(/\(.*?\)/g, ' ')
     .replace(/\[.*?\]/g, ' ')
-    .replace(/[^a-z0-9\s]/g, ' ')
+    .replace(/[^\p{L}\p{N}\s]/gu, ' ')
     .split(/\s+/)
     .filter((w) => w.length > 2 && !STOP_WORDS.has(w));
 }
 
 // Detect if candidate is the exact same song upload/cover
 export function isDuplicateSong(candidateTitle: string, currentTitle: string): boolean {
+  if (!candidateTitle || !currentTitle) return false;
+  const low1 = candidateTitle.toLowerCase().trim();
+  const low2 = currentTitle.toLowerCase().trim();
+  if (low1 === low2) return true;
+
   const w1 = extractCoreKeywords(candidateTitle);
   const w2 = extractCoreKeywords(currentTitle);
   if (w1.length === 0 || w2.length === 0) return false;
 
   const prefix1 = w1.slice(0, 2).join(' ');
   const prefix2 = w2.slice(0, 2).join(' ');
-  if (prefix1.length > 4 && prefix1 === prefix2) return true;
+  if (prefix1.length >= 4 && prefix1 === prefix2) return true;
+
+  if (w1.length >= 2 && w2.length >= 2) {
+    if (w1[0] === w2[0] && (w1[1] === w2[1] || w1.slice(0, 3).includes(w2[1]))) return true;
+  }
 
   const shared = w1.filter((w) => w2.includes(w));
   if (shared.length >= Math.min(w1.length, w2.length) * 0.5) return true;

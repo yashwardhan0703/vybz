@@ -403,7 +403,7 @@ export default {
               );
               if (withPlain) fallbackPlain = withPlain;
             }
-          } catch {}
+          } catch { }
         }
 
         // Use plain lyrics fallback if no synced lyrics were found
@@ -912,7 +912,7 @@ export default {
                 }
               }
             }
-          } catch {}
+          } catch { }
         }
 
         const sections =
