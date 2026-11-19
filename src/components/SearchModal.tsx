@@ -4,6 +4,7 @@ import { usePlayerStore } from '../store/playerStore';
 import { THEMES } from '../data/worlds';
 import { ARTISTS_CATALOG } from '../data/artistsData';
 import { getLocalVibeTracks } from '../utils/vibeRecommender';
+import type { QueueTrack } from '../hooks/useYouTube';
 import { handleArtworkError } from '../utils/mediaHelpers';
 
 export interface SearchResultItem {
@@ -235,18 +236,45 @@ export default function SearchModal({ onPlayCustomVideoId }: SearchModalProps) {
   const handleSelectTrack = useCallback(
     (item: SearchResultItem, _index?: number) => {
       if (!item.id) return;
-      // Pre-populate instant same-vibe queue (0ms wait, zero duplicate versions of this song)
-      const localVibe = getLocalVibeTracks(item.id, item.title, item.artist);
-      const radioQueue = [
-        {
-          id: item.id,
-          title: item.title,
-          artist: item.artist,
-          thumbnail: item.thumbnail,
-          duration: item.duration,
-        },
-        ...localVibe,
-      ];
+      // If user selected from search results, preserve search context:
+      // Other search results form the most relevant and natural queue!
+      let radioQueue: QueueTrack[] = [];
+      const validSearchTracks = (results || [])
+        .filter((r) => r.id && r.id !== item.id)
+        .map((r) => ({
+          id: r.id,
+          title: r.title,
+          artist: r.artist,
+          thumbnail: r.thumbnail,
+          duration: r.duration,
+        }));
+
+      if (validSearchTracks.length > 0) {
+        radioQueue = [
+          {
+            id: item.id,
+            title: item.title,
+            artist: item.artist,
+            thumbnail: item.thumbnail,
+            duration: item.duration,
+          },
+          ...validSearchTracks,
+        ];
+      } else {
+        // Fallback for single item or direct link
+        const localVibe = getLocalVibeTracks(item.id, item.title, item.artist);
+        radioQueue = [
+          {
+            id: item.id,
+            title: item.title,
+            artist: item.artist,
+            thumbnail: item.thumbnail,
+            duration: item.duration,
+          },
+          ...localVibe,
+        ];
+      }
+
       onPlayCustomVideoId(
         item.id,
         item.title,
@@ -259,7 +287,7 @@ export default function SearchModal({ onPlayCustomVideoId }: SearchModalProps) {
       );
       closeSearch();
     },
-    [onPlayCustomVideoId, closeSearch]
+    [results, onPlayCustomVideoId, closeSearch]
   );
 
   const handleKeyDown = (e: React.KeyboardEvent) => {

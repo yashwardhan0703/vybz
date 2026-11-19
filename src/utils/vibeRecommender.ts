@@ -10,6 +10,35 @@ export interface VibeCluster {
 }
 
 export const VIBE_CLUSTERS: Record<string, VibeCluster> = {
+  haryanvi: {
+    id: 'haryanvi',
+    name: 'Desi Haryanvi Hits',
+    keywords: [
+      'haryanvi', 'masoom sharma', 'dhanda nyoliwala', 'bintu pabra', 'shiva choudhary',
+      'ajay hooda', 'raju punjabi', 'pranjal dahiya', 'sumit parta', 'amanraj',
+      'gulzaar chhaniwala', 'amit saini rohtakiya', 'mor haryanvi', 'gem tunes haryanvi',
+      'sarwang', 'sihag', 'nav haryanvi', 'folk station'
+    ],
+    peerArtistNames: []
+  },
+  bhojpuri: {
+    id: 'bhojpuri',
+    name: 'Bhojpuri Superhits',
+    keywords: [
+      'bhojpuri', 'pawan singh', 'khesari', 'khesari lal', 'shilpi raj', 'silpi raj',
+      'akshara singh', 'pramod premi', 'arvind akela', 'kallu', 'wave music', 'bhojpuriya'
+    ],
+    peerArtistNames: []
+  },
+  bhakti_devotional: {
+    id: 'bhakti_devotional',
+    name: 'Bhakti & Devotional',
+    keywords: [
+      'bhajan', 'aarti', 'chalisa', 'krishna', 'shiva', 'ram ', 'hanuman',
+      'mata rani', 't-series bhakti', 'devotional', 'katha'
+    ],
+    peerArtistNames: []
+  },
   golden_vintage: {
     id: 'golden_vintage',
     name: '50s-70s Golden Vintage Classics',
@@ -73,6 +102,15 @@ export const VIBE_CLUSTERS: Record<string, VibeCluster> = {
     ],
     peerArtistNames: ['A.R. Rahman', 'Rahat Fateh Ali Khan', 'Nusrat Fateh Ali Khan']
   },
+  english_pop: {
+    id: 'english_pop',
+    name: 'International Pop & Hits',
+    keywords: [
+      'taylor swift', 'ed sheeran', 'billie eilish', 'the weeknd', 'weeknd', 'drake',
+      'eminem', 'coldplay', 'dua lipa', 'justin bieber', 'charlie puth'
+    ],
+    peerArtistNames: []
+  },
   modern_romance: {
     id: 'modern_romance',
     name: 'Modern Melodic Romance & Heartbreak',
@@ -86,18 +124,22 @@ export const VIBE_CLUSTERS: Record<string, VibeCluster> = {
   }
 };
 
-// Priority order: check specific vintage/indie/party first before broad romance
+// Priority order: check specific regional/vintage/indie/party first before broad romance
 const CLUSTER_PRIORITY: (keyof typeof VIBE_CLUSTERS)[] = [
+  'haryanvi',
+  'bhojpuri',
+  'bhakti_devotional',
   'golden_vintage',
   'indie_sukoon',
   'punjabi_swag',
   'party_hiphop',
   'nostalgia_90s',
   'sufi_soul',
+  'english_pop',
   'modern_romance'
 ];
 
-export function detectVibeCluster(title: string, artist: string): VibeCluster {
+export function detectVibeCluster(title: string, artist: string): VibeCluster | null {
   const combined = `${title} ${artist}`.toLowerCase();
   for (const cKey of CLUSTER_PRIORITY) {
     const cluster = VIBE_CLUSTERS[cKey];
@@ -105,7 +147,7 @@ export function detectVibeCluster(title: string, artist: string): VibeCluster {
       return cluster;
     }
   }
-  return VIBE_CLUSTERS.modern_romance;
+  return null;
 }
 
 const STOP_WORDS = new Set([
@@ -183,6 +225,12 @@ export function getLocalVibeTracks(currentId: string, title: string, artist: str
   // 2. Identify Vibe Cluster & Peer Artists
   const cluster = detectVibeCluster(title, artist);
 
+  // If no artist match in catalog AND cluster has no static peers (e.g. Haryanvi, Bhojpuri, Bhakti),
+  // DO NOT poison queue with random Bollywood tracks! Return empty so live API populates it.
+  if (!matchedArtist && (!cluster || cluster.peerArtistNames.length === 0)) {
+    return [];
+  }
+
   // 3. Bucket A: Same Artist Tracks (50%)
   const sameArtistTracks: QueueTrack[] = [];
   if (matchedArtist) {
@@ -201,7 +249,7 @@ export function getLocalVibeTracks(currentId: string, title: string, artist: str
 
   // 4. Bucket B: Peer Artists in the Same Vibe Cluster (50%)
   const peerTracks: QueueTrack[] = [];
-  const targetPeers = cluster.peerArtistNames.filter(
+  const targetPeers = (cluster?.peerArtistNames || []).filter(
     (pName) => !matchedArtist || pName.toLowerCase() !== matchedArtist.name.toLowerCase()
   );
 
@@ -233,8 +281,8 @@ export function getLocalVibeTracks(currentId: string, title: string, artist: str
     if (i < peerTracks.length) results.push(peerTracks[i]);
   }
 
-  // 6. Supplement if total is low (< 8 tracks)
-  if (results.length < 8) {
+  // 6. Supplement if total is low (< 8 tracks) and cluster has keywords
+  if (results.length < 8 && cluster) {
     TOP_25_TRENDING_INDIAN.forEach((t) => {
       if (t.id === currentId || isDuplicateSong(t.title, title) || results.some((r) => r.id === t.id)) return;
       const comb = `${t.title} ${t.singers} ${t.movie}`.toLowerCase();
@@ -256,9 +304,35 @@ export function getLocalVibeTracks(currentId: string, title: string, artist: str
 export function isCandidateMatchingCluster(
   candidateTitle: string,
   candidateArtist: string,
-  cluster: VibeCluster
+  cluster: VibeCluster | null
 ): boolean {
+  if (!cluster) return true;
   const combined = `${candidateTitle} ${candidateArtist}`.toLowerCase();
+
+  if (cluster.id === 'haryanvi') {
+    const hindiRomanceBlocklist = [
+      'arijit', 'atif aslam', 'kk', 'mohit chauhan', 'pritam', 'lata mangeshkar', 'tamasha',
+      'tum hi ho', 'channa mereya', 'kesariya', 'lo-fi', 'ghazal', 'jagjit'
+    ];
+    if (hindiRomanceBlocklist.some((b) => combined.includes(b))) return false;
+    return true;
+  }
+
+  if (cluster.id === 'bhojpuri') {
+    const nonBhojpuriBlocklist = [
+      'arijit', 'atif aslam', 'kk', 'mohit chauhan', 'pritam', 'lata mangeshkar', 'taylor swift'
+    ];
+    if (nonBhojpuriBlocklist.some((b) => combined.includes(b))) return false;
+    return true;
+  }
+
+  if (cluster.id === 'bhakti_devotional') {
+    const secularPartyBlocklist = [
+      'party', 'club', 'drill', 'rap', 'hip hop', 'item song', 'sharab', 'peg', 'daaru'
+    ];
+    if (secularPartyBlocklist.some((b) => combined.includes(b))) return false;
+    return true;
+  }
 
   if (cluster.id === 'golden_vintage') {
     const modernBlocklist = [

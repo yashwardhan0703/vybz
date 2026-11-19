@@ -709,6 +709,23 @@ export default {
         function isVibeMismatch(candTitle, vibe) {
           if (!candTitle || !vibe || vibe === 'general') return false;
           const low = candTitle.toLowerCase();
+          if (vibe === 'haryanvi') {
+            const romanceBlocklist = [
+              'arijit', 'atif aslam', 'kk', 'mohit chauhan', 'pritam', 'lata mangeshkar',
+              'tamasha', 'tum hi ho', 'channa mereya', 'kesariya', 'lo-fi', 'ghazal', 'jagjit'
+            ];
+            return romanceBlocklist.some((mw) => low.includes(mw));
+          }
+          if (vibe === 'bhojpuri') {
+            const nonBhojpuriBlocklist = [
+              'arijit', 'atif aslam', 'kk', 'mohit chauhan', 'pritam', 'lata mangeshkar'
+            ];
+            return nonBhojpuriBlocklist.some((mw) => low.includes(mw));
+          }
+          if (vibe === 'bhakti') {
+            const partyBlocklist = ['party', 'club', 'drill', 'rap', 'hip hop', 'item song', 'sharab', 'peg', 'daaru'];
+            return partyBlocklist.some((mw) => low.includes(mw));
+          }
           if (vibe === 'golden_vintage') {
             const modernBlocklist = [
               'arijit', 'badshah', 'ap dhillon', 'pritam', 'shreya ghoshal', 'jubin', 'neha kakkar',
@@ -730,6 +747,47 @@ export default {
         const combinedSeed = `${currentTitle} ${currentArtist}`.toLowerCase();
         let detectedVibe = 'general';
         if (
+          combinedSeed.includes('haryanvi') ||
+          combinedSeed.includes('masoom sharma') ||
+          combinedSeed.includes('dhanda nyoliwala') ||
+          combinedSeed.includes('bintu pabra') ||
+          combinedSeed.includes('shiva choudhary') ||
+          combinedSeed.includes('ajay hooda') ||
+          combinedSeed.includes('raju punjabi') ||
+          combinedSeed.includes('pranjal dahiya') ||
+          combinedSeed.includes('sumit parta') ||
+          combinedSeed.includes('amanraj') ||
+          combinedSeed.includes('gulzaar chhaniwala') ||
+          combinedSeed.includes('mor haryanvi') ||
+          combinedSeed.includes('gem tunes haryanvi') ||
+          combinedSeed.includes('sarwang') ||
+          combinedSeed.includes('sihag') ||
+          combinedSeed.includes('nav haryanvi') ||
+          combinedSeed.includes('folk station')
+        ) {
+          detectedVibe = 'haryanvi';
+        } else if (
+          combinedSeed.includes('bhojpuri') ||
+          combinedSeed.includes('pawan singh') ||
+          combinedSeed.includes('khesari') ||
+          combinedSeed.includes('shilpi raj') ||
+          combinedSeed.includes('silpi raj') ||
+          combinedSeed.includes('wave music') ||
+          combinedSeed.includes('bhojpuriya')
+        ) {
+          detectedVibe = 'bhojpuri';
+        } else if (
+          combinedSeed.includes('bhajan') ||
+          combinedSeed.includes('aarti') ||
+          combinedSeed.includes('chalisa') ||
+          combinedSeed.includes('krishna') ||
+          combinedSeed.includes('shiva') ||
+          combinedSeed.includes('ram ') ||
+          combinedSeed.includes('hanuman') ||
+          combinedSeed.includes('t-series bhakti')
+        ) {
+          detectedVibe = 'bhakti';
+        } else if (
           combinedSeed.includes('lata') ||
           combinedSeed.includes('rafi') ||
           combinedSeed.includes('mukesh') ||
@@ -789,6 +847,12 @@ export default {
             let targetedQuery = '';
             if (movie) {
               targetedQuery = `${movie} songs`;
+            } else if (detectedVibe === 'haryanvi') {
+              targetedQuery = `${cleanArtist || ''} Haryanvi superhit songs`;
+            } else if (detectedVibe === 'bhojpuri') {
+              targetedQuery = `${cleanArtist || ''} Bhojpuri superhit songs`;
+            } else if (detectedVibe === 'bhakti') {
+              targetedQuery = `${cleanArtist || ''} Bhakti Bhajan songs`;
             } else if (detectedVibe === 'golden_vintage') {
               targetedQuery = `${cleanArtist || 'Lata Mangeshkar Mohammed Rafi'} 1960s classic old hindi songs`;
             } else if (detectedVibe === 'party_hiphop') {
