@@ -244,12 +244,12 @@ export default {
     // -1.1 Live APK Version Endpoint for instant Android in-app update trigger (Uncached API route bypasses PWA ServiceWorker)
     if (url.pathname === '/api/apk-version' || url.pathname === '/api/version-apk' || url.pathname === '/version.json') {
       return new Response(JSON.stringify({
-        latestVersion: '3.2.0',
-        versionCode: 16,
+        latestVersion: '3.3.0',
+        versionCode: 17,
         minVersion: '2.9.0',
         apkUrl: 'https://vybzmusic.online/vybz.apk',
-        title: 'VybZ v3.2.0 Spotify-Grade Stable Queue & Pure Music Engine! 🚀',
-        releaseNotes: 'Rock-solid stable queue (no resets on song change), pure music-only recommendations (no podcasts/comedy), and seamless background auto-refill.',
+        title: 'VybZ v3.3.0 Universal Vibe & Artist Continuity Engine! 🚀',
+        releaseNotes: 'Spotify-grade intelligent queue: 50/50 seed & peer artist blending, 7 dedicated vibe clusters (Party, Indie Sukoon, 60s Vintage, Punjabi, 90s, Sufi), and automatic movie soundtrack matching.',
         timestamp: Date.now(),
       }), {
         headers: {
@@ -673,6 +673,28 @@ export default {
           );
         }
 
+        function extractMovieName(rawTitle, artist) {
+          if (!rawTitle) return null;
+          const parts = rawTitle.split(/[|\-–]/).map((p) => p.trim());
+          if (parts.length < 2) return null;
+          const blacklist = [
+            'official video', 'official audio', 'lyrical video', 'lyric video',
+            'video song', 'audio song', 'full video', 'full song', '4k', '8k', 'hd',
+            'old hindi songs', 'purane gane', 'hindi songs', 'bollywood songs',
+            'remix', 'lofi', 'slowed', 'reverb', 'mashup', 'cover'
+          ];
+          for (let i = 1; i < parts.length; i++) {
+            const p = parts[i];
+            const low = p.toLowerCase();
+            if (low.length < 3 || low.length > 35) continue;
+            if (artist && low.includes(artist.toLowerCase())) continue;
+            if (blacklist.some((b) => low.includes(b))) continue;
+            if (low.includes('song') || low.includes('music') || low.includes('singer') || low.includes('audio')) continue;
+            return p;
+          }
+          return null;
+        }
+
         function isSameTrack(candTitle, curTitle) {
           if (!candTitle || !curTitle) return false;
           const c1 = cleanTitle(candTitle).split(' ').filter((w) => w.length > 2);
@@ -684,10 +706,156 @@ export default {
           return false;
         }
 
+        function isVibeMismatch(candTitle, vibe) {
+          if (!candTitle || !vibe || vibe === 'general') return false;
+          const low = candTitle.toLowerCase();
+          if (vibe === 'golden_vintage') {
+            const modernBlocklist = [
+              'arijit', 'badshah', 'ap dhillon', 'pritam', 'shreya ghoshal', 'jubin', 'neha kakkar',
+              'tony kakkar', 'raftaar', 'mc stan', 'emiway', 'seedhe maut', 'darshan raval',
+              'anuv jain', 'prateek kuhad', 'diljit', 'karan aujla', 'shubh', 'tamasha', 'jab we met',
+              'rockstar', 'kabir singh', 'animal', 'brahmastra', 'jawan', 'pathaan', 'pushpa',
+              'reels', 'shorts', '2020', '2021', '2022', '2023', '2024', '2025'
+            ];
+            return modernBlocklist.some((mw) => low.includes(mw));
+          }
+          if (vibe === 'party_hiphop') {
+            const slowBlocklist = ['bhajan', 'aarti', 'ghazal', 'sad version', 'unplugged', 'lata mangeshkar', 'jagjit singh'];
+            return slowBlocklist.some((sw) => low.includes(sw));
+          }
+          return false;
+        }
+
+        // Detect Era & Vibe Cluster
+        const combinedSeed = `${currentTitle} ${currentArtist}`.toLowerCase();
+        let detectedVibe = 'general';
+        if (
+          combinedSeed.includes('lata') ||
+          combinedSeed.includes('rafi') ||
+          combinedSeed.includes('mukesh') ||
+          combinedSeed.includes('kishore') ||
+          combinedSeed.includes('hemant') ||
+          combinedSeed.includes('meena kumari') ||
+          combinedSeed.includes('shankar jaikishan') ||
+          combinedSeed.includes('madan mohan') ||
+          combinedSeed.includes('dil ek mandir') ||
+          combinedSeed.includes('old hindi') ||
+          combinedSeed.includes('purane gane') ||
+          combinedSeed.includes('vintage') ||
+          combinedSeed.includes('196') ||
+          combinedSeed.includes('195') ||
+          combinedSeed.includes('197')
+        ) {
+          detectedVibe = 'golden_vintage';
+        } else if (
+          combinedSeed.includes('honey singh') ||
+          combinedSeed.includes('badshah') ||
+          combinedSeed.includes('shubh') ||
+          combinedSeed.includes('karan aujla') ||
+          combinedSeed.includes('anirudh') ||
+          combinedSeed.includes('diljit')
+        ) {
+          detectedVibe = 'party_hiphop';
+        } else if (
+          combinedSeed.includes('anuv jain') ||
+          combinedSeed.includes('prateek kuhad') ||
+          combinedSeed.includes('local train') ||
+          combinedSeed.includes('sukoon') ||
+          combinedSeed.includes('indie')
+        ) {
+          detectedVibe = 'indie_sukoon';
+        } else if (
+          combinedSeed.includes('sidhu') ||
+          combinedSeed.includes('moosewala') ||
+          combinedSeed.includes('ap dhillon')
+        ) {
+          detectedVibe = 'punjabi_swag';
+        } else if (
+          combinedSeed.includes('kumar sanu') ||
+          combinedSeed.includes('alka yagnik') ||
+          combinedSeed.includes('udit narayan') ||
+          combinedSeed.includes('90s')
+        ) {
+          detectedVibe = 'nostalgia_90s';
+        }
+
+        const cleanArtist = currentArtist.replace('youtube music', '').trim();
+        const movie = extractMovieName(currentTitle, cleanArtist);
+
+        // Targeted search tracks (Movie soundtrack OR period-matched artist radio)
+        const targetedTracks = [];
+        if (movie || detectedVibe !== 'general') {
+          try {
+            let targetedQuery = '';
+            if (movie) {
+              targetedQuery = `${movie} songs`;
+            } else if (detectedVibe === 'golden_vintage') {
+              targetedQuery = `${cleanArtist || 'Lata Mangeshkar Mohammed Rafi'} 1960s classic old hindi songs`;
+            } else if (detectedVibe === 'party_hiphop') {
+              targetedQuery = `${cleanArtist || 'Yo Yo Honey Singh'} Badshah party hit songs`;
+            } else if (detectedVibe === 'indie_sukoon') {
+              targetedQuery = `${cleanArtist || 'Anuv Jain'} Prateek Kuhad acoustic sukoon songs`;
+            } else if (detectedVibe === 'punjabi_swag') {
+              targetedQuery = `${cleanArtist || 'Sidhu Moosewala'} Shubh Punjabi songs`;
+            } else if (detectedVibe === 'nostalgia_90s') {
+              targetedQuery = `${cleanArtist || 'Kumar Sanu'} Alka Yagnik 90s romantic songs`;
+            }
+
+            if (targetedQuery) {
+              const targetedRes = await fetch('https://www.youtube.com/youtubei/v1/search', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'User-Agent':
+                    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                },
+                body: JSON.stringify({
+                  context: {
+                    client: {
+                      clientName: 'WEB',
+                      clientVersion: '2.20240101.01.00',
+                      hl: 'en',
+                      gl: 'IN',
+                    },
+                  },
+                  query: targetedQuery,
+                }),
+              });
+
+              if (targetedRes.ok) {
+                const sData = await targetedRes.json();
+                const sContents =
+                  sData.contents?.twoColumnSearchResultsRenderer?.primaryContents
+                    ?.sectionListRenderer?.contents?.[0]?.itemSectionRenderer
+                    ?.contents || [];
+
+                for (const item of sContents) {
+                  const vr = item.videoRenderer;
+                  if (vr && vr.videoId && vr.videoId !== videoId) {
+                    const t = vr.title?.runs?.[0]?.text || '';
+                    if (!t || isNonMusic(t) || isSameTrack(t, currentTitle)) continue;
+                    if (isVibeMismatch(t, detectedVibe)) continue;
+                    if (targetedTracks.some((tt) => isSameTrack(tt.title, t))) continue;
+
+                    targetedTracks.push({
+                      id: vr.videoId,
+                      title: t,
+                      artist: vr.ownerText?.runs?.[0]?.text || currentArtist || 'YouTube Music',
+                      thumbnail: `https://img.youtube.com/vi/${vr.videoId}/mqdefault.jpg`,
+                    });
+                    if (targetedTracks.length >= 8) break;
+                  }
+                }
+              }
+            }
+          } catch {}
+        }
+
         const sections =
           nextData?.contents?.twoColumnWatchNextResults?.secondaryResults?.secondaryResults
             ?.results || [];
 
+        const nextRecommendations = [];
         for (const item of sections) {
           let id = '';
           let title = '';
@@ -712,9 +880,11 @@ export default {
           if (!title) continue;
           if (isNonMusic(title)) continue;
           if (isSameTrack(title, currentTitle)) continue;
-          if (relatedVideos.some((rv) => isSameTrack(rv.title, title))) continue;
+          if (isVibeMismatch(title, detectedVibe)) continue;
+          if (targetedTracks.some((tt) => isSameTrack(tt.title, title))) continue;
+          if (nextRecommendations.some((rv) => isSameTrack(rv.title, title))) continue;
 
-          relatedVideos.push({
+          nextRecommendations.push({
             id,
             title,
             artist,
@@ -722,60 +892,14 @@ export default {
           });
         }
 
-        // Targeted pure-music search fallback if /next recommendations returned too few results
-        if (relatedVideos.length < 8 && (currentTitle || currentArtist)) {
-          try {
-            const cleanArtist = currentArtist.replace('youtube music', '').trim();
-            const searchQuery = cleanArtist && cleanArtist.length > 2
-              ? `${cleanArtist} songs`
-              : `${currentTitle} songs`;
-
-            const searchFallbackRes = await fetch('https://www.youtube.com/youtubei/v1/search', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'User-Agent':
-                  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-              },
-              body: JSON.stringify({
-                context: {
-                  client: {
-                    clientName: 'WEB',
-                    clientVersion: '2.20240101.01.00',
-                    hl: 'en',
-                    gl: 'IN',
-                  },
-                },
-                query: searchQuery,
-              }),
-            });
-
-            if (searchFallbackRes.ok) {
-              const itData = await searchFallbackRes.json();
-              const itContents =
-                itData.contents?.twoColumnSearchResultsRenderer?.primaryContents
-                  ?.sectionListRenderer?.contents?.[0]?.itemSectionRenderer
-                  ?.contents || [];
-
-              for (const item of itContents) {
-                const vr = item.videoRenderer;
-                if (vr && vr.videoId && vr.videoId !== videoId) {
-                  const t = vr.title?.runs?.[0]?.text || '';
-                  if (!t || isNonMusic(t) || isSameTrack(t, currentTitle)) continue;
-                  if (relatedVideos.some((rv) => isSameTrack(rv.title, t))) continue;
-
-                  relatedVideos.push({
-                    id: vr.videoId,
-                    title: t,
-                    artist: vr.ownerText?.runs?.[0]?.text || currentArtist || 'YouTube Music',
-                    thumbnail:
-                      vr.thumbnail?.thumbnails?.slice(-1)[0]?.url ||
-                      `https://img.youtube.com/vi/${vr.videoId}/mqdefault.jpg`,
-                  });
-                }
-              }
-            }
-          } catch {}
+        // Targeted songs (movie album / era match) take primary spotlight, followed by vibe-consistent next suggestions
+        for (const tt of targetedTracks) {
+          relatedVideos.push(tt);
+        }
+        for (const nr of nextRecommendations) {
+          if (!relatedVideos.some((rv) => rv.id === nr.id || isSameTrack(rv.title, nr.title))) {
+            relatedVideos.push(nr);
+          }
         }
 
         return new Response(JSON.stringify({ results: relatedVideos.slice(0, 20) }), {
@@ -895,7 +1019,7 @@ export default {
   "operatingSystem": "Android",
   "applicationCategory": "MusicApplication",
   "fileSize": "9.7MB",
-  "softwareVersion": "3.2.0",
+  "softwareVersion": "3.3.0",
   "downloadUrl": "https://vybzmusic.online/vybz.apk",
   "offers": {
     "@type": "Offer",

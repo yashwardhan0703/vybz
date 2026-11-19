@@ -1,9 +1,9 @@
 {
-  "latestVersion": "3.2.0",
-  "versionCode": 16,
+  "latestVersion": "3.3.0",
+  "versionCode": 17,
   "minVersion": "2.9.0",
   "apkUrl": "https://vybzmusic.online/vybz.apk",
-  "title": "VybZ v3.2.0 Spotify-Grade Stable Queue & Pure Music Engine! 🚀",
-  "releaseNotes": "Rock-solid stable queue (no resets on song change), pure music-only recommendations (no podcasts/comedy), and seamless background auto-refill.",
-  "timestamp": 1731960000000
+  "title": "VybZ v3.3.0 Universal Vibe & Artist Continuity Engine! 🚀",
+  "releaseNotes": "Spotify-grade intelligent queue: 50/50 seed & peer artist blending, 7 dedicated vibe clusters (Party, Indie Sukoon, 60s Vintage, Punjabi, 90s, Sufi), and automatic movie soundtrack matching.",
+  "timestamp": 1731990000000
 }
