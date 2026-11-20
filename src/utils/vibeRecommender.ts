@@ -323,11 +323,53 @@ export function getLocalVibeTracks(currentId: string, title: string, artist: str
   return results.slice(0, 15);
 }
 
+export function isExcessiveDuration(dur?: string | number): boolean {
+  if (!dur) return false;
+  if (typeof dur === 'number') return dur > 1200;
+  if (typeof dur === 'string') {
+    const clean = dur.trim();
+    if (!clean) return false;
+    const parts = clean.split(':').map((p) => parseInt(p, 10));
+    if (parts.length >= 3) return true;
+    if (parts.length === 2 && parts[0] > 20) return true;
+  }
+  return false;
+}
+
+export function isMovieOrNonMusic(title: string, duration?: string | number): boolean {
+  if (isExcessiveDuration(duration)) return true;
+  if (!title) return false;
+  const s = title.toLowerCase();
+
+  // 1. Explicit full-length movies (Hindi, Bollywood, South, Action, etc.)
+  const explicitFullMovieRegex =
+    /(?:full\s+(?:hindi\s+|action\s+|south\s+|bollywood\s+)?(?:movie|film)|(?:hindi|bollywood|south)\s+full\s+(?:movie|film)|complete\s+movie|पूरी\s*(?:फिल्म|मूवी)|धमाकेदार\s*एक्शन\s*फिल्म|एक्शन\s*फिल्म|ब्लॉकबस्टर\s*हिंदी\s*(?:मूवी|film|फिल्म)|फुल\s*(?:मूवी|फिल्म))/i;
+  if (explicitFullMovieRegex.test(s)) return true;
+
+  // 2. General movie patterns (Blockbuster Film, Bollywood Movie, etc.)
+  const generalMovieRegex =
+    /(?:(?:hindi|bollywood|south)\s+(?:movie|film|movies)|blockbuster\s+(?:new\s+)?(?:movie|film|hindi\s+film)|हिंदी\s*(?:मूवी|फिल्म))/i;
+  if (generalMovieRegex.test(s)) {
+    const isSongIndicator = /(?:song|songs|audio|lyrical|video\s+song|track|soundtrack|ost)/i.test(s);
+    if (!isSongIndicator) return true;
+  }
+
+  // 3. Non-music keywords
+  const nonMusicPatterns = [
+    'standup', 'stand-up', 'comedy', 'roast', 'vlog', 'prank', 'podcast', 'trailer',
+    'teaser', 'interview', 'reaction', 'episode', 'review', 'behind the scene', 'making of', 'cricket'
+  ];
+  if (nonMusicPatterns.some((nm) => s.includes(nm))) return true;
+
+  return false;
+}
+
 export function isCandidateMatchingCluster(
   candidateTitle: string,
   candidateArtist: string,
   cluster: VibeCluster | null
 ): boolean {
+  if (isMovieOrNonMusic(candidateTitle)) return false;
   if (!cluster) return true;
   const combined = `${candidateTitle} ${candidateArtist}`.toLowerCase();
 

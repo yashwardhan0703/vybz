@@ -201,6 +201,81 @@ function getRouteMetadata(pathname) {
   return null;
 }
 
+function isExcessiveDuration(dur) {
+  if (!dur) return false;
+  if (typeof dur === 'number') {
+    return dur > 1200; // > 20 minutes (1200 seconds)
+  }
+  if (typeof dur === 'string') {
+    const clean = dur.trim();
+    if (!clean) return false;
+    const parts = clean.split(':').map((p) => parseInt(p, 10));
+    // If format is HH:MM:SS or more (parts.length >= 3), it has hours -> REJECT!
+    if (parts.length >= 3) {
+      return true;
+    }
+    // If format is MM:SS (parts.length === 2)
+    if (parts.length === 2) {
+      const minutes = parts[0];
+      if (isNaN(minutes)) return false;
+      return minutes > 20; // > 20 minutes -> REJECT!
+    }
+  }
+  return false;
+}
+
+function isNonMusic(t, duration) {
+  if (!t) return true;
+  if (duration && isExcessiveDuration(duration)) return true;
+
+  const s = t.toLowerCase();
+
+  // 1. Standard non-music categories
+  const nonMusicKeywords = [
+    'standup', 'stand-up', 'comedy', 'roast', 'vlog', 'prank', 'podcast', 'news',
+    'trailer', 'teaser', 'interview', 'reaction', 'episode', 'review', 'talk show',
+    'highlights', 'cricket', 'football', 'kabaddi', 'match', 'web series', 'shorts',
+    'behind the scene', 'making of', 'uncut', 'jukebox', 'all songs', 'non stop',
+    'nonstop', 'top 10', 'top 20', 'top 50', 'mashup'
+  ];
+  if (nonMusicKeywords.some((k) => s.includes(k))) return true;
+
+  // 2. Explicit full-length movies (Hindi, Bollywood, South, Action, etc.)
+  const explicitFullMovieRegex =
+    /(?:full\s+(?:hindi\s+|action\s+|south\s+|bollywood\s+)?(?:movie|film)|(?:hindi|bollywood|south)\s+full\s+(?:movie|film)|complete\s+movie|पूरी\s*(?:फिल्म|मूवी)|धमाकेदार\s*एक्शन\s*फिल्म|एक्शन\s*फिल्म|ब्लॉकबस्टर\s*हिंदी\s*(?:मूवी|film|फिल्म)|फुल\s*(?:मूवी|फिल्म))/i;
+  if (explicitFullMovieRegex.test(s)) return true;
+
+  // 3. General movie patterns (Blockbuster Film, Bollywood Movie, etc.)
+  const generalMovieRegex =
+    /(?:(?:hindi|bollywood|south)\s+(?:movie|film|movies)|blockbuster\s+(?:new\s+)?(?:movie|film|hindi\s+film)|हिंदी\s*(?:मूवी|फिल्म))/i;
+  if (generalMovieRegex.test(s)) {
+    const isSongIndicator = /(?:song|songs|audio|lyrical|video\s+song|track|soundtrack|ost)/i.test(s);
+    if (!isSongIndicator) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+function extractDurationFromLockup(vm) {
+  try {
+    const overlays =
+      vm?.contentImage?.thumbnailViewModel?.overlays ||
+      vm?.contentImage?.collectionThumbnailViewModel?.primaryThumbnail?.thumbnailViewModel?.overlays ||
+      [];
+    for (const ov of overlays) {
+      const badges = ov?.thumbnailBottomOverlayViewModel?.badges || [];
+      for (const b of badges) {
+        if (b?.thumbnailBadgeViewModel?.text) {
+          return b.thumbnailBadgeViewModel.text;
+        }
+      }
+    }
+  } catch {}
+  return '';
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -491,6 +566,7 @@ export default {
                 const title = vr.title?.runs?.[0]?.text || '';
                 const artist = vr.ownerText?.runs?.[0]?.text || 'YouTube';
                 const duration = vr.lengthText?.simpleText || '';
+                if (!title || isNonMusic(title, duration)) continue;
                 const thumbnail =
                   vr.thumbnail?.thumbnails?.slice(-1)[0]?.url ||
                   `https://img.youtube.com/vi/${vr.videoId}/mqdefault.jpg`;
@@ -545,6 +621,7 @@ export default {
                   const title = vr.title?.runs?.[0]?.text || '';
                   const artist = vr.ownerText?.runs?.[0]?.text || 'YouTube';
                   const duration = vr.lengthText?.simpleText || '';
+                  if (!title || isNonMusic(title, duration)) continue;
                   const thumbnail =
                     vr.thumbnail?.thumbnails?.slice(-1)[0]?.url ||
                     `https://img.youtube.com/vi/${vr.videoId}/mqdefault.jpg`;
@@ -630,47 +707,6 @@ export default {
             .replace(/[^a-z0-9]/g, ' ')
             .replace(/\s+/g, ' ')
             .trim();
-        }
-
-        function isNonMusic(t) {
-          if (!t) return true;
-          const s = t.toLowerCase();
-          return (
-            s.includes('standup') ||
-            s.includes('stand-up') ||
-            s.includes('comedy') ||
-            s.includes('roast') ||
-            s.includes('vlog') ||
-            s.includes('prank') ||
-            s.includes('podcast') ||
-            s.includes('news') ||
-            s.includes('trailer') ||
-            s.includes('teaser') ||
-            s.includes('interview') ||
-            s.includes('full movie') ||
-            s.includes('reaction') ||
-            s.includes('episode') ||
-            s.includes('review') ||
-            s.includes('talk show') ||
-            s.includes('highlights') ||
-            s.includes('cricket') ||
-            s.includes('football') ||
-            s.includes('kabaddi') ||
-            s.includes('match') ||
-            s.includes('web series') ||
-            s.includes('shorts') ||
-            s.includes('behind the scene') ||
-            s.includes('making of') ||
-            s.includes('uncut') ||
-            s.includes('jukebox') ||
-            s.includes('all songs') ||
-            s.includes('non stop') ||
-            s.includes('nonstop') ||
-            s.includes('top 10') ||
-            s.includes('top 20') ||
-            s.includes('top 50') ||
-            s.includes('mashup')
-          );
         }
 
         function extractMovieName(rawTitle, artist) {
@@ -846,7 +882,7 @@ export default {
           try {
             let targetedQuery = '';
             if (movie) {
-              targetedQuery = `${movie} songs`;
+              targetedQuery = `${movie} song audio`;
             } else if (detectedVibe === 'haryanvi') {
               targetedQuery = `${cleanArtist || ''} Haryanvi superhit songs`;
             } else if (detectedVibe === 'bhojpuri') {
@@ -897,7 +933,8 @@ export default {
                   const vr = item.videoRenderer;
                   if (vr && vr.videoId && vr.videoId !== videoId) {
                     const t = vr.title?.runs?.[0]?.text || '';
-                    if (!t || isNonMusic(t) || isSameTrack(t, currentTitle)) continue;
+                    const dur = vr.lengthText?.simpleText || '';
+                    if (!t || isNonMusic(t, dur) || isSameTrack(t, currentTitle)) continue;
                     if (isVibeMismatch(t, detectedVibe)) continue;
                     if (targetedTracks.some((tt) => isSameTrack(tt.title, t))) continue;
 
@@ -924,6 +961,7 @@ export default {
           let id = '';
           let title = '';
           let artist = 'YouTube Music';
+          let duration = '';
 
           // Support both modern lockupViewModel and legacy compactVideoRenderer
           if (item.lockupViewModel) {
@@ -933,16 +971,18 @@ export default {
             artist =
               vm.metadata?.lockupMetadataViewModel?.metadata?.contentMetadataViewModel
                 ?.metadataRows?.[0]?.metadataParts?.[0]?.text?.content || 'YouTube Music';
+            duration = extractDurationFromLockup(vm);
           } else if (item.compactVideoRenderer) {
             const cvr = item.compactVideoRenderer;
             id = cvr.videoId || '';
             title = cvr.title?.simpleText || cvr.title?.runs?.[0]?.text || '';
             artist = cvr.shortBylineText?.runs?.[0]?.text || 'YouTube Music';
+            duration = cvr.lengthText?.simpleText || cvr.lengthText?.runs?.[0]?.text || '';
           }
 
           if (!id || id === videoId || id.length !== 11) continue;
           if (!title) continue;
-          if (isNonMusic(title)) continue;
+          if (isNonMusic(title, duration)) continue;
           if (isSameTrack(title, currentTitle)) continue;
           if (isVibeMismatch(title, detectedVibe)) continue;
           if (targetedTracks.some((tt) => isSameTrack(tt.title, title))) continue;

@@ -3,7 +3,7 @@ import { Search, X, Play, Music, Sparkles, Loader2, PlayCircle } from 'lucide-re
 import { usePlayerStore } from '../store/playerStore';
 import { THEMES } from '../data/worlds';
 import { ARTISTS_CATALOG } from '../data/artistsData';
-import { getLocalVibeTracks, isDuplicateSong } from '../utils/vibeRecommender';
+import { getLocalVibeTracks, isDuplicateSong, isMovieOrNonMusic } from '../utils/vibeRecommender';
 import type { QueueTrack } from '../hooks/useYouTube';
 import { handleArtworkError } from '../utils/mediaHelpers';
 
@@ -134,6 +134,7 @@ export default function SearchModal({ onPlayCustomVideoId }: SearchModalProps) {
         const data = await res.json();
         if (Array.isArray(data.results) && data.results.length > 0) {
           for (const item of data.results) {
+            if (isMovieOrNonMusic(item.title, item.duration)) continue;
             fetchedResults.push({
               id: item.id,
               title: item.title,
