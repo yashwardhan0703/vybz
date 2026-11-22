@@ -43,6 +43,7 @@ import {
 } from '../utils/navigation';
 import AmbientMixer from './AmbientMixer';
 import DownloadLandingPage from './DownloadLandingPage';
+import LegalInfoModal, { type LegalTab } from './LegalInfoModal';
 
 interface UniqueIndianPlayerProps {
   onPlayCustomVideoId: (
@@ -233,6 +234,7 @@ export default function UniqueIndianPlayer({
     const p = window.location.pathname.replace(/\/+$/, '');
     return p === '/download' || p === '/app';
   });
+  const [legalModalTab, setLegalModalTab] = useState<LegalTab | null>(null);
 
   // Pagination & Display State for Selected Vibe Station (Defaults to true for full 25 continuous scroll)
   const [vibePage, setVibePage] = useState<number>(1);
@@ -2940,23 +2942,69 @@ export default function UniqueIndianPlayer({
                   </div>
                 </div>
 
-                <div className="border-t border-white/5 pt-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-[0.68rem] text-white/35">
-                  <p>© 2026 VybZ Music • Official India Audio Hub • https://vybzmusic.online</p>
-                  <div className="flex items-center gap-3">
-                    <span>Crafted for Indian Music Lovers ❤️</span>
-                    <span>•</span>
-                    <span>No Ads</span>
-                    <span>•</span>
+                <div className="border-t border-white/5 pt-4 flex flex-col gap-3 text-[0.68rem] text-white/35">
+                  {/* Row 1: Legal & Information Links (Fully responsive: centered & wrapped on mobile, neat row on desktop) */}
+                  <div className="flex flex-wrap items-center justify-center sm:justify-start gap-x-3 sm:gap-x-4 gap-y-1.5 text-white/45">
                     <button
                       type="button"
-                      onClick={() => {
-                        setIsDownloadPage(true);
-                        navigateTo('/download');
-                      }}
-                      className="hover:text-amber-300 underline transition-colors"
+                      onClick={() => setLegalModalTab('about')}
+                      className="hover:text-amber-300 transition-colors cursor-pointer"
                     >
-                      Android APK (v3.3.0)
+                      About VybZ
                     </button>
+                    <span className="text-white/20 hidden sm:inline">•</span>
+                    <button
+                      type="button"
+                      onClick={() => setLegalModalTab('faq')}
+                      className="hover:text-amber-300 transition-colors cursor-pointer"
+                    >
+                      FAQ & Devices
+                    </button>
+                    <span className="text-white/20 hidden sm:inline">•</span>
+                    <button
+                      type="button"
+                      onClick={() => setLegalModalTab('privacy')}
+                      className="hover:text-amber-300 transition-colors cursor-pointer"
+                    >
+                      Privacy Policy
+                    </button>
+                    <span className="text-white/20 hidden sm:inline">•</span>
+                    <button
+                      type="button"
+                      onClick={() => setLegalModalTab('terms')}
+                      className="hover:text-amber-300 transition-colors cursor-pointer"
+                    >
+                      Terms of Service
+                    </button>
+                    <span className="text-white/20 hidden sm:inline">•</span>
+                    <button
+                      type="button"
+                      onClick={() => setLegalModalTab('disclaimer')}
+                      className="hover:text-amber-300 transition-colors cursor-pointer"
+                    >
+                      DMCA & Disclaimer
+                    </button>
+                  </div>
+
+                  {/* Row 2: Copyright & Badges */}
+                  <div className="flex flex-col sm:flex-row items-center justify-between gap-2 text-center sm:text-left">
+                    <p>© 2026 VybZ Music • Official India Audio Hub • https://vybzmusic.online</p>
+                    <div className="flex items-center gap-3">
+                      <span>Crafted for Indian Music Lovers ❤️</span>
+                      <span>•</span>
+                      <span>No Ads</span>
+                      <span>•</span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsDownloadPage(true);
+                          navigateTo('/download');
+                        }}
+                        className="hover:text-amber-300 underline transition-colors"
+                      >
+                        Android APK (v3.3.0)
+                      </button>
+                    </div>
                   </div>
                 </div>
               </footer>
@@ -3250,6 +3298,13 @@ export default function UniqueIndianPlayer({
           </div>
         </div>
       )}
+      {/* Legal & Info Transparency Modal */}
+      <LegalInfoModal
+        isOpen={!!legalModalTab}
+        activeTab={legalModalTab || 'about'}
+        onTabChange={setLegalModalTab}
+        onClose={() => setLegalModalTab(null)}
+      />
     </div>
   );
 }
