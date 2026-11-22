@@ -250,7 +250,7 @@ export default function DownloadLandingPage({ onBackToPlayer }: DownloadLandingP
               <div className="relative inline-flex flex-wrap items-center justify-center gap-2">
                 <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/30 bg-amber-400/10 px-3 py-1 text-xs font-bold text-amber-300">
                   <Sparkles size={12} className="animate-pulse text-amber-400" />
-                  Official Release v3.3.0
+                  Official Release v3.4.0
                 </span>
                 <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1 text-xs font-semibold text-emerald-300">
                   <ShieldCheck size={13} />
@@ -276,7 +276,7 @@ export default function DownloadLandingPage({ onBackToPlayer }: DownloadLandingP
                   className="group relative flex w-full max-w-xs sm:max-w-md items-center justify-center gap-2.5 rounded-2xl bg-gradient-to-r from-amber-400 via-orange-400 to-amber-500 py-3.5 sm:py-4 px-6 text-sm sm:text-base font-black text-black shadow-[0_15px_35px_rgba(245,158,11,0.35)] transition-all hover:scale-[1.02] hover:brightness-110 active:scale-95"
                 >
                   <DownloadCloud size={20} className="group-hover:scale-110 transition-transform shrink-0" />
-                  <span className="truncate">Download APK (v3.3.0 • 9.8 MB)</span>
+                  <span className="truncate">Download APK (v3.4.0 • 9.8 MB)</span>
                 </button>
 
                 {downloadStarted && (
@@ -627,7 +627,7 @@ export default function DownloadLandingPage({ onBackToPlayer }: DownloadLandingP
             </div>
             <div className="flex items-center justify-between py-2.5">
               <span className="text-white/60">Android Package</span>
-              <span className="font-mono text-amber-300 text-xs">com.vybz.music (v3.3.0)</span>
+              <span className="font-mono text-amber-300 text-xs">com.vybz.music (v3.4.0)</span>
             </div>
             <div className="flex items-center justify-between py-2.5">
               <span className="text-white/60">Android APK Size</span>
@@ -698,7 +698,7 @@ export default function DownloadLandingPage({ onBackToPlayer }: DownloadLandingP
               onClick={selectedDevice === 'android' ? triggerApkDownload : onBackToPlayer}
               className="rounded-2xl bg-gradient-to-r from-amber-400 to-orange-500 px-6 py-3 text-xs sm:text-sm font-bold text-black shadow-lg hover:brightness-110 active:scale-95 transition-all"
             >
-              {selectedDevice === 'android' ? 'Download VybZ APK (v3.3.0)' : 'Open VybZ Web Player'}
+              {selectedDevice === 'android' ? 'Download VybZ APK (v3.4.0)' : 'Open VybZ Web Player'}
             </button>
           </div>
         </div>

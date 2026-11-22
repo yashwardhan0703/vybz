@@ -234,7 +234,13 @@ export default function UniqueIndianPlayer({
     const p = window.location.pathname.replace(/\/+$/, '');
     return p === '/download' || p === '/app';
   });
-  const [legalModalTab, setLegalModalTab] = useState<LegalTab | null>(null);
+  const [legalModalTab, setLegalModalTab] = useState<LegalTab | null>(() => {
+    if (typeof window === 'undefined') return null;
+    const p = window.location.pathname.replace(/\/+$/, '').replace(/^\//, '');
+    if (p === 'about' || p === 'faq' || p === 'privacy' || p === 'terms') return p;
+    if (p === 'dmca' || p === 'disclaimer') return 'disclaimer';
+    return null;
+  });
 
   // Pagination & Display State for Selected Vibe Station (Defaults to true for full 25 continuous scroll)
   const [vibePage, setVibePage] = useState<number>(1);
@@ -523,6 +529,12 @@ export default function UniqueIndianPlayer({
     const handlePopState = () => {
       const cleanP = window.location.pathname.replace(/\/+$/, '');
       setIsDownloadPage(cleanP === '/download' || cleanP === '/app');
+      const legalSlug = cleanP.replace(/^\//, '');
+      if (['about', 'faq', 'privacy', 'terms', 'dmca', 'disclaimer'].includes(legalSlug)) {
+        setLegalModalTab(legalSlug === 'dmca' ? 'disclaimer' : (legalSlug as LegalTab));
+      } else {
+        setLegalModalTab(null);
+      }
       const route = parseRoute();
       if (route.artistId) {
         const nextArtist = ARTISTS_CATALOG.find((a) => a.id === route.artistId) || null;
@@ -550,6 +562,25 @@ export default function UniqueIndianPlayer({
       window.removeEventListener('popstate', handlePopState);
     };
   }, [setActiveCategory, setWorld, currentWorld.id]);
+
+  const openLegalModal = (tab: LegalTab) => {
+    setLegalModalTab(tab);
+    navigateTo(`/${tab}`);
+  };
+
+  const closeLegalModal = () => {
+    setLegalModalTab(null);
+    if (selectedVibeWorld) {
+      const slug = WORLD_ID_TO_SLUG[selectedVibeWorld.id] || selectedVibeWorld.id;
+      navigateTo(`/vibes/${slug}`, { replace: true });
+    } else if (selectedArtist) {
+      navigateTo(`/artist/${selectedArtist.id}`, { replace: true });
+    } else if (isDownloadPage) {
+      navigateTo('/download', { replace: true });
+    } else {
+      navigateTo('/', { replace: true });
+    }
+  };
 
   const openArtist = (artist: Artist) => {
     navigateTo(`/artist/${artist.id}`);
@@ -2947,7 +2978,7 @@ export default function UniqueIndianPlayer({
                   <div className="flex flex-wrap items-center justify-center sm:justify-start gap-x-3 sm:gap-x-4 gap-y-1.5 text-white/45">
                     <button
                       type="button"
-                      onClick={() => setLegalModalTab('about')}
+                      onClick={() => openLegalModal('about')}
                       className="hover:text-amber-300 transition-colors cursor-pointer"
                     >
                       About VybZ
@@ -2955,7 +2986,7 @@ export default function UniqueIndianPlayer({
                     <span className="text-white/20 hidden sm:inline">•</span>
                     <button
                       type="button"
-                      onClick={() => setLegalModalTab('faq')}
+                      onClick={() => openLegalModal('faq')}
                       className="hover:text-amber-300 transition-colors cursor-pointer"
                     >
                       FAQ & Devices
@@ -2963,7 +2994,7 @@ export default function UniqueIndianPlayer({
                     <span className="text-white/20 hidden sm:inline">•</span>
                     <button
                       type="button"
-                      onClick={() => setLegalModalTab('privacy')}
+                      onClick={() => openLegalModal('privacy')}
                       className="hover:text-amber-300 transition-colors cursor-pointer"
                     >
                       Privacy Policy
@@ -2971,7 +3002,7 @@ export default function UniqueIndianPlayer({
                     <span className="text-white/20 hidden sm:inline">•</span>
                     <button
                       type="button"
-                      onClick={() => setLegalModalTab('terms')}
+                      onClick={() => openLegalModal('terms')}
                       className="hover:text-amber-300 transition-colors cursor-pointer"
                     >
                       Terms of Service
@@ -2979,7 +3010,7 @@ export default function UniqueIndianPlayer({
                     <span className="text-white/20 hidden sm:inline">•</span>
                     <button
                       type="button"
-                      onClick={() => setLegalModalTab('disclaimer')}
+                      onClick={() => openLegalModal('disclaimer')}
                       className="hover:text-amber-300 transition-colors cursor-pointer"
                     >
                       DMCA & Disclaimer
@@ -3002,7 +3033,7 @@ export default function UniqueIndianPlayer({
                         }}
                         className="hover:text-amber-300 underline transition-colors"
                       >
-                        Android APK (v3.3.0)
+                        Android APK (v3.4.0)
                       </button>
                     </div>
                   </div>
@@ -3302,8 +3333,8 @@ export default function UniqueIndianPlayer({
       <LegalInfoModal
         isOpen={!!legalModalTab}
         activeTab={legalModalTab || 'about'}
-        onTabChange={setLegalModalTab}
-        onClose={() => setLegalModalTab(null)}
+        onTabChange={openLegalModal}
+        onClose={closeLegalModal}
       />
     </div>
   );

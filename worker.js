@@ -177,8 +177,43 @@ function getRouteMetadata(pathname) {
 
   if (clean === '/download' || clean === '/app') {
     return {
-      title: 'Download VybZ Music APK for Android (v2.9.7) – Free Ad-Free Music Player',
-      description: 'Download official VybZ Music Android APK (v2.9.7 • 9.7 MB). 100% ad-free, instant 0.1s offline launch, 60 FPS smooth playback, continuous background audio, and synced karaoke lyrics.',
+      title: 'Download VybZ Music APK for Android (v3.4.0) – Free Ad-Free Music Player',
+      description: 'Download official VybZ Music Android APK (v3.4.0 • 9.8 MB). 100% ad-free, instant 0.1s offline launch, 60 FPS smooth playback, continuous background audio, and synced karaoke lyrics.',
+    };
+  }
+
+  if (clean === '/about') {
+    return {
+      title: 'About VybZ Music – Indian Ambient Mood & Vibe Discovery Platform',
+      description: 'Discover the story behind VybZ Music. Born for cutting chai tapris, hostel midnight jams, and monsoon rain nostalgia. 10 ambient vibe stations, 100% ad-free.',
+    };
+  }
+
+  if (clean === '/faq') {
+    return {
+      title: 'FAQ & Supported Devices | VybZ Music Help Center',
+      description: 'Frequently asked questions about VybZ Music. Learn how to stream 100% free with zero ads, install the Android background audio APK, and setup on iPhone or PC.',
+    };
+  }
+
+  if (clean === '/privacy') {
+    return {
+      title: 'Privacy Policy | VybZ Music Platform Transparency',
+      description: 'Read the official VybZ Music Privacy Policy. We do not sell user data. Your playlists and history are stored locally on your device.',
+    };
+  }
+
+  if (clean === '/terms') {
+    return {
+      title: 'Terms of Service | VybZ Music Player Guidelines',
+      description: 'Official Terms of Service for VybZ Music. Learn about non-commercial personal usage guidelines and YouTube API platform compliance.',
+    };
+  }
+
+  if (clean === '/dmca' || clean === '/disclaimer') {
+    return {
+      title: 'DMCA & Content Disclaimer | VybZ Music Rights & Attribution',
+      description: 'Official DMCA copyright and content attribution disclaimer for VybZ Music. All media is streamed via official YouTube IFrame API. Contact: vybzmusic7@gmail.com.',
     };
   }
 

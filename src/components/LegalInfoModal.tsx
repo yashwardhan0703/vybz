@@ -277,7 +277,7 @@ export default function LegalInfoModal({
                   If you are a copyright owner, publisher, or legal agent and wish to have any query addressed, please reach out to us at:
                 </p>
                 <p className="mt-1 font-mono text-[0.75rem] text-amber-300 bg-white/5 px-2.5 py-1 rounded-md inline-block">
-                  support@vybzmusic.online
+                  vybzmusic7@gmail.com
                 </p>
                 <p className="mt-1 text-[0.65rem] text-white/40">
                   We honor all legitimate verification and takedown requests promptly within 24 to 48 hours.

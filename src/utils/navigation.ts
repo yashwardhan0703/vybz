@@ -4,6 +4,7 @@ import type { PlayerCategory } from '../store/playerStore';
 export interface RouteMeta {
   category?: PlayerCategory | 'download';
   isDownload?: boolean;
+  legalTab?: 'about' | 'faq' | 'privacy' | 'terms' | 'disclaimer';
   artistId?: string;
   vibeSlug?: string;
   worldId?: string;
@@ -250,6 +251,47 @@ export function parseRoute(pathname = window.location.pathname, hash = window.lo
       category: 'favorites',
       title: 'Liked Songs – Favorite Indian Tracks | VybZ Music',
       description: 'Your personal collection of liked songs and favorite tracks on VybZ Music.',
+    };
+  }
+
+  // 8. Legal & Information Routes
+  if (cleanPath === '/about') {
+    return {
+      legalTab: 'about',
+      title: 'About VybZ Music – Indian Ambient Mood & Vibe Discovery Platform',
+      description: 'Discover the story behind VybZ Music. Born for cutting chai tapris, hostel midnight jams, and monsoon rain nostalgia. 10 ambient vibe stations, 100% ad-free.',
+    };
+  }
+
+  if (cleanPath === '/faq') {
+    return {
+      legalTab: 'faq',
+      title: 'FAQ & Supported Devices | VybZ Music Help Center',
+      description: 'Frequently asked questions about VybZ Music. Learn how to stream 100% free with zero ads, install the Android background audio APK, and setup on iPhone or PC.',
+    };
+  }
+
+  if (cleanPath === '/privacy') {
+    return {
+      legalTab: 'privacy',
+      title: 'Privacy Policy | VybZ Music Platform Transparency',
+      description: 'Read the official VybZ Music Privacy Policy. We do not sell user data. Your playlists and history are stored locally on your device.',
+    };
+  }
+
+  if (cleanPath === '/terms') {
+    return {
+      legalTab: 'terms',
+      title: 'Terms of Service | VybZ Music Player Guidelines',
+      description: 'Official Terms of Service for VybZ Music. Learn about non-commercial personal usage guidelines and YouTube API platform compliance.',
+    };
+  }
+
+  if (cleanPath === '/dmca' || cleanPath === '/disclaimer') {
+    return {
+      legalTab: 'disclaimer',
+      title: 'DMCA & Content Disclaimer | VybZ Music Rights & Attribution',
+      description: 'Official DMCA copyright and content attribution disclaimer for VybZ Music. All media is streamed via official YouTube IFrame API. Contact: vybzmusic7@gmail.com.',
     };
   }
 
