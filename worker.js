@@ -354,12 +354,12 @@ export default {
     // -1.1 Live APK Version Endpoint for instant Android in-app update trigger (Uncached API route bypasses PWA ServiceWorker)
     if (url.pathname === '/api/apk-version' || url.pathname === '/api/version-apk' || url.pathname === '/version.json') {
       return new Response(JSON.stringify({
-        latestVersion: '3.3.0',
-        versionCode: 17,
+        latestVersion: '3.4.0',
+        versionCode: 18,
         minVersion: '2.9.0',
         apkUrl: 'https://vybzmusic.online/vybz.apk',
-        title: 'VybZ v3.3.0 Universal Vibe & Artist Continuity Engine! 🚀',
-        releaseNotes: 'Spotify-grade intelligent queue: 50/50 seed & peer artist blending, 7 dedicated vibe clusters (Party, Indie Sukoon, 60s Vintage, Punjabi, 90s, Sufi), and automatic movie soundtrack matching.',
+        title: 'VybZ v3.4.0 Official Legal, FAQ & Audio Continuity Engine! 🚀',
+        releaseNotes: 'Official Legal & Transparency Hub (About, FAQ, Privacy, Terms, DMCA Disclaimer), 20-min anti-movie firewall, and background playback improvements.',
         timestamp: Date.now(),
       }), {
         headers: {
