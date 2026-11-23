@@ -12,6 +12,7 @@ export interface ShareModalProps {
   vibeName?: string;
   customUrl?: string;
   isPlaylist?: boolean;
+  isAppShare?: boolean;
   onToast: (msg: string) => void;
 }
 
@@ -24,6 +25,7 @@ export default function ShareModal({
   vibeName,
   customUrl,
   isPlaylist,
+  isAppShare,
   onToast,
 }: ShareModalProps) {
   const [isGeneratingStory, setIsGeneratingStory] = useState(false);
@@ -35,8 +37,8 @@ export default function ShareModal({
   const rawArtist = artist || 'Top Indian Music';
   const { displayTitle, displaySubtitle } = parseTrackMetadata(rawTitle, rawArtist);
 
-  const songTitle = isPlaylist ? rawTitle : displayTitle;
-  const artistName = isPlaylist ? rawArtist : displaySubtitle;
+  const songTitle = isAppShare ? 'VybZ Music' : isPlaylist ? rawTitle : displayTitle;
+  const artistName = isAppShare ? '100% Ad-Free Indian Music' : isPlaylist ? rawArtist : displaySubtitle;
   const shareTargetUrl = customUrl || (typeof window !== 'undefined' ? window.location.href : 'https://vybzmusic.online');
 
   // 1. Instagram Story Share
@@ -44,10 +46,10 @@ export default function ShareModal({
     setIsGeneratingStory(true);
     try {
       const res = await shareStoryToInstagram({
-        title: songTitle,
-        artist: artistName,
-        artworkUrl,
-        vibeName: isPlaylist ? 'PLAYLIST' : vibeName,
+        title: isAppShare ? 'VybZ Music' : songTitle,
+        artist: isAppShare ? '100% Ad-Free Indian Music' : artistName,
+        artworkUrl: isAppShare ? '/logo.png' : artworkUrl,
+        vibeName: isAppShare ? 'AD-FREE AUDIO' : isPlaylist ? 'PLAYLIST' : vibeName,
         shareUrl: shareTargetUrl,
       });
 
@@ -67,9 +69,14 @@ export default function ShareModal({
 
   // 2. WhatsApp Share
   const handleWhatsAppShare = () => {
-    const text = isPlaylist
-      ? `🎧 Shared Playlist: "${songTitle}" on VybZ Music\n✨ ${artistName}\n\n▶ Listen Online (Ad-Free):\n${shareTargetUrl}\n\n📲 Get Android App (Background Audio):\nhttps://vybzmusic.online/download`
-      : `🎧 Listening to: "${songTitle}"\n✨ ${artistName}\n\n▶ Listen Online (Ad-Free):\n${shareTargetUrl}\n\n📲 Get Android App (Background Audio):\nhttps://vybzmusic.online/download`;
+    let text = '';
+    if (isAppShare) {
+      text = `🔥 VybZ Music – 100% Ad-Free Indian Music\nSpotify ke ads se chhutkara!\n\n✦ Zero Ads & Zero Interruptions\n✦ Screen lock / Background me bhi chalta hai\n✦ Curated Mood Stations (Chai Tapri, Late Night Lo-Fi, Sufi)\n✦ Daily Top 25 Trending Hits\n\n🌐 Web Player: https://vybzmusic.online\n📲 Download Android App: https://vybzmusic.online/download`;
+    } else if (isPlaylist) {
+      text = `🎧 Shared Playlist on VybZ Music:\n"${songTitle}"\n✨ ${artistName}\n\n▶ Listen Ad-Free: ${shareTargetUrl}\n📲 Get App (Free Background Play): https://vybzmusic.online/download`;
+    } else {
+      text = `🎧 Now Playing on VybZ Music:\n"${songTitle}"\n${artistName && !/VybZ/i.test(artistName) ? `✨ ${artistName}\n` : ''}\n▶ Listen Ad-Free: https://vybzmusic.online/\n📲 Get App (Free Background Play): https://vybzmusic.online/download`;
+    }
 
     const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
     if (typeof window !== 'undefined') {
@@ -108,7 +115,7 @@ export default function ShareModal({
               <Sparkles size={14} />
             </span>
             <h3 className="text-base font-bold text-white">
-              {isPlaylist ? 'Share Playlist' : 'Share Music'}
+              {isAppShare ? 'Share VybZ Music' : isPlaylist ? 'Share Playlist' : 'Share Music'}
             </h3>
           </div>
           <button
@@ -121,11 +128,13 @@ export default function ShareModal({
           </button>
         </div>
 
-        {/* Current Song / Playlist Preview Banner */}
+        {/* Current Song / Playlist / App Preview Banner */}
         <div className="my-4 flex items-center gap-3.5 rounded-2xl border border-white/10 bg-white/[0.04] p-3">
           <div className="size-14 shrink-0 overflow-hidden rounded-xl border border-white/10 bg-black/50">
             {artworkUrl ? (
               <img src={artworkUrl} alt={songTitle} className="size-full object-cover" />
+            ) : isAppShare ? (
+              <img src="/logo.png" alt="VybZ Music" className="size-full object-contain p-1" />
             ) : (
               <div className="grid size-full place-items-center text-amber-400 text-xl font-bold">
                 {isPlaylist ? '📂' : '🎵'}
@@ -133,11 +142,15 @@ export default function ShareModal({
             )}
           </div>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-bold text-white">{songTitle}</p>
-            <p className="truncate text-xs text-white/60">{artistName}</p>
-            {vibeName && (
+            <p className="truncate text-sm font-bold text-white">
+              {isAppShare ? 'VybZ Music' : songTitle}
+            </p>
+            <p className="truncate text-xs text-white/60">
+              {isAppShare ? '100% Ad-Free Indian Music Streaming' : artistName}
+            </p>
+            {(vibeName || isAppShare) && (
               <span className="mt-1 inline-block text-[10px] font-semibold text-amber-300">
-                ✦ {vibeName}
+                ✦ {isAppShare ? 'OFFICIAL APP' : vibeName}
               </span>
             )}
           </div>

@@ -83,6 +83,7 @@ interface PlayerState {
     vibeName?: string;
     customUrl?: string;
     isPlaylist?: boolean;
+    isAppShare?: boolean;
   };
   openShareModal: (data?: {
     title?: string;
@@ -91,6 +92,7 @@ interface PlayerState {
     vibeName?: string;
     customUrl?: string;
     isPlaylist?: boolean;
+    isAppShare?: boolean;
   }) => void;
   closeShareModal: () => void;
 
@@ -515,6 +517,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
         vibeName: data?.vibeName || state.currentWorld?.name || undefined,
         customUrl: data?.customUrl || (typeof window !== 'undefined' ? window.location.href : 'https://vybzmusic.online'),
         isPlaylist: Boolean(data?.isPlaylist),
+        isAppShare: Boolean(data?.isAppShare),
       },
     })),
 

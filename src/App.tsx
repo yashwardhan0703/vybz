@@ -202,6 +202,7 @@ function AppLayout() {
         vibeName={shareModal.vibeName}
         customUrl={shareModal.customUrl}
         isPlaylist={shareModal.isPlaylist}
+        isAppShare={shareModal.isAppShare}
         onToast={showToast}
       />
       <SharedPlaylistModal

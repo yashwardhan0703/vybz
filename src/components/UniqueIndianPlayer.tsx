@@ -1162,6 +1162,25 @@ export default function UniqueIndianPlayer({
 
           {/* Right Header Actions */}
           <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0 ml-auto">
+            {/* Share VybZ App */}
+            <button
+              type="button"
+              onClick={() => {
+                usePlayerStore.getState().openShareModal({
+                  title: 'VybZ Music',
+                  artist: '100% Ad-Free Indian Music Streaming',
+                  vibeName: 'VYBZ MUSIC',
+                  customUrl: 'https://vybzmusic.online',
+                  isAppShare: true,
+                });
+              }}
+              aria-label="Share VybZ Music with friends"
+              className="flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 hover:border-amber-400/40 hover:bg-white/10 px-2.5 sm:px-3 py-1.5 text-[0.72rem] sm:text-xs font-semibold text-white/80 hover:text-white transition-all active:scale-95 cursor-pointer"
+            >
+              <Share2 size={13} className="text-amber-400 shrink-0" />
+              <span className="hidden xs:inline">Share</span>
+            </button>
+
             {showInstallBtn && (
               <button
                 type="button"
