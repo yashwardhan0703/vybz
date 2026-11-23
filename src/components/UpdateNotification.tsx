@@ -1,14 +1,31 @@
 import { useEffect, useState } from 'react';
-import { Sparkles, RefreshCw, DownloadCloud, Zap, Music2, CheckCircle2, ExternalLink } from 'lucide-react';
+import { Sparkles, RefreshCw, DownloadCloud, Zap, Music2, CheckCircle2, ExternalLink, X } from 'lucide-react';
+
+function parseVersionNumbers(v: string): number[] {
+  return (v || '').split('.').map((p) => parseInt(p, 10) || 0);
+}
+
+function isNewerVersion(current: string, target: string): boolean {
+  const c = parseVersionNumbers(current);
+  const t = parseVersionNumbers(target);
+  for (let i = 0; i < Math.max(c.length, t.length); i++) {
+    const cv = c[i] || 0;
+    const tv = t[i] || 0;
+    if (tv > cv) return true;
+    if (tv < cv) return false;
+  }
+  return false;
+}
 
 export default function UpdateNotification() {
   const [hasWebUpdate, setHasWebUpdate] = useState(false);
   const [hasApkUpdate, setHasApkUpdate] = useState(false);
-  const [apkTargetVersion, setApkTargetVersion] = useState('3.3.0');
+  const [apkTargetVersion, setApkTargetVersion] = useState('3.4.1');
   const [apkDownloadUrl, setApkDownloadUrl] = useState('https://vybzmusic.online/vybz.apk');
   const [isUpdating, setIsUpdating] = useState(false);
   const [downloadStarted, setDownloadStarted] = useState(false);
   const [dismissedWeb, setDismissedWeb] = useState(false);
+  const [dismissedApk, setDismissedApk] = useState(false);
 
   // 1. Android APK native in-app live update check (fetches live version.json bypassing cache)
   useEffect(() => {
@@ -17,8 +34,19 @@ export default function UpdateNotification() {
     const isVybZApp = /VybZApp/i.test(ua) || Boolean((window as unknown as { VybZNative?: unknown }).VybZNative);
     if (!isVybZApp) return;
 
-    const match = ua.match(/VybZApp\/([\d.]+)/);
-    const installed = match && match[1] ? match[1] : '2.9.0';
+    // Detect installed version via native bridge first, fallback to UserAgent
+    let installed = '2.9.0';
+    if (typeof (window as any).VybZNative?.getAppVersion === 'function') {
+      try {
+        const nativeV = (window as any).VybZNative.getAppVersion();
+        if (nativeV) installed = nativeV;
+      } catch {}
+    } else {
+      const match = ua.match(/VybZApp\/([\d.]+)/);
+      if (match && match[1]) {
+        installed = match[1];
+      }
+    }
 
     const checkLiveVersion = async () => {
       try {
@@ -44,9 +72,25 @@ export default function UpdateNotification() {
         if (!res || !res.ok) return;
         const data = await res.json();
         if (data && data.latestVersion) {
-          setApkTargetVersion(data.latestVersion);
+          const target = data.latestVersion;
+          setApkTargetVersion(target);
           if (data.apkUrl) setApkDownloadUrl(data.apkUrl);
-          if (installed !== data.latestVersion) {
+
+          // Loop & Harassment Protection:
+          // Check if user already dismissed or recently downloaded this version
+          const dismissedKey = `vybz_apk_dismissed_v${target}`;
+          const downloadedKey = `vybz_apk_downloaded_v${target}`;
+          const sessionDismissedKey = `vybz_apk_sess_dismissed_v${target}`;
+
+          const isDismissed = localStorage.getItem(dismissedKey) === 'true';
+          const isSessionDismissed = sessionStorage.getItem(sessionDismissedKey) === 'true';
+          const downloadTs = parseInt(localStorage.getItem(downloadedKey) || '0', 10);
+          const recentlyDownloaded = Date.now() - downloadTs < 24 * 60 * 60 * 1000;
+
+          // Special check: If installed version is already >= target, no update needed!
+          const needsUpdate = isNewerVersion(installed, target);
+
+          if (needsUpdate && !isDismissed && !isSessionDismissed && !recentlyDownloaded) {
             setHasApkUpdate(true);
           } else {
             setHasApkUpdate(false);
@@ -127,9 +171,23 @@ export default function UpdateNotification() {
     };
   }, []);
 
+  const handleDismissApk = () => {
+    setDismissedApk(true);
+    setHasApkUpdate(false);
+    try {
+      localStorage.setItem(`vybz_apk_dismissed_v${apkTargetVersion}`, 'true');
+      sessionStorage.setItem(`vybz_apk_sess_dismissed_v${apkTargetVersion}`, 'true');
+    } catch {}
+  };
+
   const triggerApkDownload = () => {
     setIsUpdating(true);
     setDownloadStarted(true);
+
+    try {
+      localStorage.setItem(`vybz_apk_downloaded_v${apkTargetVersion}`, Date.now().toString());
+      sessionStorage.setItem(`vybz_apk_sess_dismissed_v${apkTargetVersion}`, 'true');
+    } catch {}
 
     const downloadTarget = apkDownloadUrl || `https://vybzmusic.online/vybz-v${apkTargetVersion}.apk`;
 
@@ -188,12 +246,22 @@ export default function UpdateNotification() {
   };
 
   // ========================================================
-  // CASE 1: MANDATORY CENTER MODAL FOR OUTDATED ANDROID APK
+  // CASE 1: OPTIONAL CENTER MODAL FOR OUTDATED ANDROID APK
   // ========================================================
-  if (hasApkUpdate) {
+  if (hasApkUpdate && !dismissedApk) {
     return (
       <div className="fixed inset-0 z-[10000] flex items-center justify-center p-3 sm:p-4 bg-black/90 backdrop-blur-md animate-fade-in select-none">
         <div className="relative w-full max-w-[calc(100vw-1.5rem)] sm:max-w-md max-h-[85dvh] flex flex-col overflow-y-auto rounded-2xl sm:rounded-3xl border border-amber-400/40 bg-[#0d131f] p-5 sm:p-6 text-center shadow-[0_25px_60px_rgba(0,0,0,0.95)] [-webkit-overflow-scrolling:touch]">
+          {/* Dismiss Button */}
+          <button
+            type="button"
+            onClick={handleDismissApk}
+            className="absolute top-3.5 right-3.5 z-10 grid size-8 place-items-center rounded-full bg-white/10 text-white/70 hover:bg-white/20 hover:text-white transition-colors cursor-pointer"
+            aria-label="Close"
+          >
+            <X size={16} />
+          </button>
+
           {/* Ambient Gold Glow Behind Icon */}
           <div className="pointer-events-none absolute -top-20 left-1/2 -translate-x-1/2 size-48 rounded-full bg-amber-400/20 blur-3xl" />
 
@@ -277,13 +345,22 @@ export default function UpdateNotification() {
             </div>
           )}
 
+          {/* Secondary Button to Continue without Updating */}
+          <button
+            type="button"
+            onClick={handleDismissApk}
+            className="mt-2.5 py-1.5 px-4 text-xs font-medium text-white/50 hover:text-amber-300 transition-colors"
+          >
+            Continue to VybZ Music →
+          </button>
+
           {/* External Browser Fallback Link */}
-          <div className="mt-3 text-center">
+          <div className="mt-2 text-center">
             <a
               href={apkDownloadUrl || "https://vybzmusic.online/vybz.apk"}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 font-mono text-[11px] text-white/50 hover:text-amber-300 transition-colors underline"
+              className="inline-flex items-center gap-1 font-mono text-[11px] text-white/40 hover:text-amber-300 transition-colors underline"
             >
               <span>Download not starting? Open in Chrome</span>
               <ExternalLink size={10} />
