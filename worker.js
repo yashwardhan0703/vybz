@@ -1157,8 +1157,8 @@ export default {
   "name": "VybZ Music",
   "operatingSystem": "Android",
   "applicationCategory": "MusicApplication",
-  "fileSize": "9.7MB",
-  "softwareVersion": "3.3.0",
+  "fileSize": "10.2MB",
+  "softwareVersion": "3.4.1",
   "downloadUrl": "https://vybzmusic.online/vybz.apk",
   "offers": {
     "@type": "Offer",

@@ -15,7 +15,7 @@ import {
   Share2,
 } from 'lucide-react';
 import { usePlayerStore } from '../store/playerStore';
-import { formatTime, handleArtworkError, shareTrackOrApp } from '../utils/mediaHelpers';
+import { formatTime, handleArtworkError } from '../utils/mediaHelpers';
 
 interface BottomPlayerProps {
   onPlay: () => void;
@@ -132,7 +132,11 @@ export default function BottomPlayer({
 
   const handleShare = (e: React.MouseEvent) => {
     e.stopPropagation();
-    shareTrackOrApp(displayTitle, displayArtist);
+    usePlayerStore.getState().openShareModal({
+      title: displayTitle,
+      artist: displayArtist,
+      artworkUrl: displayThumbnail,
+    });
   };
 
   return (

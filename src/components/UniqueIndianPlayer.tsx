@@ -33,7 +33,7 @@ import {
   SAFE_ARTWORK_FALLBACK,
   handleArtworkError,
   cleanSongTitle,
-  shareTrackOrApp,
+  encodeSharedPlaylist,
 } from '../utils/mediaHelpers';
 import {
   navigateTo,
@@ -222,7 +222,6 @@ export default function UniqueIndianPlayer({
     }))
   );
 
-  const [shareToast, setShareToast] = useState<string | null>(null);
   const mainScrollRef = useRef<HTMLElement | null>(null);
 
   // Lazy-initialize artist and vibe world from URL pathname to avoid synchronous setState in useEffect
@@ -348,12 +347,43 @@ export default function UniqueIndianPlayer({
     handleSelectCategory('vibes');
   };
 
-  const handleShareTrack = async (title?: string, artist?: string, customUrl?: string) => {
-    const res = await shareTrackOrApp(title, artist, customUrl);
-    if (res === 'copied') {
-      setShareToast('Link copied! Ready to share with friends 🎉');
-      setTimeout(() => setShareToast(null), 3000);
-    }
+  const handleShareTrack = (title?: string, artist?: string, customUrl?: string, artworkUrl?: string, vibeName?: string) => {
+    const st = usePlayerStore.getState();
+    st.openShareModal({
+      title: title || st.trackTitle,
+      artist: artist || st.trackArtist,
+      artworkUrl: artworkUrl || st.trackThumbnail || selectedArtist?.avatar,
+      vibeName: vibeName || selectedVibeWorld?.name,
+      customUrl: customUrl || (typeof window !== 'undefined' ? window.location.href : undefined),
+    });
+  };
+
+  const handleSharePlaylist = (pl: UserPlaylist) => {
+    if (!pl.tracks.length) return;
+    const encoded = encodeSharedPlaylist(pl.name, pl.tracks);
+    const shareUrl = `${typeof window !== 'undefined' ? window.location.origin : 'https://vybzmusic.online'}/?playlist=${encoded}`;
+    usePlayerStore.getState().openShareModal({
+      title: pl.name,
+      artist: `${pl.tracks.length} tracks • VybZ Playlist`,
+      artworkUrl: pl.tracks[0]?.thumbnail,
+      vibeName: 'PLAYLIST',
+      customUrl: shareUrl,
+      isPlaylist: true,
+    });
+  };
+
+  const handleShareFavorites = () => {
+    if (!likedSongs.length) return;
+    const encoded = encodeSharedPlaylist('My Liked Songs', likedSongs);
+    const shareUrl = `${typeof window !== 'undefined' ? window.location.origin : 'https://vybzmusic.online'}/?playlist=${encoded}`;
+    usePlayerStore.getState().openShareModal({
+      title: 'My Liked Songs',
+      artist: `${likedSongs.length} tracks • Favorites`,
+      artworkUrl: likedSongs[0]?.thumbnail,
+      vibeName: 'FAVORITES',
+      customUrl: shareUrl,
+      isPlaylist: true,
+    });
   };
 
   // 5-by-5 Pagination State & Dynamic Search for Selected Artist (Defaults to true so user sees all 20 songs instantly)
@@ -1183,7 +1213,9 @@ export default function UniqueIndianPlayer({
                       handleShareTrack(
                         `${selectedArtist.name} Top 20 Songs`,
                         selectedArtist.name,
-                        `https://vybzmusic.online/artist/${selectedArtist.id}`
+                        `https://vybzmusic.online/artist/${selectedArtist.id}`,
+                        selectedArtist.avatar,
+                        'POPULAR ARTIST'
                       )
                     }
                     className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3.5 py-1.5 text-xs font-medium text-white/70 hover:text-white hover:bg-white/10 transition-colors"
@@ -1514,7 +1546,9 @@ export default function UniqueIndianPlayer({
                       handleShareTrack(
                         `${selectedVibeWorld.nameHindi} (${selectedVibeWorld.name}) Radio`,
                         'VybZ Music',
-                        `https://vybzmusic.online/vibes/${slug}`
+                        `https://vybzmusic.online/vibes/${slug}`,
+                        selectedVibeWorld.bg,
+                        selectedVibeWorld.name
                       );
                     }}
                     className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3.5 py-1.5 text-xs font-medium text-white/70 hover:text-white hover:bg-white/10 transition-colors"
@@ -2587,6 +2621,15 @@ export default function UniqueIndianPlayer({
                             </button>
                             <button
                               type="button"
+                              disabled={inspectedPlaylist.tracks.length === 0}
+                              onClick={() => handleSharePlaylist(inspectedPlaylist)}
+                              aria-label={`Share ${inspectedPlaylist.name}`}
+                              className="flex items-center gap-1.5 rounded-full bg-white/10 px-3.5 py-2 text-xs font-semibold text-white hover:bg-white/20 transition-colors disabled:opacity-40 cursor-pointer"
+                            >
+                              <Share2 size={13} /> Share
+                            </button>
+                            <button
+                              type="button"
                               onClick={() => {
                                 deletePlaylist(inspectedPlaylist.id);
                                 setSelectedPlaylistId(null);
@@ -2692,17 +2735,30 @@ export default function UniqueIndianPlayer({
                                   {pl.tracks.length} tracks
                                 </p>
                               </div>
-                              <button
-                                type="button"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  deletePlaylist(pl.id);
-                                }}
-                                aria-label={`Delete ${pl.name}`}
-                                className="grid size-7 place-items-center rounded-full text-white/30 hover:bg-white/10 hover:text-rose-400 transition-colors shrink-0"
-                              >
-                                <Trash2 size={13} />
-                              </button>
+                              <div className="flex items-center gap-1">
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleSharePlaylist(pl);
+                                  }}
+                                  aria-label={`Share ${pl.name}`}
+                                  className="grid size-7 place-items-center rounded-full text-white/40 hover:bg-white/10 hover:text-amber-400 transition-colors shrink-0"
+                                >
+                                  <Share2 size={13} />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    deletePlaylist(pl.id);
+                                  }}
+                                  aria-label={`Delete ${pl.name}`}
+                                  className="grid size-7 place-items-center rounded-full text-white/30 hover:bg-white/10 hover:text-rose-400 transition-colors shrink-0"
+                                >
+                                  <Trash2 size={13} />
+                                </button>
+                              </div>
                             </div>
                             <div className="mt-4 flex items-center justify-between border-t border-white/5 pt-3">
                               <button
@@ -2755,21 +2811,31 @@ export default function UniqueIndianPlayer({
                       </div>
 
                       {likedSongs.length > 0 && (
-                        <button
-                          type="button"
-                          onClick={() => handleTogglePlayStored(likedSongs[0], 0)}
-                          className="self-start sm:self-auto flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-rose-500 to-pink-500 px-5 sm:px-6 py-2 sm:py-2.5 text-xs font-bold text-white shadow hover:scale-105 active:scale-95 transition-transform"
-                        >
-                          {currentTrackId === likedSongs[0].id && isPlaying ? (
-                            <>
-                              <Pause size={14} fill="white" /> Pause Favorites
-                            </>
-                          ) : (
-                            <>
-                              <Play size={14} fill="white" /> Play Favorites
-                            </>
-                          )}
-                        </button>
+                        <div className="self-start sm:self-auto flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => handleTogglePlayStored(likedSongs[0], 0)}
+                            className="flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-rose-500 to-pink-500 px-5 sm:px-6 py-2 sm:py-2.5 text-xs font-bold text-white shadow hover:scale-105 active:scale-95 transition-transform"
+                          >
+                            {currentTrackId === likedSongs[0].id && isPlaying ? (
+                              <>
+                                <Pause size={14} fill="white" /> Pause Favorites
+                              </>
+                            ) : (
+                              <>
+                                <Play size={14} fill="white" /> Play Favorites
+                              </>
+                            )}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={handleShareFavorites}
+                            aria-label="Share liked songs"
+                            className="flex items-center justify-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-4 py-2 sm:py-2.5 text-xs font-bold text-white shadow hover:bg-white/20 active:scale-95 transition-transform cursor-pointer"
+                          >
+                            <Share2 size={13} /> Share
+                          </button>
+                        </div>
                       )}
                     </div>
 
@@ -3042,15 +3108,6 @@ export default function UniqueIndianPlayer({
           </div>
         </main>
       </div>
-
-      {/* Floating Share Toast */}
-      {shareToast && (
-        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 pointer-events-none">
-          <span className="rounded-full bg-amber-400 px-4 py-1.5 text-xs font-bold text-black shadow-xl animate-fade-in flex items-center gap-1.5">
-            <Sparkles size={13} /> {shareToast}
-          </span>
-        </div>
-      )}
 
       {/* ========================================================
           ADD TO PLAYLIST MODAL

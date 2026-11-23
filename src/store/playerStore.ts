@@ -74,6 +74,26 @@ interface PlayerState {
   isSearchOpen: boolean;
   isNowPlayingOpen: boolean;
 
+  // Share Modal State
+  shareModal: {
+    isOpen: boolean;
+    title: string;
+    artist: string;
+    artworkUrl?: string;
+    vibeName?: string;
+    customUrl?: string;
+    isPlaylist?: boolean;
+  };
+  openShareModal: (data?: {
+    title?: string;
+    artist?: string;
+    artworkUrl?: string;
+    vibeName?: string;
+    customUrl?: string;
+    isPlaylist?: boolean;
+  }) => void;
+  closeShareModal: () => void;
+
   // Actions - Modes & Nav
   setViewMode: (mode: ViewMode) => void;
   toggleViewMode: () => void;
@@ -88,6 +108,7 @@ interface PlayerState {
   // Actions - Personal Library (Cache/localStorage)
   toggleLike: (track: StoredTrack) => void;
   createPlaylist: (name: string, description?: string) => void;
+  saveImportedPlaylist: (name: string, tracks: StoredTrack[]) => UserPlaylist;
   deletePlaylist: (playlistId: string) => void;
   addToPlaylist: (playlistId: string, track: StoredTrack) => void;
   removeFromPlaylist: (playlistId: string, trackId: string) => void;
@@ -248,6 +269,12 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
   isSearchOpen: false,
   isNowPlayingOpen: false,
 
+  shareModal: {
+    isOpen: false,
+    title: '',
+    artist: '',
+  },
+
   setViewMode: (mode) => {
     saveStoredViewMode(mode);
     set({ viewMode: mode });
@@ -321,6 +348,20 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
     const updated = [newPlaylist, ...get().userPlaylists];
     saveStoredUserPlaylists(updated);
     set({ userPlaylists: updated });
+  },
+
+  saveImportedPlaylist: (name, tracks) => {
+    const newPlaylist: UserPlaylist = {
+      id: `pl-${Date.now()}`,
+      name: name.trim() || 'Shared Playlist',
+      description: `Shared Mix (${tracks.length} tracks)`,
+      createdAt: Date.now(),
+      tracks,
+    };
+    const updated = [newPlaylist, ...get().userPlaylists];
+    saveStoredUserPlaylists(updated);
+    set({ userPlaylists: updated });
+    return newPlaylist;
   },
 
   deletePlaylist: (playlistId) => {
@@ -463,4 +504,25 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
       isSearchOpen: false,
       isNowPlayingOpen: false,
     }),
+
+  openShareModal: (data) =>
+    set((state) => ({
+      shareModal: {
+        isOpen: true,
+        title: data?.title || state.trackTitle || 'Top Indian Hits',
+        artist: data?.artist || state.trackArtist || 'VybZ Music',
+        artworkUrl: data?.artworkUrl || state.trackThumbnail || undefined,
+        vibeName: data?.vibeName || state.currentWorld?.name || undefined,
+        customUrl: data?.customUrl || (typeof window !== 'undefined' ? window.location.href : 'https://vybzmusic.online'),
+        isPlaylist: Boolean(data?.isPlaylist),
+      },
+    })),
+
+  closeShareModal: () =>
+    set((state) => ({
+      shareModal: {
+        ...state.shareModal,
+        isOpen: false,
+      },
+    })),
 }));

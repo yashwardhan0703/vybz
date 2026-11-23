@@ -1,4 +1,5 @@
-import { Component, useEffect, useRef, type ReactNode } from 'react';
+import { Component, useEffect, useRef, useState, type ReactNode } from 'react';
+import { Sparkles } from 'lucide-react';
 import { useShallow } from 'zustand/react/shallow';
 import { useYouTube } from './hooks/useYouTube';
 import { usePlayerStore } from './store/playerStore';
@@ -14,18 +15,54 @@ import UniqueIndianPlayer from './components/UniqueIndianPlayer';
 import RadioTuningOverlay from './components/RadioTuningOverlay';
 import MobileBottomNav from './components/MobileBottomNav';
 import NowPlayingSheet from './components/NowPlayingSheet';
+import ShareModal from './components/ShareModal';
+import SharedPlaylistModal from './components/SharedPlaylistModal';
 import UpdateNotification from './components/UpdateNotification';
 import VersionManager from './components/VersionManager';
+import { decodeSharedPlaylist } from './utils/mediaHelpers';
+import type { StoredTrack } from './utils/localStorageHelper';
 
 function AppLayout() {
-  const { currentWorld, isPlaying, viewMode, setViewMode } = usePlayerStore(
+  const { currentWorld, isPlaying, viewMode, setViewMode, shareModal, closeShareModal } = usePlayerStore(
     useShallow((s) => ({
       currentWorld: s.currentWorld,
       isPlaying: s.isPlaying,
       viewMode: s.viewMode,
       setViewMode: s.setViewMode,
+      shareModal: s.shareModal,
+      closeShareModal: s.closeShareModal,
     }))
   );
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [sharedPlaylistData, setSharedPlaylistData] = useState<{
+    name: string;
+    tracks: StoredTrack[];
+  } | null>(null);
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 3000);
+  };
+
+  // Detect shared playlist from URL (?playlist=... or ?sp=...)
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      const searchParams = new URLSearchParams(window.location.search);
+      const encoded = searchParams.get('playlist') || searchParams.get('sp') || searchParams.get('shared_playlist');
+      if (encoded) {
+        const decoded = decodeSharedPlaylist(encoded);
+        if (decoded && decoded.tracks.length > 0) {
+          setSharedPlaylistData(decoded);
+        }
+        // Clean up URL parameter cleanly
+        const cleanUrl = window.location.pathname + window.location.hash;
+        window.history.replaceState({}, '', cleanUrl || '/');
+      }
+    } catch (e) {
+      console.warn('[App] Failed to parse shared playlist URL:', e);
+    }
+  }, []);
   const playerContainerRef = useRef<HTMLDivElement | null>(null);
   const {
     play,
@@ -156,8 +193,55 @@ function AppLayout() {
         onPlaySearchQuery={playSearchQuery}
       />
       <RadioTuningOverlay />
+      <ShareModal
+        isOpen={shareModal.isOpen}
+        onClose={closeShareModal}
+        title={shareModal.title}
+        artist={shareModal.artist}
+        artworkUrl={shareModal.artworkUrl}
+        vibeName={shareModal.vibeName}
+        customUrl={shareModal.customUrl}
+        isPlaylist={shareModal.isPlaylist}
+        onToast={showToast}
+      />
+      <SharedPlaylistModal
+        isOpen={Boolean(sharedPlaylistData)}
+        onClose={() => setSharedPlaylistData(null)}
+        playlistName={sharedPlaylistData?.name || 'Shared Playlist'}
+        tracks={sharedPlaylistData?.tracks || []}
+        onPlayAll={() => {
+          if (!sharedPlaylistData || sharedPlaylistData.tracks.length === 0) return;
+          const first = sharedPlaylistData.tracks[0];
+          const plQueue = sharedPlaylistData.tracks.map((t) => ({
+            id: t.id,
+            title: t.title,
+            artist: t.artist,
+            thumbnail: t.thumbnail,
+          }));
+          playCustomVideoId(first.id, first.title, first.artist, first.thumbnail, plQueue, 0, false);
+          showToast(`Playing "${sharedPlaylistData.name}"! 🎶`);
+          setSharedPlaylistData(null);
+        }}
+        onSaveToLibrary={() => {
+          if (!sharedPlaylistData || sharedPlaylistData.tracks.length === 0) return;
+          usePlayerStore.getState().saveImportedPlaylist(sharedPlaylistData.name, sharedPlaylistData.tracks);
+          showToast(`Saved "${sharedPlaylistData.name}" to My Playlists! 🎵`);
+          setSharedPlaylistData(null);
+        }}
+      />
       <UpdateNotification />
       <VersionManager />
+
+      {/* Floating Share / Action Toast */}
+      {toastMessage && (
+        <aside
+          aria-live="polite"
+          className="fixed bottom-20 left-1/2 -translate-x-1/2 z-[10001] flex items-center gap-2 rounded-full border border-amber-400/40 bg-[#0d131f]/95 px-4 py-2 text-xs font-semibold text-amber-300 shadow-[0_10px_30px_rgba(0,0,0,0.8)] backdrop-blur-md animate-fade-in pointer-events-none"
+        >
+          <Sparkles size={14} className="text-amber-400 animate-pulse" />
+          <span>{toastMessage}</span>
+        </aside>
+      )}
 
       {/* Persistent YouTube mount placed in active viewport layer for continuous background auto-play */}
       <div

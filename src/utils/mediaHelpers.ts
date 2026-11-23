@@ -24,21 +24,106 @@ export function formatTime(sec: number): string {
   return `${m}:${s}`;
 }
 
-/** Strips noisy YouTube suffixes like [Official Video] or label tails. */
-export function cleanSongTitle(raw: string): string {
-  if (!raw) return '';
-  return raw
-    .replace(
-      /[([][^\])]*?(official|video|audio|lyrics|lyrical|full song|teaser|trailer|4k|hd|remix|slowed|reverb)[^\])]*?[\])]/gi,
-      ''
-    )
-    .replace(
-      /\s*\|\s*(t-series|zee music company|sony music india|tips official|yrf|speed records|saregama|white hill).*$/gi,
-      ''
-    )
-    .replace(/\s*\|\s*$/g, '')
+/** Strips noisy YouTube suffixes like [Official Video] or label tails and separates Movie/Track. */
+export interface TrackDisplayInfo {
+  displayTitle: string;
+  displaySubtitle: string;
+}
+
+export function parseTrackMetadata(rawTitle: string, rawArtist?: string): TrackDisplayInfo {
+  if (!rawTitle) return { displayTitle: 'VybZ Hit', displaySubtitle: rawArtist || 'VybZ Music' };
+
+  // 1. Strip technical & YouTube noise: [Official Video], (Full Video), (Audio), 4K, HD, etc.
+  let cleaned = rawTitle
+    .replace(/[([][^\])]*?(official|video|audio|lyrics|lyrical|full song|teaser|trailer|4k|hd|remix|slowed|reverb|full video)[^\])]*?[\])]/gi, '')
+    .replace(/:\s*(akshay|salman|shah\s*rukh|ranbir|kartik|deepika|alia|katrina|shraddha|kiara|hrithik|varun)[^|]*/gi, '')
+    .replace(/\s*\|\s*(t-series|zee music company|sony music india|tips official|yrf|speed records|saregama|white hill).*$/gi, '')
     .replace(/\s{2,}/g, ' ')
     .trim();
+
+  // 2. Separate Movie/Album and Song if pipe exists
+  if (cleaned.includes('|')) {
+    const parts = cleaned.split('|').map((p) => p.trim()).filter(Boolean);
+    if (parts.length >= 2) {
+      const movie = parts[0];
+      const song = parts[1];
+      const cleanArtist =
+        rawArtist && !/t-series|zee music|sony music|speed records|saregama|tips/i.test(rawArtist)
+          ? rawArtist
+          : '';
+      return {
+        displayTitle: song,
+        displaySubtitle: cleanArtist ? `${movie} • ${cleanArtist}` : movie,
+      };
+    }
+  }
+
+  // 3. Separate if hyphen " - " exists
+  if (cleaned.includes(' - ')) {
+    const parts = cleaned.split(' - ').map((p) => p.trim()).filter(Boolean);
+    if (parts.length >= 2) {
+      return {
+        displayTitle: parts[1],
+        displaySubtitle: parts[0],
+      };
+    }
+  }
+
+  const cleanArtist =
+    rawArtist && !/t-series|zee music|sony music|speed records|saregama|tips/i.test(rawArtist)
+      ? rawArtist
+      : 'VybZ Music';
+
+  return {
+    displayTitle: cleaned || 'VybZ Hit',
+    displaySubtitle: cleanArtist,
+  };
+}
+
+export function cleanSongTitle(raw: string): string {
+  if (!raw) return '';
+  return parseTrackMetadata(raw).displayTitle;
+}
+
+/** Encode a custom playlist or favorites list into a compact shareable URL string */
+export function encodeSharedPlaylist(
+  name: string,
+  tracks: Array<{ id: string; title: string; artist: string; thumbnail?: string }>
+): string {
+  const compact = {
+    n: (name || 'My Playlist').slice(0, 40),
+    t: tracks.slice(0, 30).map((tr) => [
+      tr.id,
+      cleanSongTitle(tr.title).slice(0, 45),
+      (tr.artist || '').slice(0, 30),
+    ]),
+  };
+  const json = JSON.stringify(compact);
+  return encodeURIComponent(btoa(unescape(encodeURIComponent(json))));
+}
+
+/** Decode shared playlist data from URL parameter */
+export function decodeSharedPlaylist(
+  encoded: string
+): { name: string; tracks: Array<{ id: string; title: string; artist: string; thumbnail: string }> } | null {
+  try {
+    const json = decodeURIComponent(escape(atob(decodeURIComponent(encoded))));
+    const parsed = JSON.parse(json);
+    if (!parsed || !Array.isArray(parsed.t)) return null;
+    const name = typeof parsed.n === 'string' ? parsed.n : 'Shared Playlist';
+    const tracks = parsed.t
+      .filter((item: any) => Array.isArray(item) && item[0])
+      .map((item: any) => ({
+        id: String(item[0]),
+        title: String(item[1] || 'Music Track'),
+        artist: String(item[2] || 'VybZ Artist'),
+        thumbnail: `https://img.youtube.com/vi/${item[0]}/mqdefault.jpg`,
+      }));
+    if (tracks.length === 0) return null;
+    return { name, tracks };
+  } catch {
+    return null;
+  }
 }
 
 /** Shares a track or app link with WhatsApp fallback and clipboard copy */

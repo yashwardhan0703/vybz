@@ -257,7 +257,7 @@ export default function DownloadLandingPage({ onBackToPlayer }: DownloadLandingP
                   Verified Safe & Clean
                 </span>
                 <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-xs text-white/70">
-                  9.7 MB
+                  10.2 MB
                 </span>
               </div>
 
@@ -276,7 +276,7 @@ export default function DownloadLandingPage({ onBackToPlayer }: DownloadLandingP
                   className="group relative flex w-full max-w-xs sm:max-w-md items-center justify-center gap-2.5 rounded-2xl bg-gradient-to-r from-amber-400 via-orange-400 to-amber-500 py-3.5 sm:py-4 px-6 text-sm sm:text-base font-black text-black shadow-[0_15px_35px_rgba(245,158,11,0.35)] transition-all hover:scale-[1.02] hover:brightness-110 active:scale-95"
                 >
                   <DownloadCloud size={20} className="group-hover:scale-110 transition-transform shrink-0" />
-                  <span className="truncate">Download APK (v3.4.1 • 9.8 MB)</span>
+                  <span className="truncate">Download APK (v3.4.1 • 10.2 MB)</span>
                 </button>
 
                 {downloadStarted && (

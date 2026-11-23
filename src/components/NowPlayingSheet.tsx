@@ -17,7 +17,7 @@ import {
   Share2,
 } from 'lucide-react';
 import { usePlayerStore } from '../store/playerStore';
-import { formatTime, handleArtworkError, shareTrackOrApp } from '../utils/mediaHelpers';
+import { formatTime, handleArtworkError } from '../utils/mediaHelpers';
 
 interface NowPlayingSheetProps {
   onPlay: () => void;
@@ -74,12 +74,12 @@ export default function NowPlayingSheet({
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
 
-  const handleShareCurrentTrack = async () => {
-    const res = await shareTrackOrApp(displayTitle, displayArtist);
-    if (res === 'copied') {
-      setToastMessage('Link copied to clipboard!');
-      setTimeout(() => setToastMessage(null), 2500);
-    }
+  const handleShareCurrentTrack = () => {
+    usePlayerStore.getState().openShareModal({
+      title: displayTitle,
+      artist: displayArtist,
+      artworkUrl: displayThumbnail,
+    });
   };
 
   // Mobile gesture & browser back button integration
@@ -186,10 +186,12 @@ export default function NowPlayingSheet({
       duration: duration > 0 ? formatTime(duration) : undefined,
     });
     setAddedToPlaylistId(playlistId);
+    setToastMessage('Added to playlist! 🎵');
     setTimeout(() => {
       setAddedToPlaylistId(null);
+      setToastMessage(null);
       setShowPlaylistPicker(false);
-    }, 650);
+    }, 1200);
   };
 
   return (
