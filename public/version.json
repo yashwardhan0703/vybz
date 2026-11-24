@@ -1,9 +1,9 @@
 {
-  "latestVersion": "3.4.1",
-  "versionCode": 19,
+  "latestVersion": "3.5.0",
+  "versionCode": 20,
   "minVersion": "2.9.0",
   "apkUrl": "https://vybzmusic.online/vybz.apk",
-  "title": "VybZ v3.4.1 Official Legal, FAQ & Audio Continuity Engine! 🚀",
-  "releaseNotes": "Official Legal & Transparency Hub (About, FAQ, Privacy, Terms, DMCA Disclaimer), 20-min anti-movie firewall, dynamic version sync, and background playback improvements.",
-  "timestamp": 1732350000000
+  "title": "VybZ v3.5.0 Dynamic In-App Auto-Updater & Audio Engine 🚀",
+  "releaseNotes": "Silent in-app background updater, dynamic non-intrusive reminders, smooth continuous playback, and enhanced Android 14+ compatibility.",
+  "timestamp": 1732470000000
 }

@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { Sparkles, RefreshCw, DownloadCloud, Zap, Music2, CheckCircle2, ExternalLink, X } from 'lucide-react';
+import { useEffect, useState, useCallback } from 'react';
+import { Sparkles, Zap, X } from 'lucide-react';
 
 function parseVersionNumbers(v: string): number[] {
   return (v || '').split('.').map((p) => parseInt(p, 10) || 0);
@@ -18,24 +18,32 @@ function isNewerVersion(current: string, target: string): boolean {
 }
 
 export default function UpdateNotification() {
-  const [hasWebUpdate, setHasWebUpdate] = useState(false);
   const [hasApkUpdate, setHasApkUpdate] = useState(false);
-  const [apkTargetVersion, setApkTargetVersion] = useState('3.4.1');
+  const [apkTargetVersion, setApkTargetVersion] = useState('3.5.0');
   const [apkDownloadUrl, setApkDownloadUrl] = useState('https://vybzmusic.online/vybz.apk');
   const [isUpdating, setIsUpdating] = useState(false);
-  const [downloadStarted, setDownloadStarted] = useState(false);
-  const [dismissedWeb, setDismissedWeb] = useState(false);
-  const [dismissedApk, setDismissedApk] = useState(false);
+  const [dismissedSession, setDismissedSession] = useState(false);
+  const [promptCount, setPromptCount] = useState(1);
+  const [isReadyInCache, setIsReadyInCache] = useState(false);
 
-  // 1. Android APK native in-app live update check (fetches live version.json bypassing cache)
+  // 1. Android APK native in-app live update check & silent background cache
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const ua = navigator.userAgent;
     const isVybZApp = /VybZApp/i.test(ua) || Boolean((window as unknown as { VybZNative?: unknown }).VybZNative);
     if (!isVybZApp) return;
 
+    // Register global listener for native download completion
+    (window as any).VybZUpdateManager = {
+      onDownloadComplete: (ver: string) => {
+        if (ver === apkTargetVersion) {
+          setIsReadyInCache(true);
+        }
+      },
+    };
+
     // Detect installed version via native bridge first, fallback to UserAgent
-    let installed = '2.9.0';
+    let installed = '3.4.1';
     if (typeof (window as any).VybZNative?.getAppVersion === 'function') {
       try {
         const nativeV = (window as any).VybZNative.getAppVersion();
@@ -50,7 +58,6 @@ export default function UpdateNotification() {
 
     const checkLiveVersion = async () => {
       try {
-        // Dynamic /api/apk-version is never precached by ServiceWorker, guaranteeing a fresh check
         let res = await fetch(`/api/apk-version?t=${Date.now()}`, {
           cache: 'no-store',
           headers: {
@@ -76,25 +83,38 @@ export default function UpdateNotification() {
           setApkTargetVersion(target);
           if (data.apkUrl) setApkDownloadUrl(data.apkUrl);
 
-          // Loop & Harassment Protection:
-          // Check if user already dismissed or recently downloaded this version
-          const dismissedKey = `vybz_apk_dismissed_v${target}`;
-          const downloadedKey = `vybz_apk_downloaded_v${target}`;
-          const sessionDismissedKey = `vybz_apk_sess_dismissed_v${target}`;
-
-          const isDismissed = localStorage.getItem(dismissedKey) === 'true';
-          const isSessionDismissed = sessionStorage.getItem(sessionDismissedKey) === 'true';
-          const downloadTs = parseInt(localStorage.getItem(downloadedKey) || '0', 10);
-          const recentlyDownloaded = Date.now() - downloadTs < 24 * 60 * 60 * 1000;
-
-          // Special check: If installed version is already >= target, no update needed!
           const needsUpdate = isNewerVersion(installed, target);
-
-          if (needsUpdate && !isDismissed && !isSessionDismissed && !recentlyDownloaded) {
-            setHasApkUpdate(true);
-          } else {
+          if (!needsUpdate) {
             setHasApkUpdate(false);
+            return;
           }
+
+          // Trigger native silent download immediately in background (0s user wait!)
+          if (typeof (window as any).VybZNative?.startSilentDownload === 'function') {
+            try {
+              (window as any).VybZNative.startSilentDownload(data.apkUrl || 'https://vybzmusic.online/vybz.apk', target);
+            } catch {}
+          }
+
+          // Check if already ready in phone cache
+          if (typeof (window as any).VybZNative?.isApkReady === 'function') {
+            try {
+              const ready = (window as any).VybZNative.isApkReady(target);
+              if (ready) setIsReadyInCache(true);
+            } catch {}
+          }
+
+          // Retrieve Dynamic Count (1, 2, 3 or 4+)
+          const countKey = `vybz_apk_prompt_count_v${target}`;
+          const currentCount = parseInt(localStorage.getItem(countKey) || '1', 10);
+          setPromptCount(currentCount);
+
+          // Check if dismissed in this listening session
+          const sessionDismissedKey = `vybz_apk_sess_dismissed_v${target}`;
+          const isSessionDismissed = sessionStorage.getItem(sessionDismissedKey) === 'true';
+
+          setDismissedSession(isSessionDismissed);
+          setHasApkUpdate(true);
         }
       } catch (err) {
         console.warn('[UpdateNotification] Live version check:', err);
@@ -109,307 +129,190 @@ export default function UpdateNotification() {
     };
     document.addEventListener('visibilitychange', handleVis);
     return () => document.removeEventListener('visibilitychange', handleVis);
-  }, []);
+  }, [apkTargetVersion]);
 
-  // 2. Web PWA Service Worker update check
-  useEffect(() => {
-    if (typeof window === 'undefined' || !('serviceWorker' in navigator)) {
-      return;
-    }
-
-    let intervalId: number | undefined;
-
-    navigator.serviceWorker.ready
-      .then((registration) => {
-        if (registration.waiting) {
-          setHasWebUpdate(true);
-        }
-
-        registration.addEventListener('updatefound', () => {
-          const installingWorker = registration.installing;
-          if (!installingWorker) return;
-
-          installingWorker.addEventListener('statechange', () => {
-            if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
-              setHasWebUpdate(true);
-            }
-          });
-        });
-
-        const checkUpdate = () => {
-          registration.update().catch(() => {});
-        };
-
-        const handleVisibilityChange = () => {
-          if (document.visibilityState === 'visible') {
-            checkUpdate();
-          }
-        };
-
-        document.addEventListener('visibilitychange', handleVisibilityChange);
-        intervalId = window.setInterval(checkUpdate, 5 * 60 * 1000);
-
-        return () => {
-          document.removeEventListener('visibilitychange', handleVisibilityChange);
-          if (intervalId) clearInterval(intervalId);
-        };
-      })
-      .catch(() => {});
-
-    let refreshing = false;
-    const handleControllerChange = () => {
-      if (!refreshing) {
-        refreshing = true;
-        window.location.reload();
-      }
-    };
-
-    navigator.serviceWorker.addEventListener('controllerchange', handleControllerChange);
-    return () => {
-      if (intervalId) clearInterval(intervalId);
-      navigator.serviceWorker.removeEventListener('controllerchange', handleControllerChange);
-    };
-  }, []);
-
-  const handleDismissApk = () => {
-    setDismissedApk(true);
-    setHasApkUpdate(false);
+  // Handle Dismiss (Increments the Dynamic Count for next app launch)
+  const handleDismiss = useCallback(() => {
+    setDismissedSession(true);
     try {
-      localStorage.setItem(`vybz_apk_dismissed_v${apkTargetVersion}`, 'true');
+      const countKey = `vybz_apk_prompt_count_v${apkTargetVersion}`;
+      const nextCount = promptCount + 1;
+      localStorage.setItem(countKey, nextCount.toString());
+      setPromptCount(nextCount);
       sessionStorage.setItem(`vybz_apk_sess_dismissed_v${apkTargetVersion}`, 'true');
     } catch {}
-  };
+  }, [apkTargetVersion, promptCount]);
 
-  const triggerApkDownload = () => {
+  // Trigger 1-Tap Install / Download
+  const handleTriggerUpdate = useCallback(() => {
     setIsUpdating(true);
-    setDownloadStarted(true);
 
     try {
-      localStorage.setItem(`vybz_apk_downloaded_v${apkTargetVersion}`, Date.now().toString());
       sessionStorage.setItem(`vybz_apk_sess_dismissed_v${apkTargetVersion}`, 'true');
     } catch {}
 
-    const downloadTarget = apkDownloadUrl || `https://vybzmusic.online/vybz-v${apkTargetVersion}.apk`;
-
-    // 0. Native Android IPC trigger (100% reliable inside VybZ APK WebView)
-    if (typeof window !== 'undefined' && (window as any).VybZNative?.downloadApk) {
+    // 1. If native silent installer exists in APK: Instant 0s install
+    if (typeof (window as any).VybZNative?.installDownloadedApk === 'function') {
       try {
-        (window as any).VybZNative.downloadApk(downloadTarget);
+        (window as any).VybZNative.installDownloadedApk(apkTargetVersion);
+        setTimeout(() => setIsUpdating(false), 2000);
+        return;
       } catch {}
     }
 
-    // 1. Direct navigation trigger
+    // 2. Fallback for older APKs: Direct native download
+    const downloadTarget = apkDownloadUrl || `https://vybzmusic.online/vybz.apk`;
+    if (typeof (window as any).VybZNative?.downloadApk === 'function') {
+      try {
+        (window as any).VybZNative.downloadApk(downloadTarget);
+        setTimeout(() => setIsUpdating(false), 2500);
+        return;
+      } catch {}
+    }
+
+    // 3. Fallback for browser
     try {
       window.location.href = downloadTarget;
-    } catch {}
-
-    // 2. Open in system external browser
-    try {
-      window.open(downloadTarget, '_system');
-    } catch {}
-
-    // 3. Fallback via anchor
-    try {
-      const link = document.createElement('a');
-      link.href = downloadTarget;
-      link.setAttribute('download', 'vybz.apk');
-      link.target = '_blank';
-      link.rel = 'noopener noreferrer';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
     } catch {}
 
     setTimeout(() => {
       setIsUpdating(false);
     }, 2500);
-  };
+  }, [apkDownloadUrl, apkTargetVersion]);
 
-  const handleWebUpdate = () => {
-    setIsUpdating(true);
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker
-        .getRegistration()
-        .then((reg) => {
-          if (reg?.waiting) {
-            reg.waiting.postMessage({ type: 'SKIP_WAITING' });
-          } else {
-            window.location.reload();
-          }
-        })
-        .catch(() => {
-          window.location.reload();
-        });
-    } else {
-      window.location.reload();
-    }
-  };
+  if (!hasApkUpdate) return null;
 
   // ========================================================
-  // CASE 1: OPTIONAL CENTER MODAL FOR OUTDATED ANDROID APK
+  // DYNAMIC 1, 2, 3 CONTENT SETUP
   // ========================================================
-  if (hasApkUpdate && !dismissedApk) {
+  let modalTitle = '✦ Nayi Vibe Ready Hai 🎧';
+  let modalSubtitle = 'Thoda extra sukoon aur makkhan playback add kiya hai.';
+  let primaryBtn = 'Chalo Lagayein ⚡';
+  let secondaryBtn = 'Baad Me';
+
+  if (promptCount === 2) {
+    modalTitle = '✦ Thoda Aur Smooth Banayein? ✨';
+    modalSubtitle = isReadyInCache
+      ? 'Downloaded & ready. Bas ek tap ki deri hai.'
+      : 'Thoda extra sukoon aur lag-free playback ready hai.';
+    primaryBtn = isReadyInCache ? '⚡ Update Karo (0s)' : '⚡ Update Karo';
+    secondaryBtn = 'Abhi Gaana Suno';
+  } else if (promptCount === 3) {
+    modalTitle = '✦ Chhota Upgrade, Badi Vibe ☕';
+    modalSubtitle = 'Zero wait time. Ek tap me aur fresh ho jayega VybZ.';
+    primaryBtn = '1 Tap Me Update ⚡';
+    secondaryBtn = 'Rehne Do';
+  }
+
+  // ========================================================
+  // CASE A: 4th TIME ONWARDS (PERSISTENT GLOWING TOP BADGE)
+  // Non-intrusive: Never blocks screen, music flows 100%
+  // ========================================================
+  if (promptCount >= 4) {
     return (
-      <div className="fixed inset-0 z-[10000] flex items-center justify-center p-3 sm:p-4 bg-black/90 backdrop-blur-md animate-fade-in select-none">
-        <div className="relative w-full max-w-[calc(100vw-1.5rem)] sm:max-w-md max-h-[85dvh] flex flex-col overflow-y-auto rounded-2xl sm:rounded-3xl border border-amber-400/40 bg-[#0d131f] p-5 sm:p-6 text-center shadow-[0_25px_60px_rgba(0,0,0,0.95)] [-webkit-overflow-scrolling:touch]">
-          {/* Dismiss Button */}
-          <button
-            type="button"
-            onClick={handleDismissApk}
-            className="absolute top-3.5 right-3.5 z-10 grid size-8 place-items-center rounded-full bg-white/10 text-white/70 hover:bg-white/20 hover:text-white transition-colors cursor-pointer"
-            aria-label="Close"
-          >
-            <X size={16} />
-          </button>
-
-          {/* Ambient Gold Glow Behind Icon */}
-          <div className="pointer-events-none absolute -top-20 left-1/2 -translate-x-1/2 size-48 rounded-full bg-amber-400/20 blur-3xl" />
-
-          {/* Glowing App Icon Badge */}
-          <div className="relative mx-auto mb-4 flex size-16 items-center justify-center rounded-2xl border border-amber-400/40 bg-amber-400/10 shadow-[0_0_30px_rgba(245,158,11,0.3)]">
-            <img src="/logo.png" alt="VybZ Music" className="size-11 object-contain drop-shadow" />
-            <span className="absolute -bottom-1 -right-1 flex size-5 items-center justify-center rounded-full bg-gradient-to-tr from-amber-400 to-orange-500 text-black shadow-md">
-              <Zap size={11} fill="currentColor" />
-            </span>
-          </div>
-
-          {/* Badge */}
-          <div className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/30 bg-amber-400/10 px-3 py-1 font-mono text-[11px] font-bold text-amber-300">
-            <Sparkles size={11} className="animate-spin text-amber-400" />
-            <span>New Version v{apkTargetVersion} Available</span>
-          </div>
-
-          {/* Heading */}
-          <h2 className="mt-3 text-xl sm:text-2xl font-black text-white leading-snug">
-            VybZ Super-Smooth Update 🚀
-          </h2>
-
-          <p className="mt-1.5 text-xs sm:text-sm text-white/70 leading-relaxed">
-            Essential performance update for <span className="text-amber-300 font-semibold">100% lag-free</span> and <span className="text-amber-300 font-semibold">smooth</span> playback:
-          </p>
-
-          {/* Feature Highlights */}
-          <div className="my-4 space-y-2 text-left">
-            <div className="flex items-start gap-2.5 rounded-xl border border-white/5 bg-white/[0.03] p-2.5">
-              <div className="mt-0.5 grid size-6 shrink-0 place-items-center rounded-lg bg-amber-400/15 text-amber-400">
-                <Zap size={13} />
-              </div>
-              <div>
-                <p className="text-xs font-bold text-white">60 / 120 FPS Buttery Smooth</p>
-                <p className="text-[11px] text-white/55">Ultra-fast scrolling with zero lag or freezes.</p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-2.5 rounded-xl border border-white/5 bg-white/[0.03] p-2.5">
-              <div className="mt-0.5 grid size-6 shrink-0 place-items-center rounded-lg bg-amber-400/15 text-amber-400">
-                <Music2 size={13} />
-              </div>
-              <div>
-                <p className="text-xs font-bold text-white">Continuous Background Playback</p>
-                <p className="text-[11px] text-white/55">Music keeps playing while multitasking or screen locked.</p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-2.5 rounded-xl border border-white/5 bg-white/[0.03] p-2.5">
-              <div className="mt-0.5 grid size-6 shrink-0 place-items-center rounded-lg bg-emerald-400/15 text-emerald-400">
-                <CheckCircle2 size={13} />
-              </div>
-              <div>
-                <p className="text-xs font-bold text-white">Clean Notification Dismiss</p>
-                <p className="text-[11px] text-white/55">Closing or swiping away the app cleanly clears the player notification.</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Action Button: Direct Link for 100% Android WebView & Browser compatibility */}
-          <a
-            href={apkDownloadUrl || `https://vybzmusic.online/vybz-v${apkTargetVersion}.apk`}
-            download="vybz.apk"
-            target="_system"
-            onClick={triggerApkDownload}
-            className="group relative flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-amber-400 via-orange-400 to-amber-500 py-3.5 text-sm font-black text-black shadow-[0_10px_30px_rgba(245,158,11,0.4)] transition hover:brightness-110 active:scale-95 no-underline cursor-pointer"
-          >
-            <DownloadCloud size={18} className={isUpdating ? 'animate-bounce' : 'group-hover:scale-110 transition-transform'} />
-            <span>{isUpdating ? 'Starting Download...' : downloadStarted ? 'Download Again 🚀' : 'Update Now (1-Click) 🚀'}</span>
-          </a>
-
-          {/* Download Instructions / Fallback */}
-          {downloadStarted && (
-            <div className="mt-3.5 animate-fade-in rounded-xl border border-emerald-400/30 bg-emerald-400/10 p-2.5 text-center">
-              <p className="text-xs font-semibold text-emerald-300">
-                ✓ Download started!
-              </p>
-              <p className="text-[11px] text-white/70 mt-0.5">
-                Tap your notification bar or open Downloads to install the update.
-              </p>
-            </div>
-          )}
-
-          {/* Secondary Button to Continue without Updating */}
-          <button
-            type="button"
-            onClick={handleDismissApk}
-            className="mt-2.5 py-1.5 px-4 text-xs font-medium text-white/50 hover:text-amber-300 transition-colors"
-          >
-            Continue to VybZ Music →
-          </button>
-
-          {/* External Browser Fallback Link */}
-          <div className="mt-2 text-center">
-            <a
-              href={apkDownloadUrl || "https://vybzmusic.online/vybz.apk"}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 font-mono text-[11px] text-white/40 hover:text-amber-300 transition-colors underline"
-            >
-              <span>Download not starting? Open in Chrome</span>
-              <ExternalLink size={10} />
-            </a>
-          </div>
-        </div>
-      </div>
+      <aside
+        aria-label="App update available"
+        className="fixed top-2.5 sm:top-3.5 left-1/2 -translate-x-1/2 z-[9999] pointer-events-auto animate-fade-in"
+      >
+        <button
+          type="button"
+          onClick={handleTriggerUpdate}
+          className="group relative flex items-center gap-2 rounded-full border border-amber-400/60 bg-gradient-to-r from-amber-500/20 via-orange-500/25 to-amber-500/20 px-4 py-1.5 text-xs font-bold text-amber-300 shadow-[0_8px_25px_rgba(245,158,11,0.4)] backdrop-blur-md transition-all hover:border-amber-300 hover:scale-105 active:scale-95 cursor-pointer"
+        >
+          <span className="relative flex size-2">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400 opacity-75" />
+            <span className="relative inline-flex size-2 rounded-full bg-amber-400" />
+          </span>
+          <span className="tracking-wide">✦ Nayi Vibe Aayi Hai • Tap karo ⚡</span>
+        </button>
+      </aside>
     );
   }
 
   // ========================================================
-  // CASE 2: SLEEK TOP PILL FOR WEB / PWA UPDATES
+  // CASE B: 1st, 2nd, 3rd GENTLE CENTER REMINDER POPUP
+  // (Shows once per listening session if dismissed)
   // ========================================================
-  if (!hasWebUpdate || dismissedWeb) {
-    return null;
+  if (dismissedSession) {
+    // If dismissed in this session, show subtle top pill so user still has access
+    return (
+      <aside
+        aria-label="App update available"
+        className="fixed top-2.5 sm:top-3.5 left-1/2 -translate-x-1/2 z-[9999] pointer-events-auto animate-fade-in"
+      >
+        <button
+          type="button"
+          onClick={handleTriggerUpdate}
+          className="group relative flex items-center gap-2 rounded-full border border-amber-400/40 bg-black/60 px-3.5 py-1 text-[11px] font-bold text-amber-300/90 shadow-md backdrop-blur-md transition-all hover:border-amber-300 active:scale-95 cursor-pointer"
+        >
+          <Sparkles size={11} className="text-amber-400 animate-spin" />
+          <span>✦ Nayi Vibe Ready Hai • Tap karo ⚡</span>
+        </button>
+      </aside>
+    );
   }
 
   return (
-    <aside
-      aria-label="App update notification"
-      className="fixed top-3 left-1/2 -translate-x-1/2 z-[9999] flex max-w-[94vw] items-center gap-2.5 rounded-full border border-amber-400/40 bg-[#0e1420]/95 px-3.5 py-1.5 shadow-[0_10px_35px_rgba(0,0,0,0.8)] backdrop-blur-md transition-all sm:gap-3 sm:px-4 sm:py-2"
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="dynamic-update-title"
+      aria-describedby="dynamic-update-desc"
+      className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in select-none"
     >
-      <div className="flex size-6 shrink-0 items-center justify-center rounded-full bg-amber-400/20 text-amber-400">
-        <Sparkles size={13} className="animate-pulse" />
+      <div className="relative w-full max-w-[340px] sm:max-w-[380px] rounded-3xl border border-amber-400/40 bg-gradient-to-b from-[#121826] to-[#080c14] p-6 text-center shadow-[0_20px_60px_rgba(0,0,0,0.95)]">
+        {/* Close Button */}
+        <button
+          type="button"
+          onClick={handleDismiss}
+          className="absolute top-3.5 right-3.5 grid size-7 place-items-center rounded-full bg-white/10 text-white/60 hover:bg-white/20 hover:text-white transition-colors cursor-pointer"
+          aria-label="Close"
+        >
+          <X size={15} />
+        </button>
+
+        {/* Ambient Gold Glow Behind Icon */}
+        <div className="pointer-events-none absolute -top-16 left-1/2 -translate-x-1/2 size-40 rounded-full bg-amber-400/25 blur-3xl" />
+
+        {/* Glowing Logo Icon */}
+        <div className="relative mx-auto mb-3.5 flex size-14 items-center justify-center rounded-2xl border border-amber-400/40 bg-amber-400/10 shadow-[0_0_25px_rgba(245,158,11,0.3)]">
+          <img src="/logo.png" alt="VybZ Music" className="size-10 object-contain drop-shadow" />
+          <span className="absolute -bottom-1 -right-1 flex size-5 items-center justify-center rounded-full bg-gradient-to-tr from-amber-400 to-orange-500 text-black shadow-md">
+            <Zap size={11} fill="currentColor" />
+          </span>
+        </div>
+
+        {/* Heading */}
+        <h2 id="dynamic-update-title" className="text-lg sm:text-xl font-black text-white leading-snug">
+          {modalTitle}
+        </h2>
+
+        {/* Subtitle */}
+        <p id="dynamic-update-desc" className="mt-1.5 text-xs sm:text-sm text-white/70 leading-relaxed">
+          {modalSubtitle}
+        </p>
+
+        {/* Primary Action Button */}
+        <div className="mt-5 space-y-2">
+          <button
+            type="button"
+            onClick={handleTriggerUpdate}
+            disabled={isUpdating}
+            className="group relative flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-amber-400 via-orange-400 to-amber-500 py-3 text-sm font-black text-black shadow-[0_8px_25px_rgba(245,158,11,0.4)] transition hover:brightness-110 active:scale-95 cursor-pointer disabled:opacity-70"
+          >
+            <span>{isUpdating ? 'Starting...' : primaryBtn}</span>
+          </button>
+
+          {/* Secondary Dismiss Button */}
+          <button
+            type="button"
+            onClick={handleDismiss}
+            className="w-full py-2 text-xs font-semibold text-white/50 hover:text-white/80 transition-colors cursor-pointer"
+          >
+            {secondaryBtn}
+          </button>
+        </div>
       </div>
-
-      <div className="flex items-center gap-1.5 text-xs font-medium text-white/90">
-        <span className="hidden sm:inline">New VybZ Music update ready!</span>
-        <span className="sm:hidden">Update ready!</span>
-      </div>
-
-      <button
-        type="button"
-        onClick={handleWebUpdate}
-        disabled={isUpdating}
-        className="flex items-center gap-1.5 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 px-3 py-1 text-[11px] font-bold text-black shadow-md transition hover:brightness-110 active:scale-95 disabled:opacity-60 shrink-0"
-      >
-        <RefreshCw size={11} className={isUpdating ? 'animate-spin' : ''} />
-        <span>{isUpdating ? 'Updating...' : 'Update ⚡'}</span>
-      </button>
-
-      <button
-        type="button"
-        onClick={() => setDismissedWeb(true)}
-        aria-label="Dismiss update notification"
-        className="flex size-5 shrink-0 items-center justify-center rounded-full text-white/50 transition hover:bg-white/10 hover:text-white shrink-0"
-      >
-        ×
-      </button>
-    </aside>
+    </div>
   );
 }

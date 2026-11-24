@@ -177,8 +177,8 @@ function getRouteMetadata(pathname) {
 
   if (clean === '/download' || clean === '/app') {
     return {
-      title: 'Download VybZ Music APK for Android (v3.4.1) – Free Ad-Free Music Player',
-      description: 'Download official VybZ Music Android APK (v3.4.1 • 9.8 MB). 100% ad-free, instant 0.1s offline launch, 60 FPS smooth playback, continuous background audio, and synced karaoke lyrics.',
+      title: 'Download VybZ Music APK for Android (v3.5.0) – Free Ad-Free Music Player',
+      description: 'Download official VybZ Music Android APK (v3.5.0 • 10.2 MB). 100% ad-free, instant 0.1s offline launch, 60 FPS smooth playback, continuous background audio, and synced karaoke lyrics.',
     };
   }
 
@@ -354,12 +354,12 @@ export default {
     // -1.1 Live APK Version Endpoint for instant Android in-app update trigger (Uncached API route bypasses PWA ServiceWorker)
     if (url.pathname === '/api/apk-version' || url.pathname === '/api/version-apk' || url.pathname === '/version.json') {
       return new Response(JSON.stringify({
-        latestVersion: '3.4.1',
-        versionCode: 19,
+        latestVersion: '3.5.0',
+        versionCode: 20,
         minVersion: '2.9.0',
         apkUrl: 'https://vybzmusic.online/vybz.apk',
-        title: 'VybZ v3.4.1 Official Legal, FAQ & Audio Continuity Engine! 🚀',
-        releaseNotes: 'Official Legal & Transparency Hub (About, FAQ, Privacy, Terms, DMCA Disclaimer), 20-min anti-movie firewall, dynamic version sync, and background playback improvements.',
+        title: 'VybZ v3.5.0 Dynamic In-App Auto-Updater & Audio Engine 🚀',
+        releaseNotes: 'Silent in-app background updater, dynamic non-intrusive reminders, smooth continuous playback, and enhanced Android 14+ compatibility.',
         timestamp: Date.now(),
       }), {
         headers: {
@@ -1158,7 +1158,7 @@ export default {
   "operatingSystem": "Android",
   "applicationCategory": "MusicApplication",
   "fileSize": "10.2MB",
-  "softwareVersion": "3.4.1",
+  "softwareVersion": "3.5.0",
   "downloadUrl": "https://vybzmusic.online/vybz.apk",
   "offers": {
     "@type": "Offer",
