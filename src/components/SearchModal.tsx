@@ -314,7 +314,7 @@ export default function SearchModal({ onPlayCustomVideoId }: SearchModalProps) {
       {/* Spotify & YouTube style Spotlight Search Dialog */}
       <div
         role="dialog"
-        aria-label="YouTube Music & Lyrics Search"
+        aria-label="VybZ Music & Lyrics Search"
         className="fixed inset-x-2.5 top-[max(0.75rem,env(safe-area-inset-top))] sm:top-14 z-50 mx-auto w-auto sm:w-[94vw] max-w-2xl sm:inset-x-auto sm:left-1/2 sm:-translate-x-1/2 flex flex-col max-h-[calc(100dvh-1.5rem)] sm:max-h-[80dvh] overflow-hidden rounded-2xl border border-white/15 bg-[#0e1218] shadow-[0_30px_90px_rgba(0,0,0,0.98)]"
       >
         {/* Top Search Input Box */}
@@ -486,7 +486,7 @@ export default function SearchModal({ onPlayCustomVideoId }: SearchModalProps) {
             <span>Play:</span>
             <kbd className="rounded bg-white/10 px-1.5 py-0.5 font-mono">Enter</kbd>
           </div>
-          <span className="ml-auto sm:ml-0">YouTube Real-Time Search &amp; Playback</span>
+          <span className="ml-auto sm:ml-0">VybZ Real-Time Search &amp; Playback</span>
         </div>
       </div>
     </>

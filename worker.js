@@ -1033,7 +1033,7 @@ export default {
                     targetedTracks.push({
                       id: vr.videoId,
                       title: t,
-                      artist: vr.ownerText?.runs?.[0]?.text || currentArtist || 'YouTube Music',
+                      artist: vr.ownerText?.runs?.[0]?.text || currentArtist || 'VybZ Audio',
                       thumbnail: `https://img.youtube.com/vi/${vr.videoId}/mqdefault.jpg`,
                     });
                     if (targetedTracks.length >= 8) break;
@@ -1056,7 +1056,7 @@ export default {
           const artist =
             pvr.shortBylineText?.runs?.[0]?.text ||
             pvr.longBylineText?.runs?.[0]?.text ||
-            'YouTube Music';
+            'VybZ Audio';
           const duration = pvr.lengthText?.simpleText || pvr.lengthText?.runs?.[0]?.text || '';
 
           if (!id || id === videoId || id.length !== 11 || !title) continue;
@@ -1082,7 +1082,7 @@ export default {
         for (const item of sections) {
           let id = '';
           let title = '';
-          let artist = 'YouTube Music';
+          let artist = 'VybZ Audio';
           let duration = '';
 
           // Support both modern lockupViewModel and legacy compactVideoRenderer
@@ -1092,13 +1092,13 @@ export default {
             title = vm.metadata?.lockupMetadataViewModel?.title?.content || '';
             artist =
               vm.metadata?.lockupMetadataViewModel?.metadata?.contentMetadataViewModel
-                ?.metadataRows?.[0]?.metadataParts?.[0]?.text?.content || 'YouTube Music';
+                ?.metadataRows?.[0]?.metadataParts?.[0]?.text?.content || 'VybZ Audio';
             duration = extractDurationFromLockup(vm);
           } else if (item.compactVideoRenderer) {
             const cvr = item.compactVideoRenderer;
             id = cvr.videoId || '';
             title = cvr.title?.simpleText || cvr.title?.runs?.[0]?.text || '';
-            artist = cvr.shortBylineText?.runs?.[0]?.text || 'YouTube Music';
+            artist = cvr.shortBylineText?.runs?.[0]?.text || 'VybZ Audio';
             duration = cvr.lengthText?.simpleText || cvr.lengthText?.runs?.[0]?.text || '';
           }
 

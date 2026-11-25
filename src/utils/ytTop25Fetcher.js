@@ -5,7 +5,7 @@ const INDIA_CHART_PLAYLISTS = [
 
 function extractMovieAndTitle(rawTitle) {
   let title = rawTitle.trim();
-  let movie = 'YouTube India Chart';
+  let movie = 'VybZ India Chart';
 
   const fromMatch = title.match(/\s*[[(]From\s+["'“]?([^"”)\]]+)["'”]?[\])]\s*/i);
   if (fromMatch) {
@@ -17,7 +17,7 @@ function extractMovieAndTitle(rawTitle) {
 }
 
 function assignRankTag(rank) {
-  if (rank === 1) return '🔥 #1 YouTube India';
+  if (rank === 1) return '🔥 #1 Trending India';
   if (rank <= 5) return '⚡ Top 5 India';
   if (rank <= 10) return '📈 Top 10 Trending';
   return '🎵 Trending India';
@@ -82,7 +82,7 @@ export async function fetchLiveIndiaTop25() {
         );
 
         const rawTitle = cols[0] || '';
-        const singers = cols[1] || 'YouTube Music India';
+        const singers = cols[1] || 'VybZ India Hits';
         const duration = fixed[0] || '3:30';
 
         if (!id || id.length !== 11 || !rawTitle) continue;
@@ -120,7 +120,7 @@ export async function fetchLiveIndiaTop25() {
       if (results.length >= 10) {
         return {
           results,
-          source: 'YouTube Music India Charts',
+          source: 'VybZ India Charts',
           updatedAt: Date.now(),
         };
       }

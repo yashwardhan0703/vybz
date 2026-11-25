@@ -2022,7 +2022,7 @@ export default function UniqueIndianPlayer({
                             type="button"
                             onClick={() => refreshLiveTop25(true)}
                             disabled={isTop25Refreshing}
-                            title="Fetch latest live YouTube India hits"
+                            title="Fetch latest live India Top 25 hits"
                             className="flex items-center justify-center gap-1.5 rounded-full border border-amber-400/30 bg-amber-400/10 px-3.5 py-2 sm:py-2.5 text-xs font-semibold text-amber-300 hover:bg-amber-400/20 active:scale-95 transition-colors disabled:opacity-60"
                           >
                             <RefreshCw
