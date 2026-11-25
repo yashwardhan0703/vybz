@@ -159,8 +159,8 @@ export function parseRoute(pathname = window.location.pathname, hash = window.lo
   if (cleanPath === '/download' || cleanPath === '/app') {
     return {
       isDownload: true,
-      title: 'Download VybZ Music APK for Android (v3.4.1) – Free Ad-Free Music Player',
-      description: 'Download the official VybZ Music Android APK (v3.4.1 • 10.2 MB). 100% ad-free, 60 FPS buttery smooth playback, background audio, and synced lyrics.',
+      title: 'Download VybZ Music APK for Android (v3.5.2) – Free Ad-Free Music Player',
+      description: 'Download the official VybZ Music Android APK (v3.5.2 • 10.2 MB). 100% ad-free, 60 FPS buttery smooth playback, background audio, and synced lyrics.',
     };
   }
 

@@ -3118,7 +3118,7 @@ export default function UniqueIndianPlayer({
                         }}
                         className="hover:text-amber-300 underline transition-colors"
                       >
-                        Android APK (v3.4.1)
+                        Android APK (v3.5.2)
                       </button>
                     </div>
                   </div>
