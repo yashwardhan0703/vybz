@@ -19,31 +19,21 @@ function isNewerVersion(current: string, target: string): boolean {
 
 export default function UpdateNotification() {
   const [hasApkUpdate, setHasApkUpdate] = useState(false);
-  const [apkTargetVersion, setApkTargetVersion] = useState('3.5.1');
+  const [apkTargetVersion, setApkTargetVersion] = useState('3.5.2');
   const [apkDownloadUrl, setApkDownloadUrl] = useState('https://vybzmusic.online/vybz.apk');
   const [isUpdating, setIsUpdating] = useState(false);
   const [dismissedSession, setDismissedSession] = useState(false);
   const [promptCount, setPromptCount] = useState(1);
-  const [isReadyInCache, setIsReadyInCache] = useState(false);
 
-  // 1. Android APK native in-app live update check & silent background cache
+  // Android APK live version check (fetches live /api/apk-version bypassing ServiceWorker cache)
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const ua = navigator.userAgent;
     const isVybZApp = /VybZApp/i.test(ua) || Boolean((window as unknown as { VybZNative?: unknown }).VybZNative);
     if (!isVybZApp) return;
 
-    // Register global listener for native download completion
-    (window as any).VybZUpdateManager = {
-      onDownloadComplete: (ver: string) => {
-        if (ver === apkTargetVersion) {
-          setIsReadyInCache(true);
-        }
-      },
-    };
-
     // Detect installed version via native bridge first, fallback to UserAgent
-    let installed = '3.4.1';
+    let installed = '3.5.2';
     if (typeof (window as any).VybZNative?.getAppVersion === 'function') {
       try {
         const nativeV = (window as any).VybZNative.getAppVersion();
@@ -89,21 +79,6 @@ export default function UpdateNotification() {
             return;
           }
 
-          // Trigger native silent download immediately in background (0s user wait!)
-          if (typeof (window as any).VybZNative?.startSilentDownload === 'function') {
-            try {
-              (window as any).VybZNative.startSilentDownload(data.apkUrl || 'https://vybzmusic.online/vybz.apk', target);
-            } catch {}
-          }
-
-          // Check if already ready in phone cache
-          if (typeof (window as any).VybZNative?.isApkReady === 'function') {
-            try {
-              const ready = (window as any).VybZNative.isApkReady(target);
-              if (ready) setIsReadyInCache(true);
-            } catch {}
-          }
-
           // Retrieve Dynamic Count (1, 2, 3 or 4+)
           const countKey = `vybz_apk_prompt_count_v${target}`;
           const currentCount = parseInt(localStorage.getItem(countKey) || '1', 10);
@@ -129,7 +104,7 @@ export default function UpdateNotification() {
     };
     document.addEventListener('visibilitychange', handleVis);
     return () => document.removeEventListener('visibilitychange', handleVis);
-  }, [apkTargetVersion]);
+  }, []);
 
   // Handle Dismiss (Increments the Dynamic Count for next app launch)
   const handleDismiss = useCallback(() => {
@@ -143,7 +118,7 @@ export default function UpdateNotification() {
     } catch {}
   }, [apkTargetVersion, promptCount]);
 
-  // Trigger 1-Tap Install / Download
+  // Trigger classic website / browser APK download
   const handleTriggerUpdate = useCallback(() => {
     setIsUpdating(true);
 
@@ -151,17 +126,8 @@ export default function UpdateNotification() {
       sessionStorage.setItem(`vybz_apk_sess_dismissed_v${apkTargetVersion}`, 'true');
     } catch {}
 
-    // 1. If native silent installer exists in APK: Instant 0s install
-    if (typeof (window as any).VybZNative?.installDownloadedApk === 'function') {
-      try {
-        (window as any).VybZNative.installDownloadedApk(apkTargetVersion);
-        setTimeout(() => setIsUpdating(false), 2000);
-        return;
-      } catch {}
-    }
+    const downloadTarget = apkDownloadUrl || 'https://vybzmusic.online/vybz.apk';
 
-    // 2. Fallback for older APKs: Direct native download
-    const downloadTarget = apkDownloadUrl || `https://vybzmusic.online/vybz.apk`;
     if (typeof (window as any).VybZNative?.downloadApk === 'function') {
       try {
         (window as any).VybZNative.downloadApk(downloadTarget);
@@ -170,7 +136,6 @@ export default function UpdateNotification() {
       } catch {}
     }
 
-    // 3. Fallback for browser
     try {
       window.location.href = downloadTarget;
     } catch {}
@@ -183,7 +148,7 @@ export default function UpdateNotification() {
   if (!hasApkUpdate) return null;
 
   // ========================================================
-  // DYNAMIC 1, 2, 3 CONTENT SETUP
+  // DYNAMIC 1, 2, 3 CONTENT SETUP (Honest Website Download Flow)
   // ========================================================
   let modalTitle = '✦ Nayi Vibe Ready Hai 🎧';
   let modalSubtitle = 'Thoda extra sukoon aur makkhan playback add kiya hai.';
@@ -192,14 +157,12 @@ export default function UpdateNotification() {
 
   if (promptCount === 2) {
     modalTitle = '✦ Thoda Aur Smooth Banayein? ✨';
-    modalSubtitle = isReadyInCache
-      ? 'Downloaded & ready. Bas ek tap ki deri hai.'
-      : 'Thoda extra sukoon aur lag-free playback ready hai.';
-    primaryBtn = isReadyInCache ? '⚡ Update Karo (0s)' : '⚡ Update Karo';
+    modalSubtitle = 'Naya version aaya hai — bas ek tap ki deri hai.';
+    primaryBtn = '⚡ Update Karo';
     secondaryBtn = 'Abhi Gaana Suno';
   } else if (promptCount === 3) {
     modalTitle = '✦ Chhota Upgrade, Badi Vibe ☕';
-    modalSubtitle = 'Zero wait time. Ek tap me aur fresh ho jayega VybZ.';
+    modalSubtitle = 'Ek tap me aur fresh ho jayega VybZ.';
     primaryBtn = '1 Tap Me Update ⚡';
     secondaryBtn = 'Rehne Do';
   }
@@ -231,10 +194,8 @@ export default function UpdateNotification() {
 
   // ========================================================
   // CASE B: 1st, 2nd, 3rd GENTLE CENTER REMINDER POPUP
-  // (Shows once per listening session if dismissed)
   // ========================================================
   if (dismissedSession) {
-    // If dismissed in this session, show subtle top pill so user still has access
     return (
       <aside
         aria-label="App update available"
@@ -300,7 +261,7 @@ export default function UpdateNotification() {
             disabled={isUpdating}
             className="group relative flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-amber-400 via-orange-400 to-amber-500 py-3 text-sm font-black text-black shadow-[0_8px_25px_rgba(245,158,11,0.4)] transition hover:brightness-110 active:scale-95 cursor-pointer disabled:opacity-70"
           >
-            <span>{isUpdating ? 'Starting...' : primaryBtn}</span>
+            <span>{isUpdating ? 'Opening Download...' : primaryBtn}</span>
           </button>
 
           {/* Secondary Dismiss Button */}

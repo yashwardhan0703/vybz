@@ -1,9 +1,9 @@
 {
-  "latestVersion": "3.5.1",
-  "versionCode": 21,
+  "latestVersion": "3.5.2",
+  "versionCode": 22,
   "minVersion": "2.9.0",
   "apkUrl": "https://vybzmusic.online/vybz.apk",
-  "title": "VybZ v3.5.1 Smart Daily Mood Reminders & Auto-Updater 🚀",
-  "releaseNotes": "7-day relatable & aesthetic vibe reminders (2/day, never interrupts playback), deep-link station launch, and silent background auto-updater.",
-  "timestamp": 1732530000000
+  "title": "VybZ v3.5.2 Clean Master Release, Live Web Sync & Daily Vibes 🚀",
+  "releaseNotes": "Zero extra permissions, Live Web Sync with offline fallback, 7-day smart mood reminders (2/day, never interrupts playback), and dynamic non-intrusive updates.",
+  "timestamp": 1732535000000
 }
