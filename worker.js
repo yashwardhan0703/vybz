@@ -710,29 +710,72 @@ export default {
       }
 
       try {
-        // 1. Primary: YouTube Music Official Radio Mix (playlistId: "RD" + videoId)
-        const ytRes = await fetch('https://www.youtube.com/youtubei/v1/next', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'User-Agent':
-              'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-          },
-          body: JSON.stringify({
-            context: {
-              client: {
-                clientName: 'WEB',
-                clientVersion: '2.20240101.01.00',
-                hl: 'en',
-                gl: 'IN',
-              },
+        // 1. Primary: YouTube Music Official Radio Mix (playlistId: "RD" + videoId) with safe fallback
+        let nextData = null;
+        try {
+          const ytMixRes = await fetch('https://www.youtube.com/youtubei/v1/next', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Origin': 'https://www.youtube.com',
+              'Referer': 'https://www.youtube.com/',
+              'User-Agent':
+                'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
             },
-            videoId,
-            playlistId: `RD${videoId}`,
-          }),
-        });
+            body: JSON.stringify({
+              context: {
+                client: {
+                  clientName: 'WEB',
+                  clientVersion: '2.20240101.01.00',
+                  hl: 'en',
+                  gl: 'IN',
+                },
+              },
+              videoId,
+              playlistId: `RD${videoId}`,
+            }),
+          });
+          if (ytMixRes.ok) {
+            const txt = await ytMixRes.text();
+            if (txt.trim().startsWith('{')) {
+              nextData = JSON.parse(txt);
+            }
+          }
+        } catch {
+          nextData = null;
+        }
 
-        let nextData = await ytRes.json();
+        // Fallback: Standard Watch-Next without playlistId if RD failed or returned non-JSON
+        if (!nextData) {
+          const ytRes = await fetch('https://www.youtube.com/youtubei/v1/next', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Origin': 'https://www.youtube.com',
+              'Referer': 'https://www.youtube.com/',
+              'User-Agent':
+                'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            },
+            body: JSON.stringify({
+              context: {
+                client: {
+                  clientName: 'WEB',
+                  clientVersion: '2.20240101.01.00',
+                  hl: 'en',
+                  gl: 'IN',
+                },
+              },
+              videoId,
+            }),
+          });
+          if (ytRes.ok) {
+            const txt = await ytRes.text();
+            if (txt.trim().startsWith('{')) {
+              nextData = JSON.parse(txt);
+            }
+          }
+        }
+
         const relatedVideos = [];
 
         function cleanTitle(t) {
