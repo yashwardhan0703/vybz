@@ -1319,6 +1319,7 @@ export function useYouTube(containerRef: React.RefObject<HTMLDivElement | null>)
           videoId
         );
         setPlaybackQueue([...queueRef.current], Math.max(0, queueIndexRef.current));
+        usePlayerStore.getState().setIsVibeRadioMode(isVibeRadioModeRef.current);
         syncMediaSession(
           resolvedTitle,
           resolvedArtist,
@@ -1331,35 +1332,40 @@ export function useYouTube(containerRef: React.RefObject<HTMLDivElement | null>)
         // In Vibe Radio mode: fetch pure music recommendations only if starting new seed OR queue running low (<= 2 tracks left)
         const queueRemaining = queueRef.current.length - queueIndexRef.current;
         if (isVibeRadioModeRef.current && (isNewRadioSeed || queueRemaining <= 2)) {
-          fetchRelatedVibeQueue(videoId, resolvedTitle, resolvedArtist).then((related) => {
-            if (related && related.length > 0) {
-              const existingIds = new Set(queueRef.current.map((q) => q.id));
-              const freshTracks = related.filter(
-                (r) =>
-                  !existingIds.has(r.id) &&
-                  !isDuplicateSong(r.title, resolvedTitle) &&
-                  !queueRef.current.some((q) => isDuplicateSong(q.title, r.title))
-              );
-              if (freshTracks.length > 0) {
-                // If queue currently only contains the seed track, initialize queue cleanly; otherwise append
-                if (queueRef.current.length <= 1) {
-                  queueRef.current = [queueRef.current[0], ...freshTracks].slice(0, 50);
-                } else {
-                  queueRef.current = [...queueRef.current, ...freshTracks].slice(0, 50);
-                }
-                setTrackInfo(
-                  queueIndexRef.current,
-                  queueRef.current.length,
-                  resolvedTitle,
-                  resolvedArtist,
-                  resolvedThumb,
-                  videoId
+          usePlayerStore.getState().setIsLoadingQueue(true);
+          fetchRelatedVibeQueue(videoId, resolvedTitle, resolvedArtist)
+            .then((related) => {
+              if (related && related.length > 0) {
+                const existingIds = new Set(queueRef.current.map((q) => q.id));
+                const freshTracks = related.filter(
+                  (r) =>
+                    !existingIds.has(r.id) &&
+                    !isDuplicateSong(r.title, resolvedTitle) &&
+                    !queueRef.current.some((q) => isDuplicateSong(q.title, r.title))
                 );
-                setPlaybackQueue([...queueRef.current], queueIndexRef.current);
-                persistState();
+                if (freshTracks.length > 0) {
+                  // If queue currently only contains the seed track, initialize queue cleanly; otherwise append
+                  if (queueRef.current.length <= 1) {
+                    queueRef.current = [queueRef.current[0], ...freshTracks].slice(0, 60);
+                  } else {
+                    queueRef.current = [...queueRef.current, ...freshTracks].slice(0, 60);
+                  }
+                  setTrackInfo(
+                    queueIndexRef.current,
+                    queueRef.current.length,
+                    resolvedTitle,
+                    resolvedArtist,
+                    resolvedThumb,
+                    videoId
+                  );
+                  setPlaybackQueue([...queueRef.current], queueIndexRef.current);
+                  persistState();
+                }
               }
-            }
-          });
+            })
+            .finally(() => {
+              usePlayerStore.getState().setIsLoadingQueue(false);
+            });
         }
       } catch {}
     },
@@ -1703,6 +1709,44 @@ export function useYouTube(containerRef: React.RefObject<HTMLDivElement | null>)
     [playCustomVideoId, playAt]
   );
 
+  const loadMoreLockRef = useRef(false);
+
+  const loadMoreQueueTracks = useCallback(async () => {
+    if (!isVibeRadioModeRef.current) return;
+    if (loadMoreLockRef.current) return;
+    if (queueRef.current.length === 0 || queueRef.current.length >= 60) return;
+
+    const lastTrack = queueRef.current[queueRef.current.length - 1];
+    if (!lastTrack?.id) return;
+
+    loadMoreLockRef.current = true;
+    usePlayerStore.getState().setIsLoadingQueue(true);
+
+    try {
+      const more = await fetchRelatedVibeQueue(lastTrack.id, lastTrack.title, lastTrack.artist);
+      if (more && more.length > 0) {
+        const existingIds = new Set(queueRef.current.map((q) => q.id));
+        const fresh = more.filter(
+          (r) =>
+            !existingIds.has(r.id) &&
+            !queueRef.current.some((q) => isDuplicateSong(q.title, r.title))
+        );
+        if (fresh.length > 0) {
+          queueRef.current = [...queueRef.current, ...fresh].slice(0, 60);
+          setPlaybackQueue([...queueRef.current], queueIndexRef.current);
+          persistState();
+        }
+      }
+    } catch {
+      // Ignore network errors on scroll load
+    } finally {
+      usePlayerStore.getState().setIsLoadingQueue(false);
+      setTimeout(() => {
+        loadMoreLockRef.current = false;
+      }, 1500);
+    }
+  }, [setPlaybackQueue, persistState]);
+
   return {
     play,
     pause,
@@ -1713,5 +1757,6 @@ export function useYouTube(containerRef: React.RefObject<HTMLDivElement | null>)
     playFromQueueIndex,
     playCustomVideoId,
     playSearchQuery,
+    loadMoreQueueTracks,
   };
 }

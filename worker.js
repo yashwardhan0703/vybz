@@ -572,30 +572,36 @@ export default {
       try {
         const videos = [];
 
-        // 1. First attempt: Direct YouTube HTML Search
+        // 1. Primary: High-speed YouTube InnerTube JSON API (~80ms, never blocked on Cloudflare Edge)
         try {
-          const ytUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
-          const ytRes = await fetch(ytUrl, {
+          const innerTubeRes = await fetch('https://www.youtube.com/youtubei/v1/search', {
+            method: 'POST',
             headers: {
+              'Content-Type': 'application/json',
               'User-Agent':
                 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-              'Accept-Language': 'en-US,en;q=0.9',
             },
+            body: JSON.stringify({
+              context: {
+                client: {
+                  clientName: 'WEB',
+                  clientVersion: '2.20240101.01.00',
+                  hl: 'en',
+                  gl: 'IN',
+                },
+              },
+              query,
+            }),
           });
 
-          const html = await ytRes.text();
-          const match =
-            html.match(/var ytInitialData = ({.*?});<\/script>/) ||
-            html.match(/ytInitialData\s*=\s*({.+?});/);
-
-          if (match) {
-            const json = JSON.parse(match[1]);
-            const contents =
-              json.contents?.twoColumnSearchResultsRenderer?.primaryContents
+          if (innerTubeRes.ok) {
+            const itData = await innerTubeRes.json();
+            const itContents =
+              itData.contents?.twoColumnSearchResultsRenderer?.primaryContents
                 ?.sectionListRenderer?.contents?.[0]?.itemSectionRenderer
                 ?.contents || [];
 
-            for (const item of contents) {
+            for (const item of itContents) {
               const vr = item.videoRenderer;
               if (vr && vr.videoId) {
                 const title = vr.title?.runs?.[0]?.text || '';
@@ -617,40 +623,34 @@ export default {
             }
           }
         } catch {
-          // HTML scrape failed or challenged, proceed to InnerTube fallback
+          // InnerTube failed, proceed to HTML fallback
         }
 
-        // 2. High-reliability fallback: YouTube InnerTube API (Never blocked on Cloudflare Edge)
+        // 2. Fallback: Direct YouTube HTML Search
         if (videos.length === 0) {
           try {
-            const innerTubeRes = await fetch('https://www.youtube.com/youtubei/v1/search', {
-              method: 'POST',
+            const ytUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
+            const ytRes = await fetch(ytUrl, {
               headers: {
-                'Content-Type': 'application/json',
                 'User-Agent':
                   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'Accept-Language': 'en-US,en;q=0.9',
               },
-              body: JSON.stringify({
-                context: {
-                  client: {
-                    clientName: 'WEB',
-                    clientVersion: '2.20240101.01.00',
-                    hl: 'en',
-                    gl: 'IN',
-                  },
-                },
-                query,
-              }),
             });
 
-            if (innerTubeRes.ok) {
-              const itData = await innerTubeRes.json();
-              const itContents =
-                itData.contents?.twoColumnSearchResultsRenderer?.primaryContents
+            const html = await ytRes.text();
+            const match =
+              html.match(/var ytInitialData = ({.*?});<\/script>/) ||
+              html.match(/ytInitialData\s*=\s*({.+?});/);
+
+            if (match) {
+              const json = JSON.parse(match[1]);
+              const contents =
+                json.contents?.twoColumnSearchResultsRenderer?.primaryContents
                   ?.sectionListRenderer?.contents?.[0]?.itemSectionRenderer
                   ?.contents || [];
 
-              for (const item of itContents) {
+              for (const item of contents) {
                 const vr = item.videoRenderer;
                 if (vr && vr.videoId) {
                   const title = vr.title?.runs?.[0]?.text || '';
@@ -710,6 +710,7 @@ export default {
       }
 
       try {
+        // 1. Primary: YouTube Music Official Radio Mix (playlistId: "RD" + videoId)
         const ytRes = await fetch('https://www.youtube.com/youtubei/v1/next', {
           method: 'POST',
           headers: {
@@ -727,10 +728,11 @@ export default {
               },
             },
             videoId,
+            playlistId: `RD${videoId}`,
           }),
         });
 
-        const nextData = await ytRes.json();
+        let nextData = await ytRes.json();
         const relatedVideos = [];
 
         function cleanTitle(t) {
@@ -768,10 +770,22 @@ export default {
 
         function isSameTrack(candTitle, curTitle) {
           if (!candTitle || !curTitle) return false;
+          const lowCand = candTitle.toLowerCase();
+          const lowCur = curTitle.toLowerCase();
+          if (lowCand.trim() === lowCur.trim()) return true;
+
+          // Filter out slowed/reverb/mashup/cover/dub versions when candidate shares key words
+          const remixOrDub = /(slowed|reverb|mashup|lofi|lo-fi|vostfr|castellano|unplugged|cover|karaoke|instrumental|8d audio|speed up|sped up)/i;
           const c1 = cleanTitle(candTitle).split(' ').filter((w) => w.length > 2);
           const c2 = cleanTitle(curTitle).split(' ').filter((w) => w.length > 2);
           if (c1.length === 0 || c2.length === 0) return false;
+
+          const shared = c1.filter((w) => c2.includes(w));
+          if (remixOrDub.test(lowCand) && shared.length >= 1) return true;
           if (c1[0] === c2[0] && (c1.length === 1 || c2.length === 1 || c1[1] === c2[1])) {
+            return true;
+          }
+          if (shared.length >= 2 && shared.length >= Math.min(c1.length, c2.length) * 0.5) {
             return true;
           }
           return false;
@@ -987,6 +1001,36 @@ export default {
           } catch { }
         }
 
+        // Extract YouTube Music Radio Mix tracks (RD<videoId>)
+        const mixTracks = [];
+        const playlistContents =
+          nextData?.contents?.twoColumnWatchNextResults?.playlist?.playlist?.contents || [];
+        for (const pItem of playlistContents) {
+          const pvr = pItem.playlistPanelVideoRenderer;
+          if (!pvr || !pvr.videoId) continue;
+          const id = pvr.videoId;
+          const title = pvr.title?.simpleText || pvr.title?.runs?.[0]?.text || '';
+          const artist =
+            pvr.shortBylineText?.runs?.[0]?.text ||
+            pvr.longBylineText?.runs?.[0]?.text ||
+            'YouTube Music';
+          const duration = pvr.lengthText?.simpleText || pvr.lengthText?.runs?.[0]?.text || '';
+
+          if (!id || id === videoId || id.length !== 11 || !title) continue;
+          if (isNonMusic(title, duration)) continue;
+          if (isSameTrack(title, currentTitle)) continue;
+          if (isVibeMismatch(title, detectedVibe)) continue;
+          if (mixTracks.some((mt) => mt.id === id || isSameTrack(mt.title, title))) continue;
+
+          mixTracks.push({
+            id,
+            title,
+            artist,
+            duration,
+            thumbnail: `https://img.youtube.com/vi/${id}/mqdefault.jpg`,
+          });
+        }
+
         const sections =
           nextData?.contents?.twoColumnWatchNextResults?.secondaryResults?.secondaryResults
             ?.results || [];
@@ -1020,6 +1064,7 @@ export default {
           if (isNonMusic(title, duration)) continue;
           if (isSameTrack(title, currentTitle)) continue;
           if (isVibeMismatch(title, detectedVibe)) continue;
+          if (mixTracks.some((mt) => isSameTrack(mt.title, title))) continue;
           if (targetedTracks.some((tt) => isSameTrack(tt.title, title))) continue;
           if (nextRecommendations.some((rv) => isSameTrack(rv.title, title))) continue;
 
@@ -1027,17 +1072,29 @@ export default {
             id,
             title,
             artist,
+            duration,
             thumbnail: `https://img.youtube.com/vi/${id}/mqdefault.jpg`,
           });
         }
 
-        // Targeted songs (movie album / era match) take primary spotlight, followed by vibe-consistent next suggestions
-        for (const tt of targetedTracks) {
-          relatedVideos.push(tt);
-        }
-        for (const nr of nextRecommendations) {
-          if (!relatedVideos.some((rv) => rv.id === nr.id || isSameTrack(rv.title, nr.title))) {
-            relatedVideos.push(nr);
+        // Priority: 1. Pure YouTube Music Radio Mix (RD<videoId>), 2. Targeted album/artist, 3. Watch-next fallback
+        if (mixTracks.length >= 5) {
+          for (const mt of mixTracks) {
+            relatedVideos.push(mt);
+          }
+        } else {
+          for (const mt of mixTracks) {
+            relatedVideos.push(mt);
+          }
+          for (const tt of targetedTracks) {
+            if (!relatedVideos.some((rv) => rv.id === tt.id || isSameTrack(rv.title, tt.title))) {
+              relatedVideos.push(tt);
+            }
+          }
+          for (const nr of nextRecommendations) {
+            if (!relatedVideos.some((rv) => rv.id === nr.id || isSameTrack(rv.title, nr.title))) {
+              relatedVideos.push(nr);
+            }
           }
         }
 

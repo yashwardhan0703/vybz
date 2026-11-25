@@ -209,7 +209,7 @@ function extractCoreKeywords(t: string): string[] {
     .filter((w) => w.length > 2 && !STOP_WORDS.has(w));
 }
 
-// Detect if candidate is the exact same song upload/cover
+// Detect if candidate is the exact same song upload/cover/remix
 export function isDuplicateSong(candidateTitle: string, currentTitle: string): boolean {
   if (!candidateTitle || !currentTitle) return false;
   const low1 = candidateTitle.toLowerCase().trim();
@@ -220,6 +220,10 @@ export function isDuplicateSong(candidateTitle: string, currentTitle: string): b
   const w2 = extractCoreKeywords(currentTitle);
   if (w1.length === 0 || w2.length === 0) return false;
 
+  const shared = w1.filter((w) => w2.includes(w));
+  const remixOrDub = /(slowed|reverb|mashup|lofi|lo-fi|vostfr|castellano|unplugged|cover|karaoke|instrumental|8d audio|speed up|sped up|live!|performance|clip)/i;
+  if (remixOrDub.test(low1) && shared.length >= 1) return true;
+
   const prefix1 = w1.slice(0, 2).join(' ');
   const prefix2 = w2.slice(0, 2).join(' ');
   if (prefix1.length >= 4 && prefix1 === prefix2) return true;
@@ -228,7 +232,6 @@ export function isDuplicateSong(candidateTitle: string, currentTitle: string): b
     if (w1[0] === w2[0] && (w1[1] === w2[1] || w1.slice(0, 3).includes(w2[1]))) return true;
   }
 
-  const shared = w1.filter((w) => w2.includes(w));
   if (shared.length >= Math.min(w1.length, w2.length) * 0.5) return true;
   return false;
 }
@@ -446,26 +449,17 @@ export async function fetchRelatedVibeQueue(
         for (const item of data.results) {
           if (item.id === videoId || isDuplicateSong(item.title, title)) continue;
           if (!isCandidateMatchingCluster(item.title, item.artist, cluster)) continue;
+          if (queue.some((q) => q.id === item.id || isDuplicateSong(q.title, item.title))) continue;
           queue.push({
             id: item.id,
             title: item.title,
             artist: item.artist,
+            duration: item.duration,
             thumbnail: item.thumbnail || `https://img.youtube.com/vi/${item.id}/mqdefault.jpg`,
           });
         }
-        if (queue.length >= 8) {
-          return queue.slice(0, 15);
-        } else if (queue.length > 0) {
-          // Blend in verified local tracks to guarantee a full, rich 50/50 queue
-          const localTracks = getLocalVibeTracks(videoId, title, artist);
-          const existingIds = new Set([videoId, ...queue.map((q) => q.id)]);
-          for (const lt of localTracks) {
-            if (!existingIds.has(lt.id)) {
-              queue.push(lt);
-              existingIds.add(lt.id);
-            }
-          }
-          return queue.slice(0, 15);
+        if (queue.length > 0) {
+          return queue.slice(0, 20);
         }
       }
     }

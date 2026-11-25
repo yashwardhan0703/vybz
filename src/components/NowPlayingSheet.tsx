@@ -26,6 +26,7 @@ interface NowPlayingSheetProps {
   onPrev: () => void;
   onSeek: (sec: number) => void;
   onPlayQueueIndex: (index: number) => void;
+  onLoadMoreQueue?: () => void;
 }
 
 /**
@@ -39,6 +40,7 @@ export default function NowPlayingSheet({
   onPrev,
   onSeek,
   onPlayQueueIndex,
+  onLoadMoreQueue,
 }: NowPlayingSheetProps) {
   const {
     isNowPlayingOpen,
@@ -64,6 +66,8 @@ export default function NowPlayingSheet({
     addToPlaylist,
     playbackQueue,
     playbackQueueIndex,
+    isLoadingQueue,
+    isVibeRadioMode,
     toggleShuffle,
     cycleRepeat,
   } = usePlayerStore();
@@ -73,6 +77,7 @@ export default function NowPlayingSheet({
   const [addedToPlaylistId, setAddedToPlaylistId] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
+  const queueSentinelRef = useRef<HTMLLIElement | null>(null);
 
   const handleShareCurrentTrack = () => {
     usePlayerStore.getState().openShareModal({
@@ -143,6 +148,24 @@ export default function NowPlayingSheet({
         }));
   const activeQueueIndex =
     playbackQueue.length > 0 ? playbackQueueIndex : trackIndex;
+
+  // Infinite scroll trigger when user scrolls to bottom of Queue
+  useEffect(() => {
+    if (!isNowPlayingOpen || !isVibeRadioMode || !onLoadMoreQueue) return;
+    const sentinel = queueSentinelRef.current;
+    if (!sentinel) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          onLoadMoreQueue();
+        }
+      },
+      { threshold: 0.1 }
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [isNowPlayingOpen, isVibeRadioMode, onLoadMoreQueue, queueItems.length, mobilePanel]);
 
   // Touch swipe handlers: swipe down to close, horizontal swipe on artwork to change track
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -544,6 +567,43 @@ export default function NowPlayingSheet({
                     </li>
                   );
                 })}
+
+                {/* Initial Shimmer Loader (while fetching RD Radio Mix) */}
+                {isLoadingQueue && queueItems.length <= 1 && (
+                  <li className="space-y-2 pt-1">
+                    {Array.from({ length: 4 }).map((_, sIdx) => (
+                      <div key={`q-skel-${sIdx}`} className="flex items-center gap-3 rounded-xl px-2.5 py-2">
+                        <div className="w-5 h-3 rounded shimmer-skeleton opacity-40" />
+                        <div className="size-10 shrink-0 rounded-lg shimmer-skeleton" />
+                        <div className="flex-1 space-y-1.5">
+                          <div className="h-3.5 w-3/4 rounded shimmer-skeleton" />
+                          <div className="h-2.5 w-1/2 rounded shimmer-skeleton opacity-60" />
+                        </div>
+                      </div>
+                    ))}
+                  </li>
+                )}
+
+                {/* Infinite Scroll Bottom Loader Sentinel */}
+                {isVibeRadioMode && queueItems.length > 0 && queueItems.length < 60 && (
+                  <li ref={queueSentinelRef} className="pt-2 pb-3 text-center">
+                    {isLoadingQueue ? (
+                      <div className="inline-flex items-center gap-2 rounded-full border border-amber-400/25 bg-amber-400/10 px-3.5 py-1.5 text-xs font-medium text-amber-300">
+                        <Loader2 size={13} className="animate-spin text-amber-400" />
+                        <span>Loading more similar vibes...</span>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => onLoadMoreQueue?.()}
+                        className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.03] px-3.5 py-1 text-[11px] font-medium text-white/50 hover:border-amber-400/30 hover:text-amber-300 transition-colors cursor-pointer"
+                      >
+                        <Sparkles size={11} />
+                        <span>Load more similar vibes</span>
+                      </button>
+                    )}
+                  </li>
+                )}
               </ul>
             )}
           </div>

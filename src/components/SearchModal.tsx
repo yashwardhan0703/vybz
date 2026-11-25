@@ -3,7 +3,7 @@ import { Search, X, Play, Music, Sparkles, Loader2, PlayCircle } from 'lucide-re
 import { usePlayerStore } from '../store/playerStore';
 import { THEMES } from '../data/worlds';
 import { ARTISTS_CATALOG } from '../data/artistsData';
-import { getLocalVibeTracks, isDuplicateSong, isMovieOrNonMusic } from '../utils/vibeRecommender';
+import { isMovieOrNonMusic } from '../utils/vibeRecommender';
 import type { QueueTrack } from '../hooks/useYouTube';
 import { handleArtworkError } from '../utils/mediaHelpers';
 
@@ -62,6 +62,7 @@ export default function SearchModal({ onPlayCustomVideoId }: SearchModalProps) {
 
   const inputRef = useRef<HTMLInputElement>(null);
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
   const themeColor = currentWorld.themeColor || '#2dd4bf';
 
   // Auto focus input when opened & handle mobile / browser back button
@@ -97,14 +98,21 @@ export default function SearchModal({ onPlayCustomVideoId }: SearchModalProps) {
     }
   }, [setSearchOpen]);
 
-  // Execute YouTube Live Search (supports song titles, movie names, and lyrics)
+  // Execute YouTube Live Search with instant 0ms local matches + AbortController
   const executeSearch = useCallback(async (searchQuery: string) => {
     const q = searchQuery.trim();
     if (!q) {
+      if (abortControllerRef.current) abortControllerRef.current.abort();
       setResults([]);
       setIsLoading(false);
       return;
     }
+
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
 
     setIsLoading(true);
     setApiOffline(false);
@@ -125,43 +133,18 @@ export default function SearchModal({ onPlayCustomVideoId }: SearchModalProps) {
       return;
     }
 
-    const fetchedResults: SearchResultItem[] = [];
-
-    // 2. Fetch from our YouTube Search backend API
-    try {
-      const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`);
-      if (res.ok) {
-        const data = await res.json();
-        if (Array.isArray(data.results) && data.results.length > 0) {
-          for (const item of data.results) {
-            if (isMovieOrNonMusic(item.title, item.duration)) continue;
-            fetchedResults.push({
-              id: item.id,
-              title: item.title,
-              artist: item.artist,
-              duration: item.duration,
-              thumbnail: item.thumbnail || `https://img.youtube.com/vi/${item.id}/mqdefault.jpg`,
-              source: 'youtube',
-            });
-          }
-        }
-      } else {
-        setApiOffline(true);
-      }
-    } catch {
-      setApiOffline(true);
-    }
-
-    // 3. Match from Live Top 25 Trending Indian Hits
+    // 2. Instant Local Matches First (0ms latency)
+    const localMatches: SearchResultItem[] = [];
     const lower = q.toLowerCase();
+
     usePlayerStore.getState().top25Tracks.forEach((track) => {
       if (
         track.title.toLowerCase().includes(lower) ||
         track.singers.toLowerCase().includes(lower) ||
         track.movie.toLowerCase().includes(lower)
       ) {
-        if (!fetchedResults.some((fr) => fr.id === track.id)) {
-          fetchedResults.unshift({
+        if (!localMatches.some((fr) => fr.id === track.id)) {
+          localMatches.push({
             id: track.id,
             title: track.title,
             artist: `${track.singers} • ${track.movie}`,
@@ -173,12 +156,11 @@ export default function SearchModal({ onPlayCustomVideoId }: SearchModalProps) {
       }
     });
 
-    // 4. Match from Popular Indian Artists top tracks
     ARTISTS_CATALOG.forEach((artist) => {
       if (artist.name.toLowerCase().includes(lower)) {
         artist.topTracks?.forEach((t) => {
-          if (!fetchedResults.some((fr) => fr.id === t.id)) {
-            fetchedResults.push({
+          if (!localMatches.some((fr) => fr.id === t.id)) {
+            localMatches.push({
               id: t.id,
               title: t.title,
               artist: `${artist.name} • ${t.album || 'Top Track'}`,
@@ -191,15 +173,14 @@ export default function SearchModal({ onPlayCustomVideoId }: SearchModalProps) {
       }
     });
 
-    // 5. Match from station tracks if any matching
     THEMES.forEach((theme) => {
       theme.tracks.forEach((t) => {
         if (
           t.title.toLowerCase().includes(lower) ||
           t.artist.toLowerCase().includes(lower)
         ) {
-          if (!fetchedResults.some((fr) => fr.id === t.id)) {
-            fetchedResults.unshift({
+          if (!localMatches.some((fr) => fr.id === t.id)) {
+            localMatches.push({
               id: t.id,
               title: t.title,
               artist: `${t.artist} • ${theme.nameHindi}`,
@@ -211,7 +192,44 @@ export default function SearchModal({ onPlayCustomVideoId }: SearchModalProps) {
       });
     });
 
-    setResults(fetchedResults);
+    if (localMatches.length > 0) {
+      setResults(localMatches);
+      setSelectedIndex(0);
+    }
+
+    // 3. Fetch live YouTube Search results in parallel
+    const youtubeResults: SearchResultItem[] = [];
+    try {
+      const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`, {
+        signal: controller.signal,
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data.results) && data.results.length > 0) {
+          for (const item of data.results) {
+            if (isMovieOrNonMusic(item.title, item.duration)) continue;
+            if (localMatches.some((lm) => lm.id === item.id)) continue;
+            youtubeResults.push({
+              id: item.id,
+              title: item.title,
+              artist: item.artist,
+              duration: item.duration,
+              thumbnail: item.thumbnail || `https://img.youtube.com/vi/${item.id}/mqdefault.jpg`,
+              source: 'youtube',
+            });
+          }
+        }
+      } else {
+        setApiOffline(true);
+      }
+    } catch (err: any) {
+      if (err?.name === 'AbortError') return;
+      setApiOffline(true);
+    }
+
+    if (controller.signal.aborted) return;
+
+    setResults([...localMatches, ...youtubeResults]);
     setSelectedIndex(0);
     setIsLoading(false);
   }, []);
@@ -237,50 +255,16 @@ export default function SearchModal({ onPlayCustomVideoId }: SearchModalProps) {
   const handleSelectTrack = useCallback(
     (item: SearchResultItem, _index?: number) => {
       if (!item.id) return;
-      // 1. Filter out search results that are duplicate covers/versions of the selected song
-      const distinctOtherTracks: QueueTrack[] = [];
-      for (const r of results || []) {
-        if (!r.id || r.id === item.id) continue;
-        if (isDuplicateSong(r.title, item.title)) continue;
-        if (distinctOtherTracks.some((d) => isDuplicateSong(d.title, r.title))) continue;
-        distinctOtherTracks.push({
-          id: r.id,
-          title: r.title,
-          artist: r.artist,
-          thumbnail: r.thumbnail,
-          duration: r.duration,
-        });
-      }
-
-      let radioQueue: QueueTrack[] = [];
-      // If user searched for a category/genre (e.g. "haryanvi song"), distinctOtherTracks will have 3+ distinct songs
-      if (distinctOtherTracks.length >= 3) {
-        radioQueue = [
-          {
-            id: item.id,
-            title: item.title,
-            artist: item.artist,
-            thumbnail: item.thumbnail,
-            duration: item.duration,
-          },
-          ...distinctOtherTracks,
-        ];
-      } else {
-        // Targeted song search (e.g. "hum tere pyaar me" where results were duplicate covers):
-        // Trigger clean Vibe Radio Engine (Film / Era / Artist Radio)
-        const localVibe = getLocalVibeTracks(item.id, item.title, item.artist);
-        const filteredVibe = localVibe.filter((lv) => !isDuplicateSong(lv.title, item.title));
-        radioQueue = [
-          {
-            id: item.id,
-            title: item.title,
-            artist: item.artist,
-            thumbnail: item.thumbnail,
-            duration: item.duration,
-          },
-          ...filteredVibe,
-        ];
-      }
+      // Spotify/JioSaavn style: seed queue with ONLY the chosen track so RD Radio Mix populates clean Up Next songs
+      const radioQueue: QueueTrack[] = [
+        {
+          id: item.id,
+          title: item.title,
+          artist: item.artist,
+          thumbnail: item.thumbnail,
+          duration: item.duration,
+        },
+      ];
 
       onPlayCustomVideoId(
         item.id,
@@ -294,7 +278,7 @@ export default function SearchModal({ onPlayCustomVideoId }: SearchModalProps) {
       );
       closeSearch();
     },
-    [results, onPlayCustomVideoId, closeSearch]
+    [onPlayCustomVideoId, closeSearch]
   );
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -320,9 +304,9 @@ export default function SearchModal({ onPlayCustomVideoId }: SearchModalProps) {
 
   return (
     <>
-      {/* Backdrop */}
+      {/* Backdrop (Zero heavy blur for 60 FPS mobile WebView typing) */}
       <div
-        className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md transition-opacity"
+        className="fixed inset-0 z-50 bg-black/85 transition-opacity"
         onClick={closeSearch}
         aria-hidden="true"
       />
@@ -331,7 +315,7 @@ export default function SearchModal({ onPlayCustomVideoId }: SearchModalProps) {
       <div
         role="dialog"
         aria-label="YouTube Music & Lyrics Search"
-        className="fixed inset-x-2.5 top-[max(0.75rem,env(safe-area-inset-top))] sm:top-14 z-50 mx-auto w-auto sm:w-[94vw] max-w-2xl sm:inset-x-auto sm:left-1/2 sm:-translate-x-1/2 flex flex-col max-h-[calc(100dvh-1.5rem)] sm:max-h-[80dvh] overflow-hidden rounded-2xl border border-white/15 bg-[#0e1215]/98 shadow-[0_30px_90px_rgba(0,0,0,0.98)] backdrop-blur-2xl"
+        className="fixed inset-x-2.5 top-[max(0.75rem,env(safe-area-inset-top))] sm:top-14 z-50 mx-auto w-auto sm:w-[94vw] max-w-2xl sm:inset-x-auto sm:left-1/2 sm:-translate-x-1/2 flex flex-col max-h-[calc(100dvh-1.5rem)] sm:max-h-[80dvh] overflow-hidden rounded-2xl border border-white/15 bg-[#0e1218] shadow-[0_30px_90px_rgba(0,0,0,0.98)]"
       >
         {/* Top Search Input Box */}
         <div className="flex items-center gap-2 sm:gap-3 border-b border-white/10 px-3 py-2.5 sm:px-5 sm:py-3.5">
@@ -406,7 +390,7 @@ export default function SearchModal({ onPlayCustomVideoId }: SearchModalProps) {
                 Live search unreachable — showing cached library &amp; Top 25 matches.
               </div>
             )}
-            {isLoading ? (
+            {isLoading && results.length === 0 ? (
               <div className="space-y-1 p-1">
                 {Array.from({ length: 4 }).map((_, sIdx) => (
                   <div

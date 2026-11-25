@@ -32,6 +32,8 @@ interface PlayerState {
   // Live Queue State (mirrored from YouTube engine for UI)
   playbackQueue: PersistedQueueTrack[];
   playbackQueueIndex: number;
+  isLoadingQueue: boolean;
+  isVibeRadioMode: boolean;
 
   // Live Top 25 India Chart
   top25Tracks: TrendingTrack[];
@@ -103,6 +105,8 @@ interface PlayerState {
   setActiveCategory: (category: PlayerCategory) => void;
   setActiveArtistId: (artistId: string | null) => void;
   setPlaybackQueue: (queue: PersistedQueueTrack[], index?: number) => void;
+  setIsLoadingQueue: (loading: boolean) => void;
+  setIsVibeRadioMode: (enabled: boolean) => void;
 
   // Actions - World
   setWorld: (worldId: string) => void;
@@ -191,6 +195,8 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
 
   playbackQueue: persistedState?.queue ?? [],
   playbackQueueIndex: persistedState?.queueIndex ?? 0,
+  isLoadingQueue: false,
+  isVibeRadioMode: false,
 
   top25Tracks: initialTop25.tracks,
   top25LastUpdated: initialTop25.updatedAt,
@@ -303,6 +309,8 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
       playbackQueue: queue,
       playbackQueueIndex: index !== undefined ? Math.max(0, index) : s.playbackQueueIndex,
     })),
+  setIsLoadingQueue: (isLoadingQueue) => set({ isLoadingQueue }),
+  setIsVibeRadioMode: (isVibeRadioMode) => set({ isVibeRadioMode }),
 
   setWorld: (worldId) =>
     set((state) => {

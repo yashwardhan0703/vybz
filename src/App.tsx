@@ -74,6 +74,7 @@ function AppLayout() {
     playFromQueueIndex,
     playCustomVideoId,
     playSearchQuery,
+    loadMoreQueueTracks,
   } = useYouTube(playerContainerRef);
 
   // Auto-heal single-page app chunk mismatches across updates without user having to clear cache
@@ -185,6 +186,7 @@ function AppLayout() {
         onPrev={prev}
         onSeek={seekTo}
         onPlayQueueIndex={playFromQueueIndex}
+        onLoadMoreQueue={loadMoreQueueTracks}
       />
       <PlaylistsModal />
       <TrackList onPlayAt={playFromQueueIndex} />
