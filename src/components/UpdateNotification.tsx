@@ -19,7 +19,7 @@ function isNewerVersion(current: string, target: string): boolean {
 
 export default function UpdateNotification() {
   const [hasApkUpdate, setHasApkUpdate] = useState(false);
-  const [apkTargetVersion, setApkTargetVersion] = useState('3.5.0');
+  const [apkTargetVersion, setApkTargetVersion] = useState('3.5.1');
   const [apkDownloadUrl, setApkDownloadUrl] = useState('https://vybzmusic.online/vybz.apk');
   const [isUpdating, setIsUpdating] = useState(false);
   const [dismissedSession, setDismissedSession] = useState(false);
