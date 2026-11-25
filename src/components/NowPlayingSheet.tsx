@@ -120,6 +120,24 @@ export default function NowPlayingSheet({
     }
   }, [setNowPlayingOpen]);
 
+  // Infinite scroll trigger when user scrolls to bottom of Queue (MUST stay before early return!)
+  useEffect(() => {
+    if (!isNowPlayingOpen || !isVibeRadioMode || !onLoadMoreQueue) return;
+    const sentinel = queueSentinelRef.current;
+    if (!sentinel) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          onLoadMoreQueue();
+        }
+      },
+      { threshold: 0.1 }
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [isNowPlayingOpen, isVibeRadioMode, onLoadMoreQueue, playbackQueue.length, mobilePanel]);
+
   if (!isNowPlayingOpen) return null;
 
   const activeTrack = currentWorld.tracks?.[trackIndex] || currentWorld.tracks?.[0];
@@ -148,24 +166,6 @@ export default function NowPlayingSheet({
         }));
   const activeQueueIndex =
     playbackQueue.length > 0 ? playbackQueueIndex : trackIndex;
-
-  // Infinite scroll trigger when user scrolls to bottom of Queue
-  useEffect(() => {
-    if (!isNowPlayingOpen || !isVibeRadioMode || !onLoadMoreQueue) return;
-    const sentinel = queueSentinelRef.current;
-    if (!sentinel) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0]?.isIntersecting) {
-          onLoadMoreQueue();
-        }
-      },
-      { threshold: 0.1 }
-    );
-    observer.observe(sentinel);
-    return () => observer.disconnect();
-  }, [isNowPlayingOpen, isVibeRadioMode, onLoadMoreQueue, queueItems.length, mobilePanel]);
 
   // Touch swipe handlers: swipe down to close, horizontal swipe on artwork to change track
   const handleTouchStart = (e: React.TouchEvent) => {
