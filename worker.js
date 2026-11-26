@@ -1,4 +1,239 @@
 import { fetchLiveIndiaTop25 } from './src/utils/ytTop25Fetcher.js';
+import { ARTISTS_CATALOG } from './src/data/artistsData.ts';
+import { THEMES } from './src/data/worlds.ts';
+
+const SLUG_TO_WORLD_ID = {
+  'sufi-sukoon': 'sufi_ghazal',
+  'sufi-ghazal': 'sufi_ghazal',
+  'sufi_ghazal': 'sufi_ghazal',
+  'chai-tapri': 'chai_tapri',
+  'chai_tapri': 'chai_tapri',
+  'deluxe-salon': 'deluxe_salon',
+  'deluxe_salon': 'deluxe_salon',
+  'monsoon-baarish': 'monsoon_barish',
+  'monsoon-barish': 'monsoon_barish',
+  'monsoon_barish': 'monsoon_barish',
+  'monsoon_baarish': 'monsoon_barish',
+  'highway-dhaba': 'highway_dhaba',
+  'highway_dhaba': 'highway_dhaba',
+  'corporate-majdoor': 'corporate_majdoor',
+  'corporate_majdoor': 'corporate_majdoor',
+  'corporate-chill': 'corporate_majdoor',
+  'corporate_chill': 'corporate_majdoor',
+  'bartan-time': 'bartan_time',
+  'bartan_time': 'bartan_time',
+  'alfaaz-ehsaas': 'alfaaz_ehsaas',
+  'alfaaz_ehsaas': 'alfaaz_ehsaas',
+  'hostel-ki-raat': 'hostel_ki_raat',
+  'hostel_ki_raat': 'hostel_ki_raat',
+  'train-ki-khidki': 'train_ki_khidki',
+  'train_ki_khidki': 'train_ki_khidki',
+};
+
+const WORLD_ID_TO_SLUG = {
+  sufi_ghazal: 'sufi-sukoon',
+  chai_tapri: 'chai-tapri',
+  deluxe_salon: 'deluxe-salon',
+  monsoon_barish: 'monsoon-baarish',
+  highway_dhaba: 'highway-dhaba',
+  corporate_majdoor: 'corporate-majdoor',
+  bartan_time: 'bartan-time',
+  alfaaz_ehsaas: 'alfaaz-ehsaas',
+  hostel_ki_raat: 'hostel-ki-raat',
+  train_ki_khidki: 'train-ki-khidki',
+};
+
+function escapeHtml(str) {
+  return String(str || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function getRouteBodyHtml(canonicalPath, meta) {
+  const clean = canonicalPath.replace(/\/+$/, '') || '/';
+  if (clean === '/' || clean === '/index.html') return null;
+
+  if (clean.startsWith('/artist/')) {
+    const artId = clean.replace('/artist/', '').trim();
+    const artist = ARTISTS_CATALOG.find((a) => a.id === artId);
+    if (!artist) return null;
+
+    const tracksHtml = artist.topTracks
+      .map((t, i) => {
+        const albumInfo = t.album ? ` — <span>${escapeHtml(t.album)}</span>` : '';
+        const durInfo = t.duration ? ` <small>(${escapeHtml(t.duration)})</small>` : '';
+        return `<li>${i + 1}. <strong>${escapeHtml(t.title)}</strong>${albumInfo}${durInfo}</li>`;
+      })
+      .join('\n');
+
+    const idx = ARTISTS_CATALOG.findIndex((a) => a.id === artId);
+    const related = [];
+    for (let offset = 1; offset <= 6; offset++) {
+      const nextArtist = ARTISTS_CATALOG[(idx + offset) % ARTISTS_CATALOG.length];
+      if (nextArtist) {
+        related.push(`<a href="/artist/${escapeHtml(nextArtist.id)}">${escapeHtml(nextArtist.name)}</a>`);
+      }
+    }
+
+    return `<main id="seo-main-body">
+      <article>
+        <section style="margin-bottom:24px;">
+          <h2>${escapeHtml(artist.name)} — ${escapeHtml(artist.tagline)}</h2>
+          <p>Listen to ${artist.topTracks.length} curated hit songs by ${escapeHtml(artist.name)} online free on VybZ Music. No ads, no login required, instant playback with synchronized lyrics.</p>
+        </section>
+        <section style="margin-bottom:24px;">
+          <h2>Top ${artist.topTracks.length} Verified Hits by ${escapeHtml(artist.name)}</h2>
+          <ol>${tracksHtml}</ol>
+        </section>
+        <nav aria-label="More Indian Artists and Stations">
+          <h3>Explore Similar Indian Artists</h3>
+          <p>${related.join(' • ')}</p>
+          <p><a href="/artists">Browse All 50 Indian Artists</a> • <a href="/vibes">24/7 Hindi Vibe Radio</a> • <a href="/top-25">Daily Top 25 India Chart</a></p>
+        </nav>
+      </article>
+    </main>`;
+  }
+
+  if (clean.startsWith('/vibes/') || clean.startsWith('/vibe/')) {
+    const slug = clean.split('/')[2];
+    const worldId = SLUG_TO_WORLD_ID[slug];
+    const world = THEMES.find((w) => w.id === worldId);
+    if (!world) return null;
+
+    const tracksHtml = world.tracks
+      .map((t, i) => `<li>${i + 1}. <strong>${escapeHtml(t.title)}</strong> — ${escapeHtml(t.artist)}</li>`)
+      .join('\n');
+
+    const quotesHtml = (world.quotes || [])
+      .map((q) => `<li><strong>${escapeHtml(q.sub)}:</strong> ${escapeHtml(q.title)}</li>`)
+      .join(' ');
+
+    const otherStations = THEMES.filter((w) => w.id !== world.id)
+      .map((w) => `<a href="/vibes/${WORLD_ID_TO_SLUG[w.id] || w.id}">${escapeHtml(w.name)}</a>`)
+      .join(' • ');
+
+    return `<main id="seo-main-body">
+      <article>
+        <section style="margin-bottom:24px;">
+          <h2>${escapeHtml(world.name)} (${escapeHtml(world.nameHindi)}) — ${escapeHtml(world.subtitle)}</h2>
+          <p>${escapeHtml(world.subQuote || meta.description)}</p>
+          <ul>${quotesHtml}</ul>
+        </section>
+        <section style="margin-bottom:24px;">
+          <h2>Full ${world.tracks.length}-Track Station Playlist — ${escapeHtml(world.name)}</h2>
+          <ol>${tracksHtml}</ol>
+        </section>
+        <nav aria-label="Other Ambient Vibe Radio Stations">
+          <h3>Switch Ambient Vibe Radio Station</h3>
+          <p>${otherStations}</p>
+          <p><a href="/top-25">Daily Top 25 India</a> • <a href="/artists">50 Indian Artists</a> • <a href="/download">Download Android APK</a></p>
+        </nav>
+      </article>
+    </main>`;
+  }
+
+  if (clean === '/vibes' || clean === '/vibe') {
+    const stationsHtml = THEMES.map((w) => {
+      const slug = WORLD_ID_TO_SLUG[w.id] || w.id.replace(/_/g, '-');
+      const preview = w.tracks.slice(0, 4).map((t) => `${t.title} (${t.artist})`).join(', ');
+      return `<section style="margin-bottom:16px;">
+        <h2><a href="/vibes/${slug}">${escapeHtml(w.name)} (${escapeHtml(w.nameHindi)})</a> — ${escapeHtml(w.subtitle)}</h2>
+        <p>${escapeHtml(w.subQuote || '')} Includes ${w.tracks.length} songs: ${escapeHtml(preview)}.</p>
+      </section>`;
+    }).join('\n');
+
+    return `<main id="seo-main-body">
+      <article>
+        ${stationsHtml}
+        <nav><p><a href="/top-25">Daily Top 25 India</a> • <a href="/artists">50 Indian Artists</a> • <a href="/download">Download Android APK</a></p></nav>
+      </article>
+    </main>`;
+  }
+
+  if (clean === '/artists') {
+    const artistsHtml = ARTISTS_CATALOG.map((a) => {
+      const top3 = a.topTracks.slice(0, 3).map((t) => t.title).join(', ');
+      return `<li><a href="/artist/${escapeHtml(a.id)}"><strong>${escapeHtml(a.name)}</strong></a> — ${escapeHtml(a.tagline)}. Top hits: ${escapeHtml(top3)}</li>`;
+    }).join('\n');
+
+    return `<main id="seo-main-body">
+      <article>
+        <h2>All ${ARTISTS_CATALOG.length} Curated Bollywood, Punjabi, Sufi &amp; Indie Artists</h2>
+        <p>Select any artist below to stream 20 handpicked verified hit songs completely ad-free without login.</p>
+        <ul>${artistsHtml}</ul>
+      </article>
+    </main>`;
+  }
+
+  if (clean === '/top-25' || clean === '/top25') {
+    return `<main id="seo-main-body">
+      <article>
+        <h2>Daily Top 25 Trending Indian Songs Chart</h2>
+        <p>Updated automatically every 24 hours from India's top Bollywood, Punjabi, and Indie music charts. Stream every track ad-free with synchronized lyrics and zero interruptions.</p>
+        <nav>
+          <p>Explore more on VybZ Music: <a href="/vibes">10 Ambient Vibe Radio Stations</a> • <a href="/artists">50 Popular Indian Artists</a> • <a href="/download">Get VybZ Android APK</a></p>
+        </nav>
+      </article>
+    </main>`;
+  }
+
+  if (clean === '/download' || clean === '/app') {
+    return `<main id="seo-main-body">
+      <article>
+        <h2>Download VybZ Music Android APK (v3.5.2 • 10.2 MB)</h2>
+        <p>Install the official ad-free Android APK for background audio playback with screen locked, Bluetooth &amp; notification player controls, offline-cached artwork, and instant YouTube audio streaming without login.</p>
+        <ul>
+          <li><strong>Zero Audio Ads:</strong> Uninterrupted Bollywood, 90s retro, Sufi, and Lo-Fi music.</li>
+          <li><strong>Background Play:</strong> Keep music playing while locked or multitasking.</li>
+          <li><strong>iOS &amp; Desktop Support:</strong> Use Add to Home Screen / Install PWA in Safari or Chrome.</li>
+        </ul>
+        <nav><p><a href="/faq">Read Installation FAQ</a> • <a href="/vibes">Browse Vibe Stations</a> • <a href="/artists">Browse 50 Artists</a></p></nav>
+      </article>
+    </main>`;
+  }
+
+  if (clean === '/about') {
+    return `<main id="seo-main-body">
+      <article>
+        <h2>Our Story — Built for Real Indian Music Moments</h2>
+        <p>VybZ Music started with a simple idea: listening to Hindi, Bollywood, Sufi, and Punjabi classics should feel effortless — like sipping kulhad chai at an evening tapri or catching a window seat on a long train journey, with zero audio ads or forced signups.</p>
+        <nav><p><a href="/vibes">Explore 10 Vibe Stations</a> • <a href="/faq">FAQ</a> • <a href="/download">Android APK</a></p></nav>
+      </article>
+    </main>`;
+  }
+
+  if (clean === '/faq') {
+    return `<main id="seo-main-body">
+      <article>
+        <h2>Frequently Asked Questions — VybZ Music</h2>
+        <dl>
+          <dt><strong>Is VybZ Music 100% free and ad-free?</strong></dt>
+          <dd>Yes. All 10 ambient stations, Top 25 chart hits, and 50 artist discographies stream completely free with zero pre-roll or mid-roll ads and no login.</dd>
+          <dt><strong>How do I listen with my phone screen off?</strong></dt>
+          <dd>Install the official VybZ Music Android APK (10.2 MB) from our Download page for native Android background playback and lock-screen notification controls.</dd>
+          <dt><strong>Can I use VybZ Music on iPhone, Mac, or Windows?</strong></dt>
+          <dd>Yes. Open vybzmusic.online in Safari or Chrome and tap Add to Home Screen / Install App to run it as a responsive PWA.</dd>
+        </dl>
+        <nav><p><a href="/download">Download Android APK</a> • <a href="/vibes">10 Vibe Stations</a> • <a href="/about">About VybZ Music</a></p></nav>
+      </article>
+    </main>`;
+  }
+
+  if (clean === '/privacy' || clean === '/terms' || clean === '/dmca' || clean === '/disclaimer') {
+    return `<main id="seo-main-body">
+      <article>
+        <h2>${escapeHtml(meta.title)}</h2>
+        <p>${escapeHtml(meta.description)}</p>
+        <p>VybZ Music stores your liked songs, custom playlists, and playback preferences locally in your browser/device storage without selling personal information. All media embeds stream via the official YouTube IFrame API. Contact: vybzmusic7@gmail.com.</p>
+        <nav><p><a href="/">Home</a> • <a href="/about">About</a> • <a href="/faq">FAQ</a> • <a href="/privacy">Privacy</a> • <a href="/terms">Terms</a> • <a href="/dmca">DMCA</a></p></nav>
+      </article>
+    </main>`;
+  }
+
+  return null;
+}
 
 function getRouteMetadata(pathname) {
   const clean = pathname.replace(/\/+$/, '') || '/';
@@ -151,13 +386,18 @@ function getRouteMetadata(pathname) {
 
   if (clean.startsWith('/artist/')) {
     const artId = clean.replace('/artist/', '').trim();
-    const artName = artId
-      .split(/[-_]+/)
-      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-      .join(' ');
+    const artistObj = ARTISTS_CATALOG.find((a) => a.id === artId);
+    const artName = artistObj
+      ? artistObj.name
+      : artId
+          .split(/[-_]+/)
+          .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+          .join(' ');
+    const taglineText = artistObj?.tagline ? ` (${artistObj.tagline})` : '';
     return {
       title: `${artName} – Top 20 Songs & Hits | VybZ Music`,
-      description: `Stream top 20 verified hit songs by ${artName} on VybZ Music. 100% ad-free with zero buffer.`,
+      description: `Stream top 20 verified hit songs by ${artName}${taglineText} on VybZ Music. 100% ad-free with zero buffer.`,
+      isUnknown: !artistObj,
     };
   }
 
@@ -323,6 +563,7 @@ export default {
         const apkRes = await env.ASSETS.fetch(apkReq);
         const headers = new Headers(apkRes.headers);
         headers.set('Content-Type', 'application/vnd.android.package-archive');
+        headers.set('X-Robots-Tag', 'noindex, nofollow');
         headers.set('Cache-Control', 'private, no-cache, no-store, max-age=0, must-revalidate');
         headers.set('CDN-Cache-Control', 'no-store, no-cache, max-age=0');
         headers.set('Cloudflare-CDN-Cache-Control', 'no-store, no-cache, max-age=0');
@@ -1281,6 +1522,11 @@ export default {
               /<p id="seo-main-desc">[\s\S]*?<\/p>/,
               `<p id="seo-main-desc">${meta.description}</p>`
             );
+
+          const routeBodyHtml = getRouteBodyHtml(canonicalPath, meta);
+          if (routeBodyHtml) {
+            html = html.replace(/<main id="seo-main-body">[\s\S]*?<\/main>/, routeBodyHtml);
+          }
         }
 
         // Prevent indexing of personal localStorage-only pages and unknown/garbage URLs

@@ -74,18 +74,6 @@ let xml = `<?xml version="1.0" encoding="UTF-8"?>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://vybzmusic.online/playlists</loc>
-    <lastmod>${today}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://vybzmusic.online/liked</loc>
-    <lastmod>${today}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
     <loc>https://vybzmusic.online/about</loc>
     <lastmod>${today}</lastmod>
     <changefreq>monthly</changefreq>
