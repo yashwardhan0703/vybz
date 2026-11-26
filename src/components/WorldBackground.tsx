@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { usePlayerStore } from '../store/playerStore';
 
 export default function WorldBackground() {
-  const { currentWorld } = usePlayerStore();
+  const currentWorld = usePlayerStore((s) => s.currentWorld);
   const [loadedUrl, setLoadedUrl] = useState<string | null>(null);
 
   useEffect(() => {

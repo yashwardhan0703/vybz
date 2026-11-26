@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { ListMusic, LayoutGrid, Share2, Search, Home, ArrowLeft } from 'lucide-react';
+import { useShallow } from 'zustand/react/shallow';
 import { useOnlineCount } from '../hooks/useOnlineCount';
 import { usePlayerStore } from '../store/playerStore';
 
@@ -28,7 +29,15 @@ function useRealtimeClock() {
 export default function Header() {
   const time = useRealtimeClock();
   const count = useOnlineCount();
-  const { toggleWorldSwitcher, toggleTrackList, toggleSearch, setViewMode, currentWorld } = usePlayerStore();
+  const { toggleWorldSwitcher, toggleTrackList, toggleSearch, setViewMode, currentWorld } = usePlayerStore(
+    useShallow((s) => ({
+      toggleWorldSwitcher: s.toggleWorldSwitcher,
+      toggleTrackList: s.toggleTrackList,
+      toggleSearch: s.toggleSearch,
+      setViewMode: s.setViewMode,
+      currentWorld: s.currentWorld,
+    }))
+  );
 
   // Keyboard shortcut Ctrl+K or / to open search
   useEffect(() => {

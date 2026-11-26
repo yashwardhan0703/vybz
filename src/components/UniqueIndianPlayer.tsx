@@ -47,6 +47,51 @@ import type { LegalTab } from './LegalInfoModal';
 const DownloadLandingPage = lazy(() => import('./DownloadLandingPage'));
 const LegalInfoModal = lazy(() => import('./LegalInfoModal'));
 
+function ArtistAvatarImage({
+  src,
+  alt,
+  eager,
+}: {
+  src: string;
+  alt: string;
+  eager: boolean;
+}) {
+  const [loaded, setLoaded] = useState(false);
+  const imgRef = useRef<HTMLImageElement | null>(null);
+
+  useEffect(() => {
+    if (imgRef.current && imgRef.current.complete && imgRef.current.naturalWidth > 0) {
+      setLoaded(true);
+    } else {
+      setLoaded(false);
+    }
+  }, [src]);
+
+  return (
+    <>
+      {!loaded && (
+        <div className="absolute inset-0 z-10 shimmer-skeleton rounded-full" />
+      )}
+      <img
+        ref={imgRef}
+        src={src}
+        alt={alt}
+        loading={eager ? 'eager' : 'lazy'}
+        decoding="async"
+        referrerPolicy="no-referrer"
+        onLoad={() => setLoaded(true)}
+        onError={(e) => {
+          handleArtworkError(e);
+          setLoaded(true);
+        }}
+        className={`relative z-10 size-full object-cover transition-opacity duration-200 group-hover:scale-105 ${
+          loaded ? 'opacity-100' : 'opacity-0'
+        }`}
+      />
+    </>
+  );
+}
+
 interface UniqueIndianPlayerProps {
   onPlayCustomVideoId: (
     videoId: string,
@@ -395,12 +440,12 @@ export default function UniqueIndianPlayer({
   const [isSearchingArtist, setIsSearchingArtist] = useState<boolean>(false);
 
   // Progressive YouTube-style auto-scroll rendering for Popular Artists (infinite scroll with zero blank frames)
-  const [artistDisplayLimit, setArtistDisplayLimit] = useState<number>(12);
+  const [artistDisplayLimit, setArtistDisplayLimit] = useState<number>(24);
   const artistSentinelRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (activeCategory === 'artists') {
-      setArtistDisplayLimit(12);
+      setArtistDisplayLimit(24);
     } else {
       setArtistDisplayLimit(6);
     }
@@ -416,10 +461,10 @@ export default function UniqueIndianPlayer({
       (entries) => {
         const first = entries[0];
         if (first.isIntersecting && artistDisplayLimit < ARTISTS_CATALOG.length) {
-          setArtistDisplayLimit((prev) => Math.min(prev + 12, ARTISTS_CATALOG.length));
+          setArtistDisplayLimit((prev) => Math.min(prev + 18, ARTISTS_CATALOG.length));
         }
       },
-      { root: mainScrollRef.current, rootMargin: '350px' }
+      { root: mainScrollRef.current, rootMargin: '900px' }
     );
 
     observer.observe(sentinel);
@@ -1584,7 +1629,7 @@ export default function UniqueIndianPlayer({
                 <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-white/10 bg-[#0e141f] p-4 sm:p-7 shadow-2xl">
                   {/* Atmospheric Background Art */}
                   <div
-                    className="pointer-events-none absolute inset-0 bg-cover bg-center opacity-30 scale-105 filter blur-[1px] transition-all"
+                    className="pointer-events-none absolute inset-0 bg-cover bg-center opacity-25 transition-opacity"
                     style={{ backgroundImage: `url(${selectedVibeWorld.bg})` }}
                   />
                   <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#0e141f] via-[#0e141f]/85 to-transparent" />
@@ -2313,7 +2358,7 @@ export default function UniqueIndianPlayer({
                                 handlePlayVibeStation(world, false);
                               }
                             }}
-                            className={`group relative overflow-hidden rounded-3xl border p-3 sm:p-4 flex flex-col justify-between transition-all cursor-pointer hover:scale-[1.02] active:scale-[0.99] ${
+                            className={`group relative overflow-hidden rounded-3xl border p-3 sm:p-4 flex flex-col justify-between transition-colors cursor-pointer active:scale-[0.99] ${
                               isCurrentWorld
                                 ? 'border-amber-400/60 bg-[#141b2a] shadow-xl shadow-amber-500/15 ring-1 ring-amber-400/30'
                                 : 'border-white/10 bg-[#0f1522] hover:border-amber-400/40 hover:bg-[#131b2a] shadow-md'
@@ -2476,14 +2521,10 @@ export default function UniqueIndianPlayer({
                               <div className="absolute inset-0 grid place-items-center text-amber-400/35">
                                 <Mic2 size={20} className="opacity-40" />
                               </div>
-                              <img
+                              <ArtistAvatarImage
                                 src={artist.avatar}
                                 alt={artist.name}
-                                loading={aIdx < 12 ? 'eager' : 'lazy'}
-                                decoding="async"
-                                referrerPolicy="no-referrer"
-                                onError={handleArtworkError}
-                                className="relative z-10 size-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                eager={activeCategory === 'all' || aIdx < 24}
                               />
 
                               <button

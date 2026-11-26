@@ -1,5 +1,6 @@
 /// <reference types="youtube" />
 import { useEffect, useRef, useCallback } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 import { usePlayerStore } from '../store/playerStore';
 import { fetchRelatedVibeQueue, getLocalVibeTracks, isDuplicateSong } from '../utils/vibeRecommender';
 import { getStoredPlaybackState, saveStoredPlaybackState } from '../utils/localStorageHelper';
@@ -226,7 +227,22 @@ export function useYouTube(containerRef: React.RefObject<HTMLDivElement | null>)
     setDuration,
     setTrackInfo,
     setPlaybackQueue,
-  } = usePlayerStore();
+  } = usePlayerStore(
+    useShallow((s) => ({
+      currentWorld: s.currentWorld,
+      isShuffle: s.isShuffle,
+      repeatMode: s.repeatMode,
+      volume: s.volume,
+      isMuted: s.isMuted,
+      isPlaying: s.isPlaying,
+      setIsPlaying: s.setIsPlaying,
+      setIsLoading: s.setIsLoading,
+      setCurrentTime: s.setCurrentTime,
+      setDuration: s.setDuration,
+      setTrackInfo: s.setTrackInfo,
+      setPlaybackQueue: s.setPlaybackQueue,
+    }))
+  );
 
   currentWorldRef.current = currentWorld;
   repeatModeRef.current = repeatMode;

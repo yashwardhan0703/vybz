@@ -42,7 +42,7 @@ export const THEMES: ThemeWorld[] = [
     subQuote: 'Shor se door, bas ek khamosh sukoon.',
     themeColor: '#a855f7',
     theme: 'purple',
-    bg: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=1920&q=85',
+    bg: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=900&q=75&auto=format',
     tracks: [
       { id: 'UIPXHsUXVH0', title: 'Ye Jo Halka Halka Suroor Hai', artist: 'Nusrat Fateh Ali Khan' },
       { id: '2F7G9bOIwlk', title: 'Afreen Afreen', artist: 'Nusrat Fateh Ali Khan' },
@@ -88,7 +88,7 @@ export const THEMES: ThemeWorld[] = [
     subQuote: 'Chai ke bina baat aage nahi badhti.',
     themeColor: '#f97316',
     theme: 'orange',
-    bg: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1920&q=85',
+    bg: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=900&q=75&auto=format',
     tracks: [
       { id: 'YwcRJbaQkFU', title: 'O Mere Dil Ke Chain', artist: 'Kishore Kumar' },
       { id: 'AMuRRXCuy-4', title: 'Pal Pal Dil Ke Paas', artist: 'Kishore Kumar' },
@@ -134,7 +134,7 @@ export const THEMES: ThemeWorld[] = [
     subQuote: 'Purani yaadein, naya haircut.',
     themeColor: '#fbbf24',
     theme: 'amber',
-    bg: 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=1920&q=85',
+    bg: 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=900&q=75&auto=format',
     tracks: [
       { id: 'cNV5hLSa9H8', title: 'Tujhe Dekha Toh', artist: 'Kumar Sanu, Lata Mangeshkar' },
       { id: 'G4404nb2CNY', title: 'Pehla Nasha', artist: 'Udit Narayan, Sadhana Sargam' },
@@ -180,7 +180,7 @@ export const THEMES: ThemeWorld[] = [
     subQuote: 'Khidki par barish ki boondein aur purane gaane.',
     themeColor: '#38bdf8',
     theme: 'sky',
-    bg: 'https://images.unsplash.com/photo-1534274988757-a28bf1a57c17?w=1920&q=85',
+    bg: 'https://images.unsplash.com/photo-1534274988757-a28bf1a57c17?w=900&q=75&auto=format',
     tracks: [
       { id: 'JQoSSJDZxOo', title: 'Rimjhim Gire Sawan', artist: 'Kishore Kumar' },
       { id: 'PJWemSzExXs', title: 'Baarishein', artist: 'Anuv Jain' },
@@ -226,7 +226,7 @@ export const THEMES: ThemeWorld[] = [
     subQuote: 'Raat ka safar aur desi Punjabi energy.',
     themeColor: '#ec4899',
     theme: 'pink',
-    bg: 'https://images.unsplash.com/photo-1558981852-426c373d4a83?w=1920&q=85',
+    bg: 'https://images.unsplash.com/photo-1558981852-426c373d4a83?w=900&q=75&auto=format',
     tracks: [
       { id: '92ydUdqWE1g', title: 'Tunak Tunak Tun', artist: 'Daler Mehndi' },
       { id: 'lhVceZE1lf4', title: 'Bolo Ta Ra Ra', artist: 'Daler Mehndi' },
@@ -272,7 +272,7 @@ export const THEMES: ThemeWorld[] = [
     subQuote: 'Deadline aati jaati rahegi, gaane chalte rahenge.',
     themeColor: '#38bdf8',
     theme: 'sky',
-    bg: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=1920&q=85',
+    bg: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=900&q=75&auto=format',
     tracks: [
       { id: 'BmUe3-sfr7E', title: 'Kasoor', artist: 'Prateek Kuhad' },
       { id: 'vA86QFrXoho', title: 'Alag Aasmaan', artist: 'Anuv Jain' },
@@ -318,7 +318,7 @@ export const THEMES: ThemeWorld[] = [
     subQuote: 'Kaam ke saath thoda beat bhi.',
     themeColor: '#2dd4bf',
     theme: 'teal',
-    bg: 'https://images.unsplash.com/photo-1556911220-e15b29be8c8f?w=1920&q=85',
+    bg: 'https://images.unsplash.com/photo-1556911220-e15b29be8c8f?w=900&q=75&auto=format',
     tracks: [
       { id: '2gcsgfzqN8k', title: 'Zingaat', artist: 'Ajay-Atul' },
       { id: 'udra3Mfw2oo', title: 'London Thumakda', artist: 'Labh Janjua, Sonu Kakkar' },
@@ -365,7 +365,7 @@ export const THEMES: ThemeWorld[] = [
   "subQuote": "Kuch baatein jo sirf shayari aur dhun me bayaan hoti hain.",
   "themeColor": "#38bdf8",
   "theme": "sky",
-  "bg": "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=1920&q=85",
+  "bg": "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=900&q=75&auto=format",
   "tracks": [
     {
       "id": "cQq6iLF66Gc",
@@ -520,7 +520,7 @@ export const THEMES: ThemeWorld[] = [
   "subQuote": "Doston ki mehfil, ek cup chai aur yaadon ka silsila.",
   "themeColor": "#f97316",
   "theme": "orange",
-  "bg": "https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=1920&q=85",
+  "bg": "https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=900&q=75&auto=format",
   "tracks": [
     {
       "id": "dWqb-WqbGh8",
@@ -675,7 +675,7 @@ export const THEMES: ThemeWorld[] = [
   "subQuote": "Manzil se zyada khoobsurat yeh safar hai.",
   "themeColor": "#10b981",
   "theme": "emerald",
-  "bg": "https://images.unsplash.com/photo-1474487548417-781cb71495f3?w=1920&q=85",
+  "bg": "https://images.unsplash.com/photo-1474487548417-781cb71495f3?w=900&q=75&auto=format",
   "tracks": [
     {
       "id": "9MX-QejdVaQ",

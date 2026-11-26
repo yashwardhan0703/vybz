@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Search, X, Play, Music, Sparkles, Loader2, PlayCircle } from 'lucide-react';
+import { useShallow } from 'zustand/react/shallow';
 import { usePlayerStore } from '../store/playerStore';
 import { THEMES } from '../data/worlds';
 import { ARTISTS_CATALOG } from '../data/artistsData';
@@ -53,7 +54,13 @@ function extractYouTubeId(urlOrText: string): string | null {
 }
 
 export default function SearchModal({ onPlayCustomVideoId }: SearchModalProps) {
-  const { isSearchOpen, setSearchOpen, currentWorld } = usePlayerStore();
+  const { isSearchOpen, setSearchOpen, currentWorld } = usePlayerStore(
+    useShallow((s) => ({
+      isSearchOpen: s.isSearchOpen,
+      setSearchOpen: s.setSearchOpen,
+      currentWorld: s.currentWorld,
+    }))
+  );
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchResultItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);

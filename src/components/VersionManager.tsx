@@ -1,11 +1,18 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Sparkles, Radio, X } from 'lucide-react';
+import { useShallow } from 'zustand/react/shallow';
 import { usePlayerStore } from '../store/playerStore';
 
 export const CURRENT_CLIENT_VERSION = '2.7.7-permanent-navigation-fix';
 
 export default function VersionManager() {
-  const { setActiveCategory, setViewMode, isPlaying } = usePlayerStore();
+  const { setActiveCategory, setViewMode, isPlaying } = usePlayerStore(
+    useShallow((s) => ({
+      setActiveCategory: s.setActiveCategory,
+      setViewMode: s.setViewMode,
+      isPlaying: s.isPlaying,
+    }))
+  );
   const [showWhatsNew, setShowWhatsNew] = useState(false);
   const [hasPendingUpdate, setHasPendingUpdate] = useState(false);
 

@@ -1,5 +1,6 @@
 import { useEffect, useCallback } from 'react';
 import { X, Music } from 'lucide-react';
+import { useShallow } from 'zustand/react/shallow';
 import { usePlayerStore } from '../store/playerStore';
 import { handleArtworkError } from '../utils/mediaHelpers';
 
@@ -18,7 +19,19 @@ export default function TrackList({ onPlayAt }: TrackListProps) {
     playbackQueueIndex,
     currentTrackId,
     viewMode,
-  } = usePlayerStore();
+  } = usePlayerStore(
+    useShallow((s) => ({
+      isTrackListOpen: s.isTrackListOpen,
+      toggleTrackList: s.toggleTrackList,
+      trackIndex: s.trackIndex,
+      currentWorld: s.currentWorld,
+      isPlaying: s.isPlaying,
+      playbackQueue: s.playbackQueue,
+      playbackQueueIndex: s.playbackQueueIndex,
+      currentTrackId: s.currentTrackId,
+      viewMode: s.viewMode,
+    }))
+  );
 
   // Mobile gesture & browser back button handling
   useEffect(() => {

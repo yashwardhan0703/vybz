@@ -16,8 +16,10 @@ import {
   Check,
   Share2,
 } from 'lucide-react';
+import { useShallow } from 'zustand/react/shallow';
 import { usePlayerStore } from '../store/playerStore';
 import { formatTime, handleArtworkError } from '../utils/mediaHelpers';
+import { TrackSeekBar } from './TrackProgress';
 
 interface NowPlayingSheetProps {
   onPlay: () => void;
@@ -50,8 +52,6 @@ export default function NowPlayingSheet({
     isTuning,
     isShuffle,
     repeatMode,
-    currentTime,
-    duration,
     currentTrackId,
     trackTitle,
     trackArtist,
@@ -70,7 +70,35 @@ export default function NowPlayingSheet({
     isVibeRadioMode,
     toggleShuffle,
     cycleRepeat,
-  } = usePlayerStore();
+  } = usePlayerStore(
+    useShallow((s) => ({
+      isNowPlayingOpen: s.isNowPlayingOpen,
+      setNowPlayingOpen: s.setNowPlayingOpen,
+      isPlaying: s.isPlaying,
+      isLoading: s.isLoading,
+      isTuning: s.isTuning,
+      isShuffle: s.isShuffle,
+      repeatMode: s.repeatMode,
+      currentTrackId: s.currentTrackId,
+      trackTitle: s.trackTitle,
+      trackArtist: s.trackArtist,
+      trackThumbnail: s.trackThumbnail,
+      trackIndex: s.trackIndex,
+      currentWorld: s.currentWorld,
+      viewMode: s.viewMode,
+      toggleViewMode: s.toggleViewMode,
+      likedSongs: s.likedSongs,
+      toggleLike: s.toggleLike,
+      userPlaylists: s.userPlaylists,
+      addToPlaylist: s.addToPlaylist,
+      playbackQueue: s.playbackQueue,
+      playbackQueueIndex: s.playbackQueueIndex,
+      isLoadingQueue: s.isLoadingQueue,
+      isVibeRadioMode: s.isVibeRadioMode,
+      toggleShuffle: s.toggleShuffle,
+      cycleRepeat: s.cycleRepeat,
+    }))
+  );
 
   const [mobilePanel, setMobilePanel] = useState<'player' | 'queue'>('player');
   const [showPlaylistPicker, setShowPlaylistPicker] = useState(false);
@@ -152,7 +180,6 @@ export default function NowPlayingSheet({
 
   const songId = currentTrackId || activeTrack?.id || 'song';
   const isLiked = likedSongs.some((s) => s.id === songId);
-  const progress = duration > 0 ? Math.min(100, (currentTime / duration) * 100) : 0;
   const themeColor = viewMode === 'studio' ? '#f59e0b' : currentWorld.themeColor || '#fbbf24';
 
   const queueItems =
@@ -201,12 +228,13 @@ export default function NowPlayingSheet({
   };
 
   const handleSaveToPlaylist = (playlistId: string) => {
+    const curDuration = usePlayerStore.getState().duration;
     addToPlaylist(playlistId, {
       id: songId,
       title: displayTitle,
       artist: displayArtist,
       thumbnail: displayThumbnail,
-      duration: duration > 0 ? formatTime(duration) : undefined,
+      duration: curDuration > 0 ? formatTime(curDuration) : undefined,
     });
     setAddedToPlaylistId(playlistId);
     setToastMessage('Added to playlist! 🎵');
@@ -328,15 +356,16 @@ export default function NowPlayingSheet({
               <div className="flex items-center gap-1 shrink-0">
                 <button
                   type="button"
-                  onClick={() =>
+                  onClick={() => {
+                    const curDuration = usePlayerStore.getState().duration;
                     toggleLike({
                       id: songId,
                       title: displayTitle,
                       artist: displayArtist,
                       thumbnail: displayThumbnail,
-                      duration: duration > 0 ? formatTime(duration) : undefined,
-                    })
-                  }
+                      duration: curDuration > 0 ? formatTime(curDuration) : undefined,
+                    });
+                  }}
                   aria-label={isLiked ? 'Remove from Liked Songs' : 'Save to Liked Songs'}
                   className="grid size-10 place-items-center rounded-full text-white/65 hover:bg-white/5 hover:text-rose-500 active:scale-90 transition-all"
                 >
@@ -408,25 +437,7 @@ export default function NowPlayingSheet({
             )}
 
             {/* Seek Bar */}
-            <div className="w-full">
-              <input
-                type="range"
-                min={0}
-                max={duration > 0 ? Math.floor(duration) : 100}
-                value={Math.min(Math.floor(currentTime), duration > 0 ? Math.floor(duration) : 100)}
-                aria-label="Seek track"
-                onChange={(e) => onSeek(Number(e.target.value))}
-                className="world-range h-3 sm:h-4 w-full cursor-pointer"
-                style={{
-                  '--world-primary': themeColor,
-                  '--range-progress': `${progress}%`,
-                } as React.CSSProperties}
-              />
-              <div className="mt-1 flex items-center justify-between font-mono text-[0.68rem] tabular-nums text-white/50">
-                <span>{formatTime(currentTime)}</span>
-                <span>{duration > 0 ? formatTime(duration) : '0:00'}</span>
-              </div>
-            </div>
+            <TrackSeekBar themeColor={themeColor} onSeek={onSeek} variant="sheet" />
 
             {/* Playback Controls (Shuffle, Prev, Play/Pause, Next, Repeat) */}
             <div className="w-full flex items-center justify-between px-1 sm:px-3">

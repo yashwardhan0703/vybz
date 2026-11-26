@@ -14,8 +14,10 @@ import {
   ChevronUp,
   Share2,
 } from 'lucide-react';
+import { useShallow } from 'zustand/react/shallow';
 import { usePlayerStore } from '../store/playerStore';
 import { formatTime, handleArtworkError } from '../utils/mediaHelpers';
+import { MiniProgressStrip, TrackSeekBar } from './TrackProgress';
 
 interface BottomPlayerProps {
   onPlay: () => void;
@@ -39,8 +41,6 @@ export default function BottomPlayer({
     isShuffle,
     repeatMode,
     volume,
-    currentTime,
-    duration,
     trackIndex,
     trackCount,
     currentTrackId,
@@ -57,10 +57,34 @@ export default function BottomPlayer({
     toggleMute,
     toggleTrackList,
     setNowPlayingOpen,
-  } = usePlayerStore();
+  } = usePlayerStore(
+    useShallow((s) => ({
+      isPlaying: s.isPlaying,
+      isLoading: s.isLoading,
+      isTuning: s.isTuning,
+      isShuffle: s.isShuffle,
+      repeatMode: s.repeatMode,
+      volume: s.volume,
+      trackIndex: s.trackIndex,
+      trackCount: s.trackCount,
+      currentTrackId: s.currentTrackId,
+      trackTitle: s.trackTitle,
+      trackArtist: s.trackArtist,
+      trackThumbnail: s.trackThumbnail,
+      currentWorld: s.currentWorld,
+      likedSongs: s.likedSongs,
+      toggleLike: s.toggleLike,
+      viewMode: s.viewMode,
+      toggleShuffle: s.toggleShuffle,
+      cycleRepeat: s.cycleRepeat,
+      setVolume: s.setVolume,
+      toggleMute: s.toggleMute,
+      toggleTrackList: s.toggleTrackList,
+      setNowPlayingOpen: s.setNowPlayingOpen,
+    }))
+  );
 
   const touchStartYRef = useRef<number | null>(null);
-  const progress = duration > 0 ? Math.min(100, (currentTime / duration) * 100) : 0;
   const themeColor = viewMode === 'studio' ? '#f59e0b' : currentWorld.themeColor || '#fbbf24';
 
   // Global desktop keyboard shortcuts
@@ -121,12 +145,13 @@ export default function BottomPlayer({
 
   const handleToggleLike = (e: React.MouseEvent) => {
     e.stopPropagation();
+    const curDuration = usePlayerStore.getState().duration;
     toggleLike({
       id: songId,
       title: displayTitle,
       artist: displayArtist,
       thumbnail: displayThumbnail,
-      duration: duration > 0 ? formatTime(duration) : undefined,
+      duration: curDuration > 0 ? formatTime(curDuration) : undefined,
     });
   };
 
@@ -162,12 +187,7 @@ export default function BottomPlayer({
         }}
       >
         {/* Top thin progress track */}
-        <div className="h-[2px] w-full bg-white/10">
-          <div
-            className="h-full transition-[width] duration-200"
-            style={{ width: `${progress}%`, backgroundColor: themeColor }}
-          />
-        </div>
+        <MiniProgressStrip themeColor={themeColor} />
 
         <div className="flex items-center justify-between gap-2 px-3 py-2">
           {/* Left: Tappable track trigger to open Full-Screen Now Playing */}
@@ -362,27 +382,7 @@ export default function BottomPlayer({
             </button>
           </div>
 
-          <div className="mt-1.5 flex w-full max-w-lg items-center gap-2.5">
-            <span className="min-w-8 text-right font-mono text-[0.65rem] tabular-nums text-white/50">
-              {formatTime(currentTime)}
-            </span>
-            <input
-              type="range"
-              min={0}
-              max={duration > 0 ? Math.floor(duration) : 100}
-              value={Math.min(Math.floor(currentTime), duration > 0 ? Math.floor(duration) : 100)}
-              aria-label="Seek track"
-              onChange={(e) => onSeek(Number(e.target.value))}
-              className="world-range h-3 flex-1 cursor-pointer"
-              style={{
-                '--world-primary': themeColor,
-                '--range-progress': `${progress}%`,
-              } as React.CSSProperties}
-            />
-            <span className="min-w-8 font-mono text-[0.65rem] tabular-nums text-white/50">
-              {duration > 0 ? formatTime(duration) : '0:00'}
-            </span>
-          </div>
+          <TrackSeekBar themeColor={themeColor} onSeek={onSeek} variant="bar" />
         </div>
 
         {/* Right Zone (25%): Queue, Volume, Expand */}
