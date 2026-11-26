@@ -294,14 +294,9 @@ export default function UniqueIndianPlayer({
 
   // Automatically reset scroll position to top whenever changing tab, artist, vibe, or playlist
   useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
     const el = mainScrollRef.current;
-    if (el) {
-      el.scrollTop = 0;
-      const raf = requestAnimationFrame(() => {
-        if (el) el.scrollTop = 0;
-      });
-      return () => cancelAnimationFrame(raf);
-    }
+    if (el) el.scrollTop = 0;
   }, [activeCategory, selectedArtist?.id, selectedVibeWorld?.id, selectedPlaylistId]);
 
   // Listen for mobile bottom nav category selections to reset sub-views and scroll to top
@@ -310,22 +305,14 @@ export default function UniqueIndianPlayer({
       setSelectedPlaylistId(null);
       setSelectedArtist(null);
       setSelectedVibeWorld(null);
+      window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
       const el = mainScrollRef.current;
-      if (el) {
-        el.scrollTop = 0;
-        requestAnimationFrame(() => {
-          if (el) el.scrollTop = 0;
-        });
-      }
+      if (el) el.scrollTop = 0;
     };
     const handleScrollTop = () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
       const el = mainScrollRef.current;
-      if (el) {
-        el.scrollTop = 0;
-        requestAnimationFrame(() => {
-          if (el) el.scrollTop = 0;
-        });
-      }
+      if (el) el.scrollTop = 0;
     };
     window.addEventListener('vybz-category-select', handleCategorySelect);
     window.addEventListener('vybz-scroll-top', handleScrollTop);
@@ -348,7 +335,7 @@ export default function UniqueIndianPlayer({
     // If user clicked just to view/select the vibe (userExplicitPlay is false),
     // NEVER auto-play! Simply navigate to the vibe page.
     if (!userExplicitPlay) {
-      mainScrollRef.current?.scrollTo({ top: 0, behavior: 'instant' });
+      window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
       return;
     }
 
@@ -362,7 +349,7 @@ export default function UniqueIndianPlayer({
       } else {
         onPlay();
       }
-      mainScrollRef.current?.scrollTo({ top: 0, behavior: 'instant' });
+      window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
       return;
     }
 
@@ -386,7 +373,7 @@ export default function UniqueIndianPlayer({
         false
       );
     }
-    mainScrollRef.current?.scrollTo({ top: 0, behavior: 'instant' });
+    window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
   };
 
   const closeVibeWorld = () => {
@@ -464,7 +451,7 @@ export default function UniqueIndianPlayer({
           setArtistDisplayLimit((prev) => Math.min(prev + 18, ARTISTS_CATALOG.length));
         }
       },
-      { root: mainScrollRef.current, rootMargin: '900px' }
+      { root: null, rootMargin: '900px' }
     );
 
     observer.observe(sentinel);
@@ -631,7 +618,7 @@ export default function UniqueIndianPlayer({
         setSelectedVibeWorld(null);
       }
       setSelectedPlaylistId(null);
-      mainScrollRef.current?.scrollTo({ top: 0, behavior: 'instant' });
+      window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
     };
 
     window.addEventListener('popstate', handlePopState);
@@ -666,7 +653,7 @@ export default function UniqueIndianPlayer({
     setSelectedPlaylistId(null);
     setArtistPage(1);
     setIsArtistExpandAll(true);
-    mainScrollRef.current?.scrollTo({ top: 0, behavior: 'instant' });
+    window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
   };
 
   const closeArtist = () => {
@@ -676,7 +663,7 @@ export default function UniqueIndianPlayer({
       navigateTo('/artists');
       setSelectedArtist(null);
     }
-    mainScrollRef.current?.scrollTo({ top: 0, behavior: 'instant' });
+    window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
   };
 
   const selectedArtistId = selectedArtist?.id;
@@ -786,7 +773,7 @@ export default function UniqueIndianPlayer({
     if (selectedVibeWorld) {
       setSelectedVibeWorld(null);
     }
-    mainScrollRef.current?.scrollTo({ top: 0, behavior: 'instant' });
+    window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
   };
 
   // Toggle Play / Pause trending song (with continuous Top 25 queue)
@@ -1063,16 +1050,16 @@ export default function UniqueIndianPlayer({
   }
 
   return (
-    <div className="relative flex flex-1 min-h-0 overflow-hidden bg-[#070a10] text-white">
+    <div className="relative flex flex-1 min-w-0 bg-[#070a10] text-white">
       {/* Lightweight GPU-friendly dark ambient backdrop */}
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-amber-500/[0.04] via-transparent to-black/40" />
+      <div className="pointer-events-none fixed inset-0 bg-gradient-to-b from-amber-500/[0.04] via-transparent to-black/40" />
 
       {/* ========================================================
           TABLET (Compact Rail) & DESKTOP SIDEBAR (md:flex)
          ======================================================== */}
       <aside
         aria-label="Primary Sidebar"
-        className="hidden md:flex md:w-20 lg:w-60 xl:w-64 shrink-0 flex-col border-r border-white/10 bg-[#080c13]/95 z-20"
+        className="hidden md:flex md:sticky md:top-0 md:h-screen md:w-20 lg:w-60 xl:w-64 shrink-0 flex-col border-r border-white/10 bg-[#080c13] z-20"
       >
         {/* Brand Header inside Sidebar */}
         <div className="flex items-center justify-center lg:justify-start gap-3 px-3 lg:px-5 pt-5 pb-4 border-b border-white/5">
@@ -1175,11 +1162,11 @@ export default function UniqueIndianPlayer({
       </aside>
 
       {/* ========================================================
-          RIGHT CONTENT COLUMN (Top Header + Main Scroll Canvas)
+          RIGHT CONTENT COLUMN (Top Header + Native Window Scroll Canvas)
          ======================================================== */}
-      <div className="relative z-10 flex flex-1 min-w-0 flex-col overflow-hidden">
+      <div className="relative z-10 flex flex-1 min-w-0 flex-col">
         {/* TOP HEADER BAR */}
-        <header className="relative z-20 flex items-center justify-between gap-2 border-b border-white/10 bg-[#090d14]/95 px-3 sm:px-6 lg:px-8 pt-[max(0.6rem,env(safe-area-inset-top))] pb-2.5 sm:py-3 shrink-0">
+        <header className="sticky top-0 z-30 flex items-center justify-between gap-2 border-b border-white/10 bg-[#090d14] px-3 sm:px-6 lg:px-8 pt-[max(0.6rem,env(safe-area-inset-top))] pb-2.5 sm:py-3 shrink-0">
           {/* Mobile Brand Lockup (< md) */}
           <div className="flex md:hidden items-center gap-2 min-w-0">
             <div className="flex size-8 items-center justify-center rounded-xl bg-amber-400/10 p-0.5 border border-amber-400/25 shrink-0">
@@ -1259,8 +1246,8 @@ export default function UniqueIndianPlayer({
           </div>
         </header>
 
-        {/* SCROLLABLE DISCOVERY MAIN CONTENT (Zero-lag native scrolling without GPU layer clipping) */}
-        <main ref={mainScrollRef} className="relative z-10 flex-1 min-h-0 overflow-y-auto px-3 sm:px-6 lg:px-8 py-3 sm:py-5 [-webkit-overflow-scrolling:touch] [overscroll-behavior:contain]">
+        {/* NATIVE WINDOW SCROLL DISCOVERY CONTENT (Zero-blank fling scrolling on Android WebView & Mobile) */}
+        <main ref={mainScrollRef} className="relative z-10 flex-1 px-3 sm:px-6 lg:px-8 pt-3 sm:pt-5 pb-36 md:pb-28">
           <div className="mx-auto w-full max-w-[1440px] space-y-6 sm:space-y-8 pb-6">
             {/* ========================================================
                 ARTIST DETAIL VIEW

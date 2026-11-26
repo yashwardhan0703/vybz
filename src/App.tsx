@@ -126,10 +126,16 @@ function AppLayout() {
     return () => window.removeEventListener('popstate', handlePopState);
   }, [setViewMode]);
 
+  const isStudio = viewMode === 'studio';
+
   return (
     <div
       data-world-id={currentWorld.id}
-      className="relative flex h-[100dvh] w-full flex-col overflow-hidden bg-[#070a10] text-white"
+      className={
+        isStudio
+          ? 'relative flex min-h-[100dvh] w-full flex-col bg-[#070a10] text-white'
+          : 'relative flex h-[100dvh] w-full flex-col overflow-hidden bg-[#070a10] text-white'
+      }
       style={{
         '--world-primary': currentWorld.themeColor || '#f59e0b',
       } as React.CSSProperties}
@@ -137,7 +143,13 @@ function AppLayout() {
       {/* ========================================================
           PRIMARY CONTENT AREA (Never overlapped by player)
          ======================================================== */}
-      <div className="relative flex flex-1 min-h-0 flex-col overflow-hidden">
+      <div
+        className={
+          isStudio
+            ? 'relative flex flex-1 min-w-0 flex-col'
+            : 'relative flex flex-1 min-h-0 flex-col overflow-hidden'
+        }
+      >
         {viewMode === 'studio' && (
           <UniqueIndianPlayer
             key="view-studio"
@@ -168,15 +180,17 @@ function AppLayout() {
       {/* ========================================================
           DOCKED PERSISTENT PLAYER + MOBILE NAVIGATION
          ======================================================== */}
-      <BottomPlayer
-        onPlay={play}
-        onPause={pause}
-        onNext={next}
-        onPrev={prev}
-        onSeek={seekTo}
-      />
+      <div className={isStudio ? 'fixed bottom-0 inset-x-0 z-40 flex flex-col' : 'relative z-40 shrink-0 flex flex-col'}>
+        <BottomPlayer
+          onPlay={play}
+          onPause={pause}
+          onNext={next}
+          onPrev={prev}
+          onSeek={seekTo}
+        />
 
-      {viewMode === 'studio' && <MobileBottomNav />}
+        {isStudio && <MobileBottomNav />}
+      </div>
 
       {/* Modals & Expandable Full-Screen Now Playing Sheet */}
       <NowPlayingSheet

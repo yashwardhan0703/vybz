@@ -167,7 +167,7 @@ export default function BottomPlayer({
   return (
     <section
       aria-label="Now playing"
-      className="relative z-40 shrink-0 border-t border-white/10 bg-[#090d14]/95 backdrop-blur-xl select-none"
+      className="relative z-40 shrink-0 border-t border-white/10 bg-[#090d14] select-none"
     >
       {/* ========================================================
           MOBILE COMPACT MINI-PLAYER (< 768px) — Tap or swipe up to expand
