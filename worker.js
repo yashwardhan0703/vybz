@@ -5,125 +5,125 @@ function getRouteMetadata(pathname) {
 
   if (clean === '/' || clean === '/index.html') {
     return {
-      title: 'VybZ Music – Best Ad-Free Indian Music Player & 10 Curated Vibe Stations',
-      description: 'Stream Daily Top 25 Trending Indian songs, 50 popular artists, and 10 ambient vibe radio stations: Chai Tapri, Sufi Sukoon, Deluxe Salon, and more. 100% free with synced lyrics.',
+      title: 'VybZ Music – Free Music App Without Ads | Chai Tapri & Desi Vibe Radio',
+      description: "Step into India's most nostalgic free music app without ads — tune into Garam Chai Tapri retro classics, Deluxe 90s Salon cassette hits, Hostel Ki Raat 2 AM Maggi jams, and Train Ki Khidki safar melodies, plus Top 25 hits & 50+ artists online without login.",
     };
   }
 
   if (clean === '/top-25' || clean === '/top25') {
     return {
-      title: 'Top 25 Trending Indian Songs Today | VybZ Music',
-      description: "Stream today's official Daily Top 25 Trending Indian songs across Bollywood, Punjabi, and Pop. 100% ad-free with zero buffer.",
+      title: 'Top 25 Trending Indian Songs Today – Listen Free Without Ads | VybZ Music',
+      description: "Listen to today's official Daily Top 25 Trending Indian songs across Bollywood, Punjabi, and Pop online free without login or ads.",
     };
   }
 
   if (clean === '/vibes' || clean === '/vibe') {
     return {
-      title: '10 Curated Indian Mood & Vibe Radio Stations | VybZ Music',
-      description: 'Explore 10 nostalgic Indian ambient vibe radio stations: Chai Tapri, Alfaaz & Ehsaas, Hostel Ki Raat, Train Ki Khidki, Deluxe Salon, Monsoon Baarish, Sufi Sukoon, and more on VybZ Music.',
+      title: '24/7 Hindi Online Radio – 90s Bollywood, Lo-Fi & Sufi Stations | VybZ Music',
+      description: 'Listen to 10 curated Indian ambient vibe radio stations online free without login: Chai Tapri, Deluxe 90s Salon, Corporate Majdoor Hindi Lo-Fi, Sufi Sukoon, Monsoon Baarish & more.',
     };
   }
 
   const vibeMap = {
     'chai-tapri': {
-      title: 'Chai Tapri Radio – Garam Chai & Purane Retro Gaane | VybZ Music',
-      desc: 'Listen to 25 nostalgic Chai Tapri retro songs on VybZ Music. Kishore Kumar, Rafi, and warm desi acoustic vibes.',
+      title: 'Chai Tapri Radio – Garam Kulhad Chai & Purane Retro Gaane | VybZ Music',
+      desc: 'Garam kulhad chai, shaam ki tapri aur Kishore-Rafi ke purane retro gaane — listen to timeless 70s, 80s & 90s Hindi acoustic classics ad-free without login on VybZ Music.',
     },
     'chai_tapri': {
-      title: 'Chai Tapri Radio – Garam Chai & Purane Retro Gaane | VybZ Music',
-      desc: 'Listen to 25 nostalgic Chai Tapri retro songs on VybZ Music. Kishore Kumar, Rafi, and warm desi acoustic vibes.',
+      title: 'Chai Tapri Radio – Garam Kulhad Chai & Purane Retro Gaane | VybZ Music',
+      desc: 'Garam kulhad chai, shaam ki tapri aur Kishore-Rafi ke purane retro gaane — listen to timeless 70s, 80s & 90s Hindi acoustic classics ad-free without login on VybZ Music.',
     },
     'sufi-sukoon': {
       title: 'Sufi & Sukoon Radio – Roohani Ghazal & Qawwali Hits | VybZ Music',
-      desc: 'Stream 25 soul-soothing Sufi ghazals and qawwalis by Nusrat Fateh Ali Khan and Jagjit Singh on VybZ Music.',
+      desc: 'Roohani shaam aur dil ko chhoo jaane wali ghazal-qawwali — stream Nusrat Fateh Ali Khan, Rahat Fateh Ali Khan & Jagjit Singh Sufi hits online free without ads.',
     },
     'sufi-ghazal': {
       title: 'Sufi & Sukoon Radio – Roohani Ghazal & Qawwali Hits | VybZ Music',
-      desc: 'Stream 25 soul-soothing Sufi ghazals and qawwalis by Nusrat Fateh Ali Khan and Jagjit Singh on VybZ Music.',
+      desc: 'Roohani shaam aur dil ko chhoo jaane wali ghazal-qawwali — stream Nusrat Fateh Ali Khan, Rahat Fateh Ali Khan & Jagjit Singh Sufi hits online free without ads.',
     },
     'sufi_ghazal': {
       title: 'Sufi & Sukoon Radio – Roohani Ghazal & Qawwali Hits | VybZ Music',
-      desc: 'Stream 25 soul-soothing Sufi ghazals and qawwalis by Nusrat Fateh Ali Khan and Jagjit Singh on VybZ Music.',
+      desc: 'Roohani shaam aur dil ko chhoo jaane wali ghazal-qawwali — stream Nusrat Fateh Ali Khan, Rahat Fateh Ali Khan & Jagjit Singh Sufi hits online free without ads.',
     },
     'deluxe-salon': {
-      title: 'Deluxe 90s Salon Radio – Haircut, Champi & Retro Bollywood | VybZ Music',
-      desc: '25 retro 90s Bollywood classics for cutting, shaving, and champi vibes on Deluxe Salon Radio by VybZ Music.',
+      title: 'Deluxe 90s Salon Radio – Cutting, Champi & 90s Cassette Bollywood | VybZ Music',
+      desc: 'Naai ki dukaan wala classic cassette era — Kumar Sanu, Udit Narayan & Alka Yagnik ke best 90s & 2000s romantic Bollywood songs for cutting, shaving & Sunday champi vibes.',
     },
     'deluxe_salon': {
-      title: 'Deluxe 90s Salon Radio – Haircut, Champi & Retro Bollywood | VybZ Music',
-      desc: '25 retro 90s Bollywood classics for cutting, shaving, and champi vibes on Deluxe Salon Radio by VybZ Music.',
+      title: 'Deluxe 90s Salon Radio – Cutting, Champi & 90s Cassette Bollywood | VybZ Music',
+      desc: 'Naai ki dukaan wala classic cassette era — Kumar Sanu, Udit Narayan & Alka Yagnik ke best 90s & 2000s romantic Bollywood songs for cutting, shaving & Sunday champi vibes.',
     },
     'monsoon-baarish': {
-      title: 'Monsoon Baarish Radio – Rain & Romantic Bollywood Hits | VybZ Music',
-      desc: 'Stream 25 romantic monsoon and rain Bollywood songs on VybZ Music. 100% ad-free with zero buffer.',
+      title: 'Monsoon Baarish Radio – Rimjhim Rain & Romantic Bollywood Hits | VybZ Music',
+      desc: 'Rimjhim baarish, garam pakode aur soulful romantic Bollywood rain songs — listen to monsoon Hindi hits and baarish gaane online free without login or ads.',
     },
     'monsoon-barish': {
-      title: 'Monsoon Baarish Radio – Rain & Romantic Bollywood Hits | VybZ Music',
-      desc: 'Stream 25 romantic monsoon and rain Bollywood songs on VybZ Music. 100% ad-free with zero buffer.',
+      title: 'Monsoon Baarish Radio – Rimjhim Rain & Romantic Bollywood Hits | VybZ Music',
+      desc: 'Rimjhim baarish, garam pakode aur soulful romantic Bollywood rain songs — listen to monsoon Hindi hits and baarish gaane online free without login or ads.',
     },
     'monsoon_barish': {
-      title: 'Monsoon Baarish Radio – Rain & Romantic Bollywood Hits | VybZ Music',
-      desc: 'Stream 25 romantic monsoon and rain Bollywood songs on VybZ Music. 100% ad-free with zero buffer.',
+      title: 'Monsoon Baarish Radio – Rimjhim Rain & Romantic Bollywood Hits | VybZ Music',
+      desc: 'Rimjhim baarish, garam pakode aur soulful romantic Bollywood rain songs — listen to monsoon Hindi hits and baarish gaane online free without login or ads.',
     },
     'monsoon_baarish': {
-      title: 'Monsoon Baarish Radio – Rain & Romantic Bollywood Hits | VybZ Music',
-      desc: 'Stream 25 romantic monsoon and rain Bollywood songs on VybZ Music. 100% ad-free with zero buffer.',
+      title: 'Monsoon Baarish Radio – Rimjhim Rain & Romantic Bollywood Hits | VybZ Music',
+      desc: 'Rimjhim baarish, garam pakode aur soulful romantic Bollywood rain songs — listen to monsoon Hindi hits and baarish gaane online free without login or ads.',
     },
     'highway-dhaba': {
-      title: 'Late Night Highway Dhaba Radio – Punjabi & Retro Hits | VybZ Music',
-      desc: 'Daler Mehndi, high-energy Punjabi hits, and late-night highway truck radio on VybZ Music.',
+      title: 'Late Night Highway Dhaba Radio – Punjabi & Long Drive Hits | VybZ Music',
+      desc: 'Raat ke 1 baje highway dhaba, tandoori chai aur high-bass Punjabi & retro driving hits — nonstop long-drive Punjabi radio online free without ads.',
     },
     'highway_dhaba': {
-      title: 'Late Night Highway Dhaba Radio – Punjabi & Retro Hits | VybZ Music',
-      desc: 'Daler Mehndi, high-energy Punjabi hits, and late-night highway truck radio on VybZ Music.',
+      title: 'Late Night Highway Dhaba Radio – Punjabi & Long Drive Hits | VybZ Music',
+      desc: 'Raat ke 1 baje highway dhaba, tandoori chai aur high-bass Punjabi & retro driving hits — nonstop long-drive Punjabi radio online free without ads.',
     },
     'corporate-majdoor': {
-      title: 'Corporate Majdoor Radio – Lo-Fi Indian Beats for Work & Study | VybZ Music',
-      desc: 'Indian lo-fi chill beats and soothing instrumental melodies for coding, study, and focus on VybZ Music.',
+      title: 'Corporate Majdoor Radio – 24/7 Hindi Lo-Fi Beats for Work & Study | VybZ Music',
+      desc: 'Office Excel, late-night deadlines aur peaceful Hindi Lo-Fi chill beats — 24/7 Bollywood Lo-Fi radio for coding, study & deep work focus without ads.',
     },
     'corporate_majdoor': {
-      title: 'Corporate Majdoor Radio – Lo-Fi Indian Beats for Work & Study | VybZ Music',
-      desc: 'Indian lo-fi chill beats and soothing instrumental melodies for coding, study, and focus on VybZ Music.',
+      title: 'Corporate Majdoor Radio – 24/7 Hindi Lo-Fi Beats for Work & Study | VybZ Music',
+      desc: 'Office Excel, late-night deadlines aur peaceful Hindi Lo-Fi chill beats — 24/7 Bollywood Lo-Fi radio for coding, study & deep work focus without ads.',
     },
     'corporate-chill': {
-      title: 'Corporate Majdoor Radio – Lo-Fi Indian Beats for Work & Study | VybZ Music',
-      desc: 'Indian lo-fi chill beats and soothing instrumental melodies for coding, study, and focus on VybZ Music.',
+      title: 'Corporate Majdoor Radio – 24/7 Hindi Lo-Fi Beats for Work & Study | VybZ Music',
+      desc: 'Office Excel, late-night deadlines aur peaceful Hindi Lo-Fi chill beats — 24/7 Bollywood Lo-Fi radio for coding, study & deep work focus without ads.',
     },
     'corporate_chill': {
-      title: 'Corporate Majdoor Radio – Lo-Fi Indian Beats for Work & Study | VybZ Music',
-      desc: 'Indian lo-fi chill beats and soothing instrumental melodies for coding, study, and focus on VybZ Music.',
+      title: 'Corporate Majdoor Radio – 24/7 Hindi Lo-Fi Beats for Work & Study | VybZ Music',
+      desc: 'Office Excel, late-night deadlines aur peaceful Hindi Lo-Fi chill beats — 24/7 Bollywood Lo-Fi radio for coding, study & deep work focus without ads.',
     },
     'bartan-time': {
       title: 'Bartan Time Radio – Jhaadu, Pocha & High Energy Dance Hits | VybZ Music',
-      desc: 'Zingaat, London Thumakda, and 25 energetic Bollywood dance hits for daily chores on VybZ Music.',
+      desc: 'Jhaadu, pocha, bartan aur full-volume Bollywood dance hits — turn boring daily chores into a high-energy desi party playlist without ads.',
     },
     'bartan_time': {
       title: 'Bartan Time Radio – Jhaadu, Pocha & High Energy Dance Hits | VybZ Music',
-      desc: 'Zingaat, London Thumakda, and 25 energetic Bollywood dance hits for daily chores on VybZ Music.',
+      desc: 'Jhaadu, pocha, bartan aur full-volume Bollywood dance hits — turn boring daily chores into a high-energy desi party playlist without ads.',
     },
     'alfaaz-ehsaas': {
       title: 'Alfaaz & Ehsaas Radio – Poetic Urdu Indie & Acoustic Hits | VybZ Music',
-      desc: 'Stream 25 viral Urdu indie and acoustic songs like Jhol, Khasara, and Faasle on VybZ Music. 100% ad-free with zero buffer.',
+      desc: 'Gehri shayari, Urdu indie poetry aur soulful acoustic tracks like Jhol, Khasara & Faasle — listen to peaceful indie Hindi-Urdu melodies ad-free without login.',
     },
     'alfaaz_ehsaas': {
       title: 'Alfaaz & Ehsaas Radio – Poetic Urdu Indie & Acoustic Hits | VybZ Music',
-      desc: 'Stream 25 viral Urdu indie and acoustic songs like Jhol, Khasara, and Faasle on VybZ Music. 100% ad-free with zero buffer.',
+      desc: 'Gehri shayari, Urdu indie poetry aur soulful acoustic tracks like Jhol, Khasara & Faasle — listen to peaceful indie Hindi-Urdu melodies ad-free without login.',
     },
     'hostel-ki-raat': {
-      title: 'Hostel Ki Raat Radio – Maggi Jam & College Nostalgia Songs | VybZ Music',
-      desc: 'Stream 25 nostalgic college hostel songs, midnight guitar jams, and Lucky Ali classics on VybZ Music.',
+      title: 'Hostel Ki Raat Radio – 2 AM Maggi Jam & College Nostalgia Songs | VybZ Music',
+      desc: '2 AM Maggi, hostel ki chhat, acoustic guitar jamming aur Lucky Ali classics — stream nostalgic college yaari, friendship & late-night Hindi songs online free.',
     },
     'hostel_ki_raat': {
-      title: 'Hostel Ki Raat Radio – Maggi Jam & College Nostalgia Songs | VybZ Music',
-      desc: 'Stream 25 nostalgic college hostel songs, midnight guitar jams, and Lucky Ali classics on VybZ Music.',
+      title: 'Hostel Ki Raat Radio – 2 AM Maggi Jam & College Nostalgia Songs | VybZ Music',
+      desc: '2 AM Maggi, hostel ki chhat, acoustic guitar jamming aur Lucky Ali classics — stream nostalgic college yaari, friendship & late-night Hindi songs online free.',
     },
     'train-ki-khidki': {
       title: 'Train Ki Khidki Radio – Window Seat Safar & Travel Classics | VybZ Music',
-      desc: 'Stream 25 nostalgic train journey classics like Chaiyya Chaiyya, Yun Hi Chala Chal, and Kishore Kumar travel hits on VybZ Music.',
+      desc: 'Sleeper coach ki window seat, guzarte ped aur Chaiyya Chaiyya — stream evergreen Indian train journey, safar & road trip Bollywood songs ad-free.',
     },
     'train_ki_khidki': {
       title: 'Train Ki Khidki Radio – Window Seat Safar & Travel Classics | VybZ Music',
-      desc: 'Stream 25 nostalgic train journey classics like Chaiyya Chaiyya, Yun Hi Chala Chal, and Kishore Kumar travel hits on VybZ Music.',
+      desc: 'Sleeper coach ki window seat, guzarte ped aur Chaiyya Chaiyya — stream evergreen Indian train journey, safar & road trip Bollywood songs ad-free.',
     },
   };
 
@@ -177,8 +177,8 @@ function getRouteMetadata(pathname) {
 
   if (clean === '/download' || clean === '/app') {
     return {
-      title: 'Download VybZ Music APK for Android (v3.5.2) – Free Ad-Free Music Player',
-      description: 'Download official VybZ Music Android APK (v3.5.2 • 10.2 MB). 100% ad-free, instant 0.1s offline launch, 60 FPS smooth playback, continuous background audio, and synced karaoke lyrics.',
+      title: 'Download VybZ Music APK – Free Music App for Android Without Ads',
+      description: 'Download official VybZ Music Android APK (v3.5.2 • 10.2 MB). Free music app for Android without ads, no login required, continuous background playback, and synced lyrics.',
     };
   }
 
@@ -230,6 +230,7 @@ function getRouteMetadata(pathname) {
     return {
       title: `${formatted} | VybZ Music`,
       description: `Explore ${formatted} on VybZ Music – Indian Music Player & Ambient Vibe Hub.`,
+      isUnknown: true,
     };
   }
 
@@ -1209,6 +1210,31 @@ export default {
       // B. Universal SPA Clean Routes (/, /vibes, /artists, /top-25, /vibes/chai-tapri, /artist/..., etc.)
       // Always serve index.html directly with 200 OK without relying on 404 fallback or 307 redirect!
       if (!isApi && (request.method === 'GET' || request.method === 'HEAD')) {
+        // Enforce single canonical HTTPS origin (http:// and www. -> https://vybzmusic.online)
+        // Safe for APK/API because .apk, /api/*, and static assets are already handled above.
+        if (url.protocol === 'http:' || url.hostname === 'www.vybzmusic.online') {
+          return Response.redirect(`https://vybzmusic.online${url.pathname}${url.search}`, 301);
+        }
+
+        // Clean broken sitemap/XML tag URLs (e.g. /artist/lucky-ali%3C/loc%3E) -> 301 to clean URL
+        const lowerPath = pathname.toLowerCase();
+        if (lowerPath.includes('</loc>') || lowerPath.includes('%3c/loc%3e') || lowerPath.includes('%3c') || lowerPath.includes('<')) {
+          const cleanedPath = pathname.replace(/(%3c\/loc%3e|<\/loc>|%3c.*|<.*)/gi, '').replace(/\/+$/, '') || '/';
+          return Response.redirect(`https://vybzmusic.online${cleanedPath}`, 301);
+        }
+
+        // Redirect common typos to canonical routes
+        const typoRedirects = {
+          '/downloads': '/download',
+          '/vybz.app': '/download',
+          '/vybzmusic.apk': '/download',
+          '/vibess': '/vibes',
+        };
+        const cleanLower = lowerPath.replace(/\/+$/, '') || '/';
+        if (typoRedirects[cleanLower]) {
+          return Response.redirect(`https://vybzmusic.online${typoRedirects[cleanLower]}`, 301);
+        }
+
         const indexReq = new Request(new URL('/', request.url), { method: 'GET' });
         const indexRes = await env.ASSETS.fetch(indexReq);
         let html = await indexRes.text();
@@ -1246,7 +1272,36 @@ export default {
             .replace(
               /<link rel="canonical" href=".*?" \/>/,
               `<link rel="canonical" href="https://vybzmusic.online${canonicalPath}" />`
+            )
+            .replace(
+              /<h1 id="seo-main-h1">.*?<\/h1>/,
+              `<h1 id="seo-main-h1">${meta.title}</h1>`
+            )
+            .replace(
+              /<p id="seo-main-desc">[\s\S]*?<\/p>/,
+              `<p id="seo-main-desc">${meta.description}</p>`
             );
+        }
+
+        // Prevent indexing of personal localStorage-only pages and unknown/garbage URLs
+        if (canonicalPath === '/playlists' || canonicalPath === '/liked' || (meta && meta.isUnknown)) {
+          html = html.replace('</head>', '<meta name="robots" content="noindex, follow" />\n</head>');
+        }
+
+        if (canonicalPath.startsWith('/vibes/') && meta && !meta.isUnknown) {
+          const vibeSchema = `<script type="application/ld+json">
+${JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'MusicPlaylist',
+  name: meta.title,
+  description: meta.description,
+  url: `https://vybzmusic.online${canonicalPath}`,
+  numTracks: 25,
+  inLanguage: 'hi-IN',
+})}
+</script>
+</head>`;
+          html = html.replace('</head>', vibeSchema);
         }
 
         if (canonicalPath === '/download' || canonicalPath === '/app') {

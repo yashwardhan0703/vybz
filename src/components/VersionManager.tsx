@@ -17,7 +17,7 @@ export default function VersionManager() {
     if (!hasSeen) {
       const timer = window.setTimeout(() => {
         setShowWhatsNew(true);
-      }, 800);
+      }, 4500);
       return () => clearTimeout(timer);
     }
   }, []);

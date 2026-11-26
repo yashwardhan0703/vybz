@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef, lazy, Suspense } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import {
   Play,
@@ -42,8 +42,10 @@ import {
   findWorldBySlug,
 } from '../utils/navigation';
 import AmbientMixer from './AmbientMixer';
-import DownloadLandingPage from './DownloadLandingPage';
-import LegalInfoModal, { type LegalTab } from './LegalInfoModal';
+import type { LegalTab } from './LegalInfoModal';
+
+const DownloadLandingPage = lazy(() => import('./DownloadLandingPage'));
+const LegalInfoModal = lazy(() => import('./LegalInfoModal'));
 
 interface UniqueIndianPlayerProps {
   onPlayCustomVideoId: (
@@ -1004,12 +1006,14 @@ export default function UniqueIndianPlayer({
 
   if (isDownloadPage) {
     return (
-      <DownloadLandingPage
-        onBackToPlayer={() => {
-          setIsDownloadPage(false);
-          navigateTo('/', { replace: false });
-        }}
-      />
+      <Suspense fallback={null}>
+        <DownloadLandingPage
+          onBackToPlayer={() => {
+            setIsDownloadPage(false);
+            navigateTo('/', { replace: false });
+          }}
+        />
+      </Suspense>
     );
   }
 
@@ -2972,7 +2976,7 @@ export default function UniqueIndianPlayer({
                       </div>
                     </div>
                     <p className="text-[0.72rem] text-white/50 leading-relaxed">
-                      Ad-free modern Indian music player. Daily Top 25 trending hits, 50+ iconic Bollywood artists, and 7 ambient vibe stations.
+                      India's nostalgic free music app without ads. Garam Chai Tapri retro classics, Deluxe 90s Salon cassette hits, Hostel Ki Raat 2 AM jams, Train Ki Khidki safar songs, Daily Top 25 hits & 50+ artists — online without login.
                     </p>
                     <div className="flex items-center gap-2 text-[0.68rem] text-amber-400/90 font-medium">
                       <span>⚡ 100% Ad-Free</span>
@@ -2989,18 +2993,24 @@ export default function UniqueIndianPlayer({
                       Mood & Vibe Stations ({WORLDS.length})
                     </h3>
                     <ul className="space-y-1 text-[0.72rem] text-white/50">
-                      {WORLDS.map((w) => (
-                        <li key={`footer-vibe-${w.id}`}>
-                          <button
-                            type="button"
-                            onClick={() => handlePlayVibeStation(w, false)}
-                            className="hover:text-amber-300 transition-colors text-left flex items-center gap-1.5"
-                          >
-                            <span>{getVibeIcon(w)}</span>
-                            <span>{w.nameHindi} ({w.name})</span>
-                          </button>
-                        </li>
-                      ))}
+                      {WORLDS.map((w) => {
+                        const slug = WORLD_ID_TO_SLUG[w.id] || w.id.replace(/_/g, '-');
+                        return (
+                          <li key={`footer-vibe-${w.id}`}>
+                            <a
+                              href={`/vibes/${slug}`}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                handlePlayVibeStation(w, false);
+                              }}
+                              className="hover:text-amber-300 transition-colors text-left flex items-center gap-1.5"
+                            >
+                              <span>{getVibeIcon(w)}</span>
+                              <span>{w.nameHindi} ({w.name})</span>
+                            </a>
+                          </li>
+                        );
+                      })}
                     </ul>
                   </div>
 
@@ -3012,13 +3022,16 @@ export default function UniqueIndianPlayer({
                     <ul className="grid grid-cols-2 gap-x-2 gap-y-1 text-[0.72rem] text-white/50">
                       {ARTISTS_CATALOG.slice(0, 10).map((a) => (
                         <li key={`footer-art-${a.id}`}>
-                          <button
-                            type="button"
-                            onClick={() => openArtist(a)}
-                            className="hover:text-amber-300 transition-colors text-left truncate w-full"
+                          <a
+                            href={`/artist/${a.id}`}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              openArtist(a);
+                            }}
+                            className="hover:text-amber-300 transition-colors text-left truncate block w-full"
                           >
                             {a.name}
-                          </button>
+                          </a>
                         </li>
                       ))}
                     </ul>
@@ -3061,45 +3074,60 @@ export default function UniqueIndianPlayer({
                 <div className="border-t border-white/5 pt-4 flex flex-col gap-3 text-[0.68rem] text-white/35">
                   {/* Row 1: Legal & Information Links (Fully responsive: centered & wrapped on mobile, neat row on desktop) */}
                   <div className="flex flex-wrap items-center justify-center sm:justify-start gap-x-3 sm:gap-x-4 gap-y-1.5 text-white/45">
-                    <button
-                      type="button"
-                      onClick={() => openLegalModal('about')}
+                    <a
+                      href="/about"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        openLegalModal('about');
+                      }}
                       className="hover:text-amber-300 transition-colors cursor-pointer"
                     >
                       About VybZ
-                    </button>
+                    </a>
                     <span className="text-white/20 hidden sm:inline">•</span>
-                    <button
-                      type="button"
-                      onClick={() => openLegalModal('faq')}
+                    <a
+                      href="/faq"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        openLegalModal('faq');
+                      }}
                       className="hover:text-amber-300 transition-colors cursor-pointer"
                     >
                       FAQ & Devices
-                    </button>
+                    </a>
                     <span className="text-white/20 hidden sm:inline">•</span>
-                    <button
-                      type="button"
-                      onClick={() => openLegalModal('privacy')}
+                    <a
+                      href="/privacy"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        openLegalModal('privacy');
+                      }}
                       className="hover:text-amber-300 transition-colors cursor-pointer"
                     >
                       Privacy Policy
-                    </button>
+                    </a>
                     <span className="text-white/20 hidden sm:inline">•</span>
-                    <button
-                      type="button"
-                      onClick={() => openLegalModal('terms')}
+                    <a
+                      href="/terms"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        openLegalModal('terms');
+                      }}
                       className="hover:text-amber-300 transition-colors cursor-pointer"
                     >
                       Terms of Service
-                    </button>
+                    </a>
                     <span className="text-white/20 hidden sm:inline">•</span>
-                    <button
-                      type="button"
-                      onClick={() => openLegalModal('disclaimer')}
+                    <a
+                      href="/dmca"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        openLegalModal('disclaimer');
+                      }}
                       className="hover:text-amber-300 transition-colors cursor-pointer"
                     >
                       DMCA & Disclaimer
-                    </button>
+                    </a>
                   </div>
 
                   {/* Row 2: Copyright & Badges */}
@@ -3110,16 +3138,17 @@ export default function UniqueIndianPlayer({
                       <span>•</span>
                       <span>No Ads</span>
                       <span>•</span>
-                      <button
-                        type="button"
-                        onClick={() => {
+                      <a
+                        href="/download"
+                        onClick={(e) => {
+                          e.preventDefault();
                           setIsDownloadPage(true);
                           navigateTo('/download');
                         }}
                         className="hover:text-amber-300 underline transition-colors"
                       >
                         Android APK (v3.5.2)
-                      </button>
+                      </a>
                     </div>
                   </div>
                 </div>
@@ -3406,12 +3435,16 @@ export default function UniqueIndianPlayer({
         </div>
       )}
       {/* Legal & Info Transparency Modal */}
-      <LegalInfoModal
-        isOpen={!!legalModalTab}
-        activeTab={legalModalTab || 'about'}
-        onTabChange={openLegalModal}
-        onClose={closeLegalModal}
-      />
+      {legalModalTab && (
+        <Suspense fallback={null}>
+          <LegalInfoModal
+            isOpen={!!legalModalTab}
+            activeTab={legalModalTab || 'about'}
+            onTabChange={openLegalModal}
+            onClose={closeLegalModal}
+          />
+        </Suspense>
+      )}
     </div>
   );
 }
