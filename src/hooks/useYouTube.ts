@@ -752,143 +752,147 @@ export function useYouTube(containerRef: React.RefObject<HTMLDivElement | null>)
     };
   }, [setIsPlaying, setCurrentTime]);
 
-  // Initialize YT Player once
+  // Initialize YT Player once (deferred 800ms so initial Home screen paints & scrolls first without WebView IFrame stall)
   useEffect(() => {
     let isCancelled = false;
     const container = containerRef.current;
 
-    loadYouTubeAPI().then(() => {
+    const initTimer = window.setTimeout(() => {
       if (isCancelled || !container) return;
+      loadYouTubeAPI().then(() => {
+        if (isCancelled || !container) return;
 
-      container.innerHTML = '';
-      const mountNode = document.createElement('div');
-      mountNode.style.width = '100%';
-      mountNode.style.height = '100%';
-      container.appendChild(mountNode);
+        container.innerHTML = '';
+        const mountNode = document.createElement('div');
+        mountNode.style.width = '100%';
+        mountNode.style.height = '100%';
+        container.appendChild(mountNode);
 
-      const persisted = getStoredPlaybackState();
-      const hasSavedTrack = !!(persisted && persisted.currentTrackId);
-      const world = currentWorldRef.current;
-      const trackIds = world.tracks?.map((t) => t.id) ?? [];
-      const firstVideoId = hasSavedTrack ? persisted.currentTrackId : trackIds[0] || 'P1fIdFRnfqw';
-      const startSec = hasSavedTrack ? Math.max(0, Math.floor(persisted.currentTime)) : 0;
+        const persisted = getStoredPlaybackState();
+        const hasSavedTrack = !!(persisted && persisted.currentTrackId);
+        const world = currentWorldRef.current;
+        const trackIds = world.tracks?.map((t) => t.id) ?? [];
+        const firstVideoId = hasSavedTrack ? persisted.currentTrackId : trackIds[0] || 'P1fIdFRnfqw';
+        const startSec = hasSavedTrack ? Math.max(0, Math.floor(persisted.currentTime)) : 0;
 
-      const playerOptions: YT.PlayerOptions = {
-        width: '100%',
-        height: '100%',
-        videoId: firstVideoId,
-        host: 'https://www.youtube.com',
-        playerVars: {
-          autoplay: 0 as YT.AutoPlay,
-          playsinline: 1 as YT.PlaysInline,
-          rel: 0,
-          controls: 0,
-          disablekb: 1,
-          fs: 0,
-          modestbranding: 1,
-          enablejsapi: 1,
-          start: startSec,
-        },
-        events: {
-          onReady: (e) => {
-            if (isCancelled) return;
-            playerRef.current = e.target;
-            isReadyRef.current = true;
-
-            try {
-              e.target.setVolume(volumeRef.current);
-              if (isMutedRef.current) {
-                e.target.mute();
-              } else {
-                e.target.unMute();
-              }
-              if (isShuffleRef.current) {
-                e.target.setShuffle(true);
-              }
-
-              if (hasSavedTrack) {
-                // Restore custom track state and queue
-                activeCustomTrackRef.current = {
-                  videoId: persisted.currentTrackId,
-                  title: persisted.trackTitle,
-                  artist: persisted.trackArtist,
-                  thumbnail: persisted.trackThumbnail,
-                  duration: persisted.duration,
-                };
-                if (persisted.queue && persisted.queue.length > 0) {
-                  queueRef.current = persisted.queue;
-                  queueIndexRef.current = persisted.queueIndex || 0;
-                }
-                isVibeRadioModeRef.current = persisted.isVibeRadioMode || false;
-                lastPositionRef.current = persisted.currentTime;
-
-                e.target.cueVideoById({
-                  videoId: persisted.currentTrackId,
-                  startSeconds: persisted.currentTime,
-                });
-
-                setTrackInfo(
-                  persisted.queueIndex || 0,
-                  persisted.queue?.length || 1,
-                  persisted.trackTitle,
-                  persisted.trackArtist,
-                  persisted.trackThumbnail,
-                  persisted.currentTrackId
-                );
-                setCurrentTime(persisted.currentTime);
-                if (persisted.duration > 0) {
-                  setDuration(persisted.duration);
-                }
-                syncMediaSession(
-                  persisted.trackTitle,
-                  persisted.trackArtist,
-                  persisted.trackThumbnail,
-                  persisted.duration,
-                  persisted.currentTime
-                );
-              } else {
-                const worldTracks = currentWorldRef.current?.tracks || [];
-                const worldQueue: QueueTrack[] = worldTracks.map((t) => ({
-                  id: t.id,
-                  title: t.title,
-                  artist: t.artist || currentWorldRef.current.name,
-                  thumbnail: `https://img.youtube.com/vi/${t.id}/mqdefault.jpg`,
-                }));
-                queueRef.current = worldQueue;
-                queueIndexRef.current = 0;
-                if (worldQueue.length > 0) {
-                  activeCustomTrackRef.current = {
-                    videoId: worldQueue[0].id,
-                    title: worldQueue[0].title,
-                    artist: worldQueue[0].artist,
-                    thumbnail: worldQueue[0].thumbnail,
-                  };
-                }
-                setPlaybackQueue(worldQueue, 0);
-
-                // Cue entire station's playlist
-                if (trackIds.length > 0) {
-                  e.target.cuePlaylist(trackIds, 0, 0);
-                }
-                setTimeout(updateTrackMeta, 400);
-              }
-
-              if (pendingTrackRef.current) {
-                const pt = pendingTrackRef.current;
-                pendingTrackRef.current = null;
-                playCustomVideoId(
-                  pt.videoId,
-                  pt.title,
-                  pt.artist,
-                  pt.thumbnail,
-                  pt.contextQueue,
-                  pt.queueStartIndex,
-                  pt.isVibeRadioMode,
-                  pt.initialDuration
-                );
-              }
-            } catch {}
+        const playerOptions: YT.PlayerOptions = {
+          width: '100%',
+          height: '100%',
+          videoId: firstVideoId,
+          host: 'https://www.youtube.com',
+          playerVars: {
+            autoplay: 0 as YT.AutoPlay,
+            playsinline: 1 as YT.PlaysInline,
+            rel: 0,
+            controls: 0,
+            disablekb: 1,
+            fs: 0,
+            modestbranding: 1,
+            enablejsapi: 1,
+            start: startSec,
           },
+          events: {
+            onReady: (e) => {
+              if (isCancelled) return;
+              playerRef.current = e.target;
+              isReadyRef.current = true;
+
+              try {
+                e.target.setVolume(volumeRef.current);
+                if (isMutedRef.current) {
+                  e.target.mute();
+                } else {
+                  e.target.unMute();
+                }
+                if (isShuffleRef.current) {
+                  e.target.setShuffle(true);
+                }
+
+                if (hasSavedTrack) {
+                  // Restore custom track state and queue
+                  activeCustomTrackRef.current = {
+                    videoId: persisted.currentTrackId,
+                    title: persisted.trackTitle,
+                    artist: persisted.trackArtist,
+                    thumbnail: persisted.trackThumbnail,
+                    duration: persisted.duration,
+                  };
+                  if (persisted.queue && persisted.queue.length > 0) {
+                    queueRef.current = persisted.queue;
+                    queueIndexRef.current = persisted.queueIndex || 0;
+                  }
+                  isVibeRadioModeRef.current = persisted.isVibeRadioMode || false;
+                  lastPositionRef.current = persisted.currentTime;
+
+                  e.target.cueVideoById({
+                    videoId: persisted.currentTrackId,
+                    startSeconds: persisted.currentTime,
+                  });
+
+                  setTrackInfo(
+                    persisted.queueIndex || 0,
+                    persisted.queue?.length || 1,
+                    persisted.trackTitle,
+                    persisted.trackArtist,
+                    persisted.trackThumbnail,
+                    persisted.currentTrackId
+                  );
+                  setCurrentTime(persisted.currentTime);
+                  if (persisted.duration > 0) {
+                    setDuration(persisted.duration);
+                  }
+                  syncMediaSession(
+                    persisted.trackTitle,
+                    persisted.trackArtist,
+                    persisted.trackThumbnail,
+                    persisted.duration,
+                    persisted.currentTime
+                  );
+                } else {
+                  const worldTracks = currentWorldRef.current?.tracks || [];
+                  const worldQueue: QueueTrack[] = worldTracks.map((t) => ({
+                    id: t.id,
+                    title: t.title,
+                    artist: t.artist || currentWorldRef.current.name,
+                    thumbnail: `https://img.youtube.com/vi/${t.id}/mqdefault.jpg`,
+                  }));
+                  queueRef.current = worldQueue;
+                  queueIndexRef.current = 0;
+                  if (worldQueue.length > 0) {
+                    activeCustomTrackRef.current = {
+                      videoId: worldQueue[0].id,
+                      title: worldQueue[0].title,
+                      artist: worldQueue[0].artist,
+                      thumbnail: worldQueue[0].thumbnail,
+                    };
+                  }
+                  setPlaybackQueue(worldQueue, 0);
+
+                  // Cue entire station's playlist
+                  if (trackIds.length > 0) {
+                    e.target.cuePlaylist(trackIds, 0, 0);
+                  }
+                  setTimeout(updateTrackMeta, 400);
+                }
+
+                if (pendingTrackRef.current) {
+                  const pt = pendingTrackRef.current;
+                  pendingTrackRef.current = null;
+                  playCustomVideoId(
+                    pt.videoId,
+                    pt.title,
+                    pt.artist,
+                    pt.thumbnail,
+                    pt.contextQueue,
+                    pt.queueStartIndex,
+                    pt.isVibeRadioMode,
+                    pt.initialDuration
+                  );
+                } else if (userIntentPlayingRef.current) {
+                  e.target.playVideo();
+                }
+              } catch {}
+            },
           onStateChange: (e: YT.OnStateChangeEvent) => {
             const state = e.data;
             syncPlayerTimes();
@@ -1050,11 +1054,13 @@ export function useYouTube(containerRef: React.RefObject<HTMLDivElement | null>)
         },
       };
 
-      new window.YT.Player(mountNode, playerOptions);
-    });
+        new window.YT.Player(mountNode, playerOptions);
+      });
+    }, 800);
 
     return () => {
       isCancelled = true;
+      window.clearTimeout(initTimer);
       stopProgressInterval();
       try {
         playerRef.current?.destroy();
@@ -1201,6 +1207,7 @@ export function useYouTube(containerRef: React.RefObject<HTMLDivElement | null>)
     ) => {
       const p = playerRef.current;
       if (!p) {
+        ensureSilentAudio();
         pendingTrackRef.current = {
           videoId,
           title,

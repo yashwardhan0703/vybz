@@ -1067,7 +1067,7 @@ export default function UniqueIndianPlayer({
             <img
               src="/logo.png"
               alt="vybz logo"
-              className="size-full object-contain filter drop-shadow-[0_2px_8px_rgba(245,158,11,0.5)]"
+              className="size-full object-contain"
             />
           </div>
           <div className="hidden lg:block min-w-0">
@@ -1173,7 +1173,7 @@ export default function UniqueIndianPlayer({
               <img
                 src="/logo.png"
                 alt="vybz logo"
-                className="size-full object-contain filter drop-shadow-[0_2px_6px_rgba(245,158,11,0.5)]"
+                className="size-full object-contain"
               />
             </div>
             <h1 className="text-lg font-black tracking-tight text-white truncate">
@@ -2158,7 +2158,7 @@ export default function UniqueIndianPlayer({
                                   <img
                                     src={song.thumbnail}
                                     alt={song.title}
-                                    loading="lazy"
+                                    loading={activeCategory === 'all' ? 'eager' : 'lazy'}
                                     decoding="async"
                                     onError={handleArtworkError}
                                     className="size-full object-cover"
@@ -2351,10 +2351,17 @@ export default function UniqueIndianPlayer({
                                 : 'border-white/10 bg-[#0f1522] hover:border-amber-400/40 hover:bg-[#131b2a] shadow-md'
                             }`}
                           >
-                            {/* Background ambient subtle image accent */}
-                            <div
-                              className="pointer-events-none absolute inset-0 opacity-20 group-hover:opacity-35 transition-opacity bg-cover bg-center"
-                              style={{ backgroundImage: `url(${world.bg})` }}
+                            {/* Background ambient subtle image accent (eagerly decoded for instant below-fold paint) */}
+                            <img
+                              src={world.bg}
+                              alt=""
+                              aria-hidden="true"
+                              loading="eager"
+                              decoding="async"
+                              onError={(e) => {
+                                e.currentTarget.style.display = 'none';
+                              }}
+                              className="pointer-events-none absolute inset-0 size-full object-cover opacity-20 group-hover:opacity-35 transition-opacity"
                             />
                             <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#0f1522] via-[#0f1522]/85 to-transparent" />
 
