@@ -1038,7 +1038,7 @@ export default function UniqueIndianPlayer({
 
   if (isDownloadPage) {
     return (
-      <Suspense fallback={null}>
+      <Suspense fallback={<div className="min-h-[100dvh] w-full bg-[#070a10]" />}>
         <DownloadLandingPage
           onBackToPlayer={() => {
             setIsDownloadPage(false);
@@ -1071,9 +1071,9 @@ export default function UniqueIndianPlayer({
             />
           </div>
           <div className="hidden lg:block min-w-0">
-            <h1 className="text-xl font-black tracking-tight text-white leading-none">
+            <span className="block text-xl font-black tracking-tight text-white leading-none">
               vybz <span className="text-amber-400">music</span>
-            </h1>
+            </span>
             <p className="mt-1 font-mono text-[0.6rem] uppercase tracking-widest text-white/45 truncate">
               Indian Audio Hub
             </p>
@@ -1176,9 +1176,9 @@ export default function UniqueIndianPlayer({
                 className="size-full object-contain"
               />
             </div>
-            <h1 className="text-lg font-black tracking-tight text-white truncate">
+            <span className="block text-lg font-black tracking-tight text-white truncate">
               vybz <span className="text-amber-400">music</span>
-            </h1>
+            </span>
           </div>
 
           {/* Search Bar Trigger (md+ spacious bar, compact icon on < md) */}
@@ -1305,12 +1305,12 @@ export default function UniqueIndianPlayer({
                         </span>
                       )}
                     </div>
-                    <h2
+                    <h1
                       translate="no"
                       className="notranslate mt-2 text-2xl sm:text-4xl font-black text-white leading-tight break-words"
                     >
                       {selectedArtist.name}
-                    </h2>
+                    </h1>
                     <p className="mt-1 text-xs sm:text-sm text-amber-300/90 font-medium">{selectedArtist.tagline}</p>
                     <p className="mt-2 text-xs sm:text-[0.82rem] text-white/70 max-w-2xl leading-relaxed">
                       Stream {selectedArtist.name}&apos;s all-time Top 20 blockbuster hits, Bollywood classics, romantic anthems, and iconic melodies in high-definition ad-free audio.
@@ -1648,7 +1648,7 @@ export default function UniqueIndianPlayer({
                         </span>
                       </div>
 
-                      <h2
+                      <h1
                         translate="no"
                         className="notranslate mt-2 text-2xl sm:text-4xl font-black text-white leading-tight break-words"
                       >
@@ -1656,7 +1656,7 @@ export default function UniqueIndianPlayer({
                         <span className="ml-2 text-lg sm:text-2xl text-amber-400 font-semibold">
                           ({selectedVibeWorld.name})
                         </span>
-                      </h2>
+                      </h1>
 
                       <p className="mt-1 text-xs sm:text-sm text-amber-300/90 font-medium">
                         {selectedVibeWorld.subtitle}
@@ -2016,9 +2016,9 @@ export default function UniqueIndianPlayer({
                           <TrendingUp size={13} className="text-amber-400" />
                           <span>Official VybZ India Chart • Top 25 Daily</span>
                         </div>
-                        <h2 className="mt-2 text-xl sm:text-3xl font-black text-white leading-tight tracking-tight">
+                        <h1 className="mt-2 text-xl sm:text-3xl font-black text-white leading-tight tracking-tight">
                           Top 25 Trending on vybz
-                        </h2>
+                        </h1>
                         <p className="mt-1 text-xs sm:text-sm text-white/75 max-w-xl leading-relaxed">
                           Official real-time Indian music charts streaming today&apos;s top daily trending songs across Bollywood, Punjabi, and Indian Pop. 100% ad-free with zero buffer.
                         </p>
@@ -2297,9 +2297,9 @@ export default function UniqueIndianPlayer({
                             <Radio size={14} />
                             <span>Desi Ambient Radios • {WORLDS.length} Iconic Indian Atmospheres</span>
                           </div>
-                          <h2 className="mt-1 sm:mt-2 text-xl sm:text-3xl font-black text-white leading-tight">
+                          <h1 className="mt-1 sm:mt-2 text-xl sm:text-3xl font-black text-white leading-tight">
                             Mood & Vibe Stations
-                          </h2>
+                          </h1>
                           <p className="mt-1 text-xs sm:text-sm text-white/75 leading-relaxed">
                             Handcrafted aesthetic soundscapes and nostalgic music for every Indian mood. Tap any station to start audio and enter its full-screen visual world.
                           </p>
@@ -2382,7 +2382,17 @@ export default function UniqueIndianPlayer({
                               </div>
 
                               <h3 className="mt-2.5 text-sm sm:text-base font-bold text-white leading-snug group-hover:text-amber-300 transition-colors">
-                                {world.nameHindi}
+                                <a
+                                  href={`/vibes/${WORLD_ID_TO_SLUG[world.id] || world.id.replace(/_/g, '-')}`}
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    handlePlayVibeStation(world, false);
+                                  }}
+                                  className="hover:text-amber-300 transition-colors"
+                                >
+                                  {world.nameHindi}
+                                </a>
                               </h3>
                               <p className="font-mono text-[0.65rem] sm:text-xs text-amber-400/90 font-medium truncate mt-0.5">
                                 {world.name}
@@ -2460,9 +2470,9 @@ export default function UniqueIndianPlayer({
                             <Mic2 size={14} />
                             <span>Indian Music Legends • {ARTISTS_CATALOG.length} Curated Artists</span>
                           </div>
-                          <h2 className="mt-1 sm:mt-2 text-xl sm:text-3xl font-black text-white leading-tight">
+                          <h1 className="mt-1 sm:mt-2 text-xl sm:text-3xl font-black text-white leading-tight">
                             Popular Indian Artists
-                          </h2>
+                          </h1>
                           <p className="mt-1 text-xs sm:text-sm text-white/75 leading-relaxed">
                             From Bollywood playback legends and classical masters to modern Punjabi icons and Indie sensations. Tap any artist to explore their 20 top curated hits.
                           </p>
@@ -2542,7 +2552,17 @@ export default function UniqueIndianPlayer({
                                 translate="no"
                                 className="notranslate truncate text-xs sm:text-sm font-bold text-white group-hover:text-amber-300 transition-colors"
                               >
-                                {artist.name}
+                                <a
+                                  href={`/artist/${artist.id}`}
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    openArtist(artist);
+                                  }}
+                                  className="hover:text-amber-300 transition-colors"
+                                >
+                                  {artist.name}
+                                </a>
                               </h3>
                               <p className="mt-0.5 text-[0.65rem] sm:text-[0.7rem] text-white/50 font-medium">
                                 Artist
@@ -3107,6 +3127,24 @@ export default function UniqueIndianPlayer({
                 </div>
 
                 <div className="border-t border-white/5 pt-4 flex flex-col gap-3 text-[0.68rem] text-white/35">
+                  {/* Complete Crawlable Artist Directory Links */}
+                  <nav aria-label="All 50 Indian Artists" className="flex flex-wrap items-center justify-center sm:justify-start gap-x-2.5 gap-y-1 text-[0.62rem] text-white/35 leading-relaxed">
+                    <span className="font-mono uppercase tracking-wider text-white/45 mr-1">All Artists:</span>
+                    {ARTISTS_CATALOG.map((a) => (
+                      <a
+                        key={`dir-art-${a.id}`}
+                        href={`/artist/${a.id}`}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          openArtist(a);
+                        }}
+                        className="hover:text-amber-300 transition-colors"
+                      >
+                        {a.name}
+                      </a>
+                    ))}
+                  </nav>
+
                   {/* Row 1: Legal & Information Links (Fully responsive: centered & wrapped on mobile, neat row on desktop) */}
                   <div className="flex flex-wrap items-center justify-center sm:justify-start gap-x-3 sm:gap-x-4 gap-y-1.5 text-white/45">
                     <a

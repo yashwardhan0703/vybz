@@ -1,6 +1,7 @@
 import { fetchLiveIndiaTop25 } from './src/utils/ytTop25Fetcher.js';
 import { ARTISTS_CATALOG } from './src/data/artistsData.ts';
 import { THEMES } from './src/data/worlds.ts';
+import { TOP_25_TRENDING_INDIAN } from './src/data/trendingSongs.ts';
 
 const SLUG_TO_WORLD_ID = {
   'sufi-sukoon': 'sufi_ghazal',
@@ -168,12 +169,24 @@ function getRouteBodyHtml(canonicalPath, meta) {
   }
 
   if (clean === '/top-25' || clean === '/top25') {
+    const top25Html = TOP_25_TRENDING_INDIAN.map((t) => {
+      const movieStr = t.movie ? ` (${escapeHtml(t.movie)})` : '';
+      const durStr = t.duration ? ` <small>(${escapeHtml(t.duration)})</small>` : '';
+      return `<li>#${t.rank}. <strong>${escapeHtml(t.title)}</strong>${movieStr} — ${escapeHtml(t.singers)}${durStr}</li>`;
+    }).join('\n');
+
     return `<main id="seo-main-body">
       <article>
-        <h2>Daily Top 25 Trending Indian Songs Chart</h2>
-        <p>Updated automatically every 24 hours from India's top Bollywood, Punjabi, and Indie music charts. Stream every track ad-free with synchronized lyrics and zero interruptions.</p>
-        <nav>
-          <p>Explore more on VybZ Music: <a href="/vibes">10 Ambient Vibe Radio Stations</a> • <a href="/artists">50 Popular Indian Artists</a> • <a href="/download">Get VybZ Android APK</a></p>
+        <section style="margin-bottom:24px;">
+          <h2>Daily Top 25 Trending Indian Songs Chart (Bollywood, Punjabi &amp; Pop)</h2>
+          <p>Explore India's daily updated Top 25 trending music chart on VybZ Music. Stream viral Hindi movie soundtracks, Punjabi anthems, and Indian Indie hits completely ad-free without login or subscription fees, complete with real-time synchronized lyrics.</p>
+        </section>
+        <section style="margin-bottom:24px;">
+          <h2>Top 25 India Chart Tracklist</h2>
+          <ol>${top25Html}</ol>
+        </section>
+        <nav aria-label="Explore More VybZ Sections">
+          <p><a href="/vibes">10 Ambient Vibe Radio Stations</a> • <a href="/artists">50 Popular Indian Artists</a> • <a href="/download">Get VybZ Android APK</a> • <a href="/">Discover Home</a></p>
         </nav>
       </article>
     </main>`;
@@ -182,14 +195,20 @@ function getRouteBodyHtml(canonicalPath, meta) {
   if (clean === '/download' || clean === '/app') {
     return `<main id="seo-main-body">
       <article>
-        <h2>Download VybZ Music Android APK (v3.5.2 • 10.2 MB)</h2>
-        <p>Install the official ad-free Android APK for background audio playback with screen locked, Bluetooth &amp; notification player controls, offline-cached artwork, and instant YouTube audio streaming without login.</p>
-        <ul>
-          <li><strong>Zero Audio Ads:</strong> Uninterrupted Bollywood, 90s retro, Sufi, and Lo-Fi music.</li>
-          <li><strong>Background Play:</strong> Keep music playing while locked or multitasking.</li>
-          <li><strong>iOS &amp; Desktop Support:</strong> Use Add to Home Screen / Install PWA in Safari or Chrome.</li>
-        </ul>
-        <nav><p><a href="/faq">Read Installation FAQ</a> • <a href="/vibes">Browse Vibe Stations</a> • <a href="/artists">Browse 50 Artists</a></p></nav>
+        <section style="margin-bottom:24px;">
+          <h2>Download VybZ Music Android APK (v3.5.2 • 10.2 MB)</h2>
+          <p>Install the official ad-free VybZ Music Android application built for smooth background audio playback even when your screen is locked. Enjoy zero audio ads, zero login walls, Bluetooth &amp; lock-screen media controls, synchronized lyrics, and instant access to 10 nostalgic Indian ambient radio stations plus 50 artist discographies.</p>
+        </section>
+        <section style="margin-bottom:24px;">
+          <h2>Key Features of VybZ Music Android &amp; PWA App</h2>
+          <ul>
+            <li><strong>100% Ad-Free Audio Streaming:</strong> Listen continuously without pre-roll or mid-roll commercial interruptions across Hindi, Bollywood, 90s retro, Sufi, and Punjabi playlists.</li>
+            <li><strong>Background &amp; Lock-Screen Play:</strong> Native Android Foreground MediaService keeps your music playing smoothly while multitasking or with the screen turned off.</li>
+            <li><strong>Compact 10.2 MB Footprint:</strong> Fast download, offline-cached station artwork, smart lyrics sync, and lightweight battery usage.</li>
+            <li><strong>iPhone, Mac &amp; Windows PWA:</strong> On iOS Safari or desktop Chrome, use Add to Home Screen or Install App for a standalone app-like player experience.</li>
+          </ul>
+        </section>
+        <nav><p><a href="/vybz.apk">Direct APK Info</a> • <a href="/faq">Installation FAQ &amp; Guide</a> • <a href="/vibes">Browse 10 Vibe Stations</a> • <a href="/artists">Browse 50 Indian Artists</a> • <a href="/top-25">Top 25 India Chart</a></p></nav>
       </article>
     </main>`;
   }
@@ -197,9 +216,20 @@ function getRouteBodyHtml(canonicalPath, meta) {
   if (clean === '/about') {
     return `<main id="seo-main-body">
       <article>
-        <h2>Our Story — Built for Real Indian Music Moments</h2>
-        <p>VybZ Music started with a simple idea: listening to Hindi, Bollywood, Sufi, and Punjabi classics should feel effortless — like sipping kulhad chai at an evening tapri or catching a window seat on a long train journey, with zero audio ads or forced signups.</p>
-        <nav><p><a href="/vibes">Explore 10 Vibe Stations</a> • <a href="/faq">FAQ</a> • <a href="/download">Android APK</a></p></nav>
+        <section style="margin-bottom:24px;">
+          <h2>Our Story — Crafted for Real Indian Music Moments</h2>
+          <p>VybZ Music was created around a simple belief: listening to Hindi, Bollywood, Sufi, Ghazal, and Punjabi music should feel warm, personal, and uninterrupted — just like sipping garam kulhad chai at an evening roadside tapri, riding in a sleeper-coach train by the window, or jamming in a hostel room at 2 AM.</p>
+          <p>Instead of pushing algorithmic clutter, forced sign-ups, or loud commercial ads between emotional songs, VybZ Music organizes music into 10 immersive ambient Indian mood stations, a live Daily Top 25 India chart, and curated 20-track discographies across 50 legendary singers and composers.</p>
+        </section>
+        <section style="margin-bottom:24px;">
+          <h2>What Makes VybZ Music Different</h2>
+          <ul>
+            <li><strong>10 Nostalgic Desi Radio Worlds:</strong> From Chai Tapri and Deluxe 90s Salon to Monsoon Baarish, Hostel Ki Raat, Train Ki Khidki, Corporate Majdoor Lo-Fi, and Sufi &amp; Sukoon.</li>
+            <li><strong>Instant Access Without Login:</strong> Open the web player or Android APK and press play in seconds — playlists and liked tracks stay safely on your own device.</li>
+            <li><strong>Synchronized Lyrics &amp; Custom Mixes:</strong> Sing along with synced LRC lyrics and build shareable personal mixes.</li>
+          </ul>
+        </section>
+        <nav><p><a href="/vibes">Explore 10 Vibe Stations</a> • <a href="/artists">Browse 50 Artists</a> • <a href="/top-25">Top 25 Chart</a> • <a href="/faq">FAQ</a> • <a href="/download">Android APK</a></p></nav>
       </article>
     </main>`;
   }
@@ -207,27 +237,75 @@ function getRouteBodyHtml(canonicalPath, meta) {
   if (clean === '/faq') {
     return `<main id="seo-main-body">
       <article>
-        <h2>Frequently Asked Questions — VybZ Music</h2>
-        <dl>
-          <dt><strong>Is VybZ Music 100% free and ad-free?</strong></dt>
-          <dd>Yes. All 10 ambient stations, Top 25 chart hits, and 50 artist discographies stream completely free with zero pre-roll or mid-roll ads and no login.</dd>
-          <dt><strong>How do I listen with my phone screen off?</strong></dt>
-          <dd>Install the official VybZ Music Android APK (10.2 MB) from our Download page for native Android background playback and lock-screen notification controls.</dd>
-          <dt><strong>Can I use VybZ Music on iPhone, Mac, or Windows?</strong></dt>
-          <dd>Yes. Open vybzmusic.online in Safari or Chrome and tap Add to Home Screen / Install App to run it as a responsive PWA.</dd>
-        </dl>
-        <nav><p><a href="/download">Download Android APK</a> • <a href="/vibes">10 Vibe Stations</a> • <a href="/about">About VybZ Music</a></p></nav>
+        <section style="margin-bottom:24px;">
+          <h2>Frequently Asked Questions &amp; Supported Devices — VybZ Music</h2>
+          <p>Find quick answers about streaming Bollywood, Hindi, Punjabi, Sufi, and 90s retro songs free on VybZ Music across Android phones, iPhones, and desktop browsers.</p>
+          <dl>
+            <dt><strong>1. Is VybZ Music 100% free and ad-free?</strong></dt>
+            <dd>Yes. Every ambient vibe radio station, Daily Top 25 India chart hit, and all 50 artist discographies stream completely free with zero pre-roll or mid-roll ads and no mandatory account login.</dd>
+            <dt><strong>2. How do I listen with my phone screen turned off?</strong></dt>
+            <dd>Android users can install the official VybZ Music APK (v3.5.2, 10.2 MB) from the Download page for native Android background playback, lock-screen controls, and Bluetooth headset support.</dd>
+            <dt><strong>3. Can I use VybZ Music on iPhone (iOS), Mac, or Windows PC?</strong></dt>
+            <dd>Yes. Open vybzmusic.online in Apple Safari or Google Chrome and choose Add to Home Screen or Install App to run VybZ Music as a full-screen Progressive Web App (PWA).</dd>
+            <dt><strong>4. Where are my Liked Songs and Custom Playlists stored?</strong></dt>
+            <dd>Your liked tracks, listening history, and custom playlists are saved locally inside your browser or app storage on your own device — we never require cloud sign-ups or sell your data.</dd>
+            <dt><strong>5. How does VybZ Music play tracks and show lyrics?</strong></dt>
+            <dd>All audio streams through the official YouTube IFrame API, paired with clean metadata and optional time-synced lyrics lookup.</dd>
+          </dl>
+        </section>
+        <nav><p><a href="/download">Download Android APK</a> • <a href="/vibes">10 Vibe Stations</a> • <a href="/artists">50 Indian Artists</a> • <a href="/about">About VybZ Music</a></p></nav>
       </article>
     </main>`;
   }
 
-  if (clean === '/privacy' || clean === '/terms' || clean === '/dmca' || clean === '/disclaimer') {
+  if (clean === '/privacy') {
     return `<main id="seo-main-body">
       <article>
-        <h2>${escapeHtml(meta.title)}</h2>
-        <p>${escapeHtml(meta.description)}</p>
-        <p>VybZ Music stores your liked songs, custom playlists, and playback preferences locally in your browser/device storage without selling personal information. All media embeds stream via the official YouTube IFrame API. Contact: vybzmusic7@gmail.com.</p>
-        <nav><p><a href="/">Home</a> • <a href="/about">About</a> • <a href="/faq">FAQ</a> • <a href="/privacy">Privacy</a> • <a href="/terms">Terms</a> • <a href="/dmca">DMCA</a></p></nav>
+        <section style="margin-bottom:24px;">
+          <h2>Privacy Policy — VybZ Music Platform Transparency</h2>
+          <p>Your privacy matters on VybZ Music. We built VybZ Music as a login-free Indian music streaming platform so you can listen to Bollywood, 90s classics, Sufi, and Punjabi music without submitting phone numbers, email addresses, or personal profiles.</p>
+          <h3>1. Local-First Data Storage</h3>
+          <p>Your liked songs, custom playlists, playback progress, selected ambient station, and recent listening history are stored locally on your own device via browser localStorage. We do not maintain user tracking databases or sell user listening profiles to third-party advertisers.</p>
+          <h3>2. Embedded Media &amp; Analytics</h3>
+          <p>Audio/video playback relies on the official YouTube IFrame Player API, which operates under Google and YouTube privacy policies when streaming media embeds. Basic aggregate site traffic metrics may be collected to monitor uptime and page performance.</p>
+          <h3>3. Your Control &amp; Contact</h3>
+          <p>You can clear all stored playlists, liked songs, and preferences at any time by clearing your browser site data for vybzmusic.online. For privacy questions, write to vybzmusic7@gmail.com.</p>
+        </section>
+        <nav><p><a href="/">Home</a> • <a href="/about">About</a> • <a href="/faq">FAQ</a> • <a href="/terms">Terms of Service</a> • <a href="/dmca">DMCA &amp; Disclaimer</a></p></nav>
+      </article>
+    </main>`;
+  }
+
+  if (clean === '/terms') {
+    return `<main id="seo-main-body">
+      <article>
+        <section style="margin-bottom:24px;">
+          <h2>Terms of Service — VybZ Music Player Guidelines</h2>
+          <p>Welcome to VybZ Music (vybzmusic.online). By accessing or using our web player, Progressive Web App (PWA), or Android APK, you agree to these personal, non-commercial platform usage terms.</p>
+          <h3>1. Personal Non-Commercial Streaming</h3>
+          <p>VybZ Music is provided free of charge for personal music discovery, mood radio playback, and entertainment. You may not redistribute streams commercially, scrape bulk metadata aggressively, or misrepresent the platform.</p>
+          <h3>2. Third-Party Media Compliance</h3>
+          <p>All playable audio tracks and thumbnails are embedded via the official YouTube IFrame Player API and remain subject to YouTube's Terms of Service. VybZ Music does not host copyrighted MP3/MP4 files on its own servers and does not offer unauthorized media file downloads.</p>
+          <h3>3. Availability &amp; Updates</h3>
+          <p>Curated station playlists, Daily Top 25 charts, and artist discographies are updated periodically to keep tracks playable. We reserve the right to update features or content availability to preserve platform stability and compliance.</p>
+        </section>
+        <nav><p><a href="/">Home</a> • <a href="/about">About</a> • <a href="/faq">FAQ</a> • <a href="/privacy">Privacy Policy</a> • <a href="/dmca">DMCA &amp; Disclaimer</a></p></nav>
+      </article>
+    </main>`;
+  }
+
+  if (clean === '/dmca' || clean === '/disclaimer') {
+    return `<main id="seo-main-body">
+      <article>
+        <section style="margin-bottom:24px;">
+          <h2>DMCA Notice &amp; Content Attribution Disclaimer — VybZ Music</h2>
+          <p>VybZ Music respects the intellectual property rights of artists, music labels, composers, and lyricists across India and worldwide. This platform acts strictly as a discovery and ambient curation interface built on top of publicly embeddable official media streams.</p>
+          <h3>1. No Hosted Audio Files</h3>
+          <p>VybZ Music does not host, upload, store, or distribute copyrighted audio or video files on its origin servers. All playback runs directly from YouTube through the official YouTube IFrame API, ensuring views, rights controls, and regional availability remain governed by the original copyright owners on YouTube.</p>
+          <h3>2. Takedown &amp; Attribution Requests</h3>
+          <p>If you are a copyright owner or authorized representative and wish to request removal or modification of any curated embed reference, playlist entry, or metadata displayed on vybzmusic.online, please send the exact URL, track title, and proof of ownership to <strong>vybzmusic7@gmail.com</strong>. Valid DMCA notices are reviewed and acted upon promptly.</p>
+        </section>
+        <nav><p><a href="/">Home</a> • <a href="/about">About</a> • <a href="/faq">FAQ</a> • <a href="/privacy">Privacy Policy</a> • <a href="/terms">Terms of Service</a></p></nav>
       </article>
     </main>`;
   }
@@ -1579,11 +1657,21 @@ ${JSON.stringify({
 
         const h = new Headers(indexRes.headers);
         h.set('Content-Type', 'text/html; charset=utf-8');
-        h.set('Cache-Control', 'private, no-cache, no-store, max-age=0, must-revalidate');
-        h.set('CDN-Cache-Control', 'no-store, no-cache, max-age=0');
-        h.set('Cloudflare-CDN-Cache-Control', 'no-store, no-cache, max-age=0');
-        h.set('Pragma', 'no-cache');
-        h.set('Expires', '0');
+        const isPrivateOrNoIndex =
+          canonicalPath === '/playlists' ||
+          canonicalPath === '/liked' ||
+          Boolean(meta && meta.isUnknown);
+        if (isPrivateOrNoIndex) {
+          h.set('Cache-Control', 'private, no-cache, no-store, max-age=0, must-revalidate');
+          h.set('CDN-Cache-Control', 'no-store, no-cache, max-age=0');
+          h.set('Cloudflare-CDN-Cache-Control', 'no-store, no-cache, max-age=0');
+          h.set('Pragma', 'no-cache');
+          h.set('Expires', '0');
+        } else {
+          h.set('Cache-Control', 'public, max-age=300, stale-while-revalidate=3600');
+          h.delete('Pragma');
+          h.delete('Expires');
+        }
         return new Response(request.method === 'HEAD' ? null : html, {
           status: 200,
           headers: h,

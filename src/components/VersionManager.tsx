@@ -16,18 +16,7 @@ export default function VersionManager() {
   const [showWhatsNew, setShowWhatsNew] = useState(false);
   const [hasPendingUpdate, setHasPendingUpdate] = useState(false);
 
-  // 1. Check if user has already seen the "250 Songs" announcement
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-
-    const hasSeen = localStorage.getItem('vybz_seen_v3_250');
-    if (!hasSeen) {
-      const timer = window.setTimeout(() => {
-        setShowWhatsNew(true);
-      }, 4500);
-      return () => clearTimeout(timer);
-    }
-  }, []);
+  // 1. Keep initial page render unobstructed for users and Googlebot WRS (no auto-interstitial popup)
 
   // 2. High-reliability silent update execution
   const executeSilentUpdate = useCallback(async (forced = false) => {
